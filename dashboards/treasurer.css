@@ -1,0 +1,1129 @@
+.treasurer-dashboard .sidebar {
+  background: #0e1712;
+}
+.treasurer-dashboard .sidebar-brand {
+  margin-bottom: 20px;
+}
+.treasurer-dashboard .active-group {
+  align-items: flex-start;
+}
+.treasurer-dashboard .active-group .group-copy {
+  padding-top: 1px;
+}
+.treasurer-dashboard .nav-link.is-active {
+  box-shadow: inset 2px 0 #d9b737;
+}
+.treasurer-dashboard .sidebar-note {
+  margin-bottom: 3px;
+}
+.treasurer-main {
+  padding-top: 27px;
+}
+.treasurer-welcome,
+.treasurer-page-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 21px;
+}
+.treasurer-welcome .eyebrow,
+.treasurer-page-heading .eyebrow {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 9px;
+}
+.treasurer-welcome h1,
+.treasurer-page-heading h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(27px, 2.2vw, 34px);
+  font-weight: 500;
+  letter-spacing: -.04em;
+}
+.treasurer-welcome p,
+.treasurer-page-heading p {
+  margin: 6px 0 0;
+  color: #8da095;
+  font-size: 11px;
+}
+.treasurer-welcome .btn,
+.treasurer-page-heading .btn {
+  width: auto;
+  min-width: 165px;
+  height: 43px;
+  flex: 0 0 auto;
+  font-size: 10px;
+}
+.treasurer-view {
+  display: none;
+}
+.treasurer-view.is-visible {
+  display: block;
+  animation: page-in .18s ease-out;
+}
+.treasurer-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+}
+.treasurer-kpis article {
+  min-height: 106px;
+  padding: 15px 17px;
+  border-right: 1px solid #26342b;
+}
+.treasurer-kpis article:last-child {
+  border-right: 0;
+}
+.treasurer-kpis article > span,
+.treasurer-kpis article > strong,
+.treasurer-kpis article > small {
+  display: block;
+}
+.treasurer-kpis article > span {
+  color: #829287;
+  font-size: 7px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.treasurer-kpis article > strong {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+.treasurer-kpis article > small {
+  margin-top: 4px;
+  color: #65bd8b;
+  font-size: 8px;
+}
+.treasurer-kpis .progress-track {
+  margin-top: 9px;
+}
+.treasurer-priority-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(270px, .75fr);
+  gap: 12px;
+  margin-top: 15px;
+}
+.receipt-card,
+.fund-summary,
+.treasury-transactions,
+.pending-approvals {
+  min-width: 0;
+  padding: 18px;
+}
+.receipt-card .panel-heading {
+  align-items: flex-start;
+}
+.receipt-card .eyebrow,
+.fund-summary .eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 8px;
+}
+.receipt-card h2,
+.fund-summary h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+}
+.receipt-card .panel-heading p,
+.fund-summary .panel-heading p {
+  margin: 5px 0 0;
+  color: #819287;
+  font-size: 8px;
+}
+.priority-count {
+  padding: 6px 8px;
+  color: #e0bd43;
+  background: #302b19;
+  border: 1px solid #51451e;
+  border-radius: 20px;
+  font-size: 8px;
+  white-space: nowrap;
+}
+.receipt-list {
+  margin-top: 11px;
+}
+.receipt-row {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-top: 1px solid #26342b;
+}
+.receipt-row .transaction-icon {
+  width: 31px;
+  height: 31px;
+}
+.receipt-row .transaction-icon svg {
+  width: 16px;
+  height: 16px;
+}
+.receipt-row .row-grow strong {
+  font-size: 8px;
+}
+.receipt-row .row-grow small {
+  font-size: 7px;
+}
+.receipt-row > b {
+  min-width: 57px;
+  font-size: 9px;
+  text-align: right;
+  white-space: nowrap;
+}
+.receipt-row > .button-outline {
+  min-height: 28px;
+  padding: 0 8px;
+  color: #d7bc4c;
+  border-color: #675523;
+  font-size: 8px;
+}
+.receipt-card > .text-link {
+  margin-top: 12px;
+}
+.fund-summary .panel-heading {
+  margin-bottom: 19px;
+}
+.target-number {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.target-number strong {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+}
+.target-number span {
+  color: #829287;
+  font-size: 8px;
+}
+.target-captions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  color: #829287;
+  font-size: 7px;
+}
+.target-captions b {
+  color: #d6b43b;
+}
+.fund-divider {
+  height: 1px;
+  margin: 16px 0 8px;
+  background: #28362d;
+}
+.fund-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  color: #89978d;
+  font-size: 8px;
+}
+.fund-stat strong {
+  color: #e3e8e1;
+  font-size: 9px;
+}
+.fund-stat strong small {
+  color: #849287;
+  font-size: 8px;
+  font-weight: 400;
+}
+.fund-summary .full-button {
+  min-height: 35px;
+  margin-top: 9px;
+}
+.treasurer-lower-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, .75fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+.treasury-transactions .transaction-list {
+  margin-top: 9px;
+}
+.treasury-transactions .transaction-row {
+  min-height: 50px;
+}
+.treasury-transactions .transaction-row .row-grow strong {
+  font-size: 8px;
+}
+.treasury-transactions .transaction-row .row-grow small {
+  font-size: 7px;
+}
+.treasury-transactions .transaction-row > b {
+  font-size: 8px;
+}
+.treasury-transactions .status {
+  font-size: 7px;
+}
+.pending-approvals .panel-heading {
+  align-items: center;
+}
+.pending-approvals .panel-heading h2 {
+  font-size: 13px;
+}
+.approval-preview {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 23px;
+}
+.approval-preview .row-grow strong {
+  font-size: 8px;
+}
+.approval-preview .row-grow small {
+  font-size: 7px;
+}
+.approval-preview .row-grow b {
+  display: block;
+  margin-top: 4px;
+  color: #e0bc45;
+  font-size: 11px;
+}
+.approval-progress {
+  margin-top: 15px;
+}
+.approval-progress-label {
+  display: block;
+  margin-top: 6px;
+  color: #88978b;
+  font-size: 7px;
+}
+.pending-approvals .full-button {
+  min-height: 34px;
+  margin-top: 15px;
+  font-size: 8px;
+}
+
+.treasurer-page-heading {
+  align-items: center;
+  margin-bottom: 23px;
+}
+.treasurer-page-heading h1 {
+  font-size: 30px;
+}
+.contribution-kpis {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.contribution-kpis article {
+  min-height: 91px;
+}
+.contribution-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 18px 0 0;
+  padding: 4px;
+  overflow-x: auto;
+  background: #111b15;
+  border: 1px solid #26342b;
+  border-radius: 8px;
+}
+.contribution-tabs button {
+  min-height: 29px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  color: #87958a;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: 500 8px var(--font-sans);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.contribution-tabs button:hover {
+  color: #d9bd49;
+}
+.contribution-tabs button.is-selected {
+  color: #e0c449;
+  background: #292a1c;
+  border-color: #685721;
+}
+.contribution-tabs button span {
+  min-width: 16px;
+  height: 16px;
+  display: inline-grid;
+  place-items: center;
+  color: #d4b642;
+  background: #3a321b;
+  border-radius: 50%;
+  font-size: 7px;
+}
+.contribution-ledger {
+  margin-top: 13px;
+  padding: 17px;
+}
+.ledger-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+.ledger-heading h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+}
+.ledger-heading p {
+  margin: 4px 0 0;
+  color: #819186;
+  font-size: 8px;
+}
+.ledger-search {
+  width: min(230px, 45%);
+  height: 33px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+  color: #819186;
+  border: 1px solid #2a382f;
+  border-radius: 7px;
+}
+.ledger-search svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+.ledger-search input {
+  width: 100%;
+  min-width: 0;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: 8px var(--font-sans);
+}
+.ledger-search input::placeholder {
+  color: #738378;
+}
+.ledger-list {
+  margin-top: 13px;
+}
+.ledger-row {
+  min-height: 55px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid #26342b;
+}
+.ledger-row .avatar {
+  width: 32px;
+  height: 32px;
+}
+.ledger-row .row-grow strong {
+  font-size: 9px;
+}
+.ledger-row .row-grow small {
+  font-size: 7px;
+}
+.ledger-amount {
+  min-width: 73px;
+  font-size: 9px;
+}
+.ledger-row > .status {
+  min-width: 79px;
+  justify-content: center;
+  font-size: 7px;
+}
+.ledger-action {
+  min-width: 78px;
+  color: #59c795;
+  font-size: 8px;
+  text-align: right;
+}
+.ledger-row > .text-link {
+  min-width: 90px;
+  justify-content: flex-end;
+  font-size: 8px;
+}
+.ledger-row[hidden],
+.treasurer-transaction-table tbody tr[hidden],
+.member-ledger-row[hidden] {
+  display: none;
+}
+.empty-state {
+  padding: 20px;
+  color: #87968a;
+  font-size: 10px;
+  text-align: center;
+}
+
+.treasurer-approval-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(285px, .75fr);
+  align-items: stretch;
+  gap: 14px;
+}
+.treasurer-request,
+.treasurer-approval-layout > .signers-card {
+  min-width: 0;
+  padding: 22px;
+  border-color: #2b3d31;
+  background:
+    radial-gradient(ellipse at 92% 0, rgba(210, 174, 53, .055), transparent 36%),
+    linear-gradient(145deg, #142019, #111a15);
+}
+.treasurer-request {
+  border-top: 2px solid #876f26;
+}
+.treasurer-request .request-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.treasurer-request .request-tag > small {
+  color: #788b7e;
+  font-size: 8px;
+  letter-spacing: .1em;
+}
+.treasurer-request > h2 {
+  margin: 18px 0 6px;
+  font-family: var(--font-display);
+  font-size: clamp(19px, 2vw, 24px);
+  font-weight: 600;
+  letter-spacing: -.025em;
+}
+.treasurer-request > p:not(.approval-feedback) {
+  max-width: 580px;
+  margin: 0;
+  color: #8fa095;
+  font-size: 9px;
+  line-height: 1.6;
+}
+.treasurer-request .request-amount {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  padding: 16px 18px;
+  background: linear-gradient(120deg, #0d1711, #111b15);
+  border: 1px solid #29382e;
+  border-radius: 10px;
+}
+.treasurer-request .request-amount small {
+  color: #7d9083;
+  font-size: 7px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.treasurer-request .request-amount strong {
+  margin-top: 5px;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 33px);
+  font-weight: 600;
+  letter-spacing: -.035em;
+}
+.treasurer-request .request-amount span {
+  margin-top: 3px;
+  color: #849589;
+  font-size: 8px;
+}
+.treasurer-request .request-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+  margin-top: 16px;
+}
+.treasurer-request .request-meta > div {
+  min-width: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid #27352c;
+}
+.treasurer-request .request-meta small,
+.treasurer-request .request-meta strong {
+  display: block;
+}
+.treasurer-request .request-meta small {
+  color: #7e9285;
+  font-size: 7px;
+}
+.treasurer-request .request-meta strong {
+  margin-top: 4px;
+  overflow: hidden;
+  color: #e1e8e1;
+  font-size: 9px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+.treasurer-request .approval-actions {
+  display: grid;
+  grid-template-columns: minmax(110px, .7fr) minmax(0, 1.3fr);
+  gap: 9px;
+  margin-top: 19px;
+}
+.treasurer-request .approval-actions .button-outline,
+.treasurer-request .approval-actions .btn {
+  min-height: 42px;
+  font-size: 9px;
+}
+.treasurer-request .approval-actions .button-outline {
+  color: #d29b8c;
+  border-color: #51332e;
+  background: #211a17;
+}
+.treasurer-request .approval-actions .button-outline:hover {
+  background: #30201d;
+  border-color: #7c493d;
+}
+.treasurer-request .approval-feedback {
+  min-height: 12px;
+  margin: 8px 0 0;
+  color: #64cc99;
+  font-size: 8px;
+}
+.treasurer-approval-layout > .signers-card {
+  display: flex;
+  flex-direction: column;
+}
+.treasurer-approval-layout .signers-card h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+}
+.treasurer-approval-layout .signers-card > p {
+  margin: 5px 0 0;
+  color: #829488;
+  font-size: 8px;
+}
+.treasurer-approval-layout .approval-ring {
+  width: 116px;
+  height: 116px;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 21px auto 18px;
+  background: conic-gradient(#d5b234 0 50%, #29372e 50% 100%);
+  border-color: #78887a;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 8px #111b15, inset 0 0 0 10px #889489, 0 0 28px rgba(212, 174, 49, .08);
+  text-align: center;
+}
+.treasurer-approval-layout .approval-ring strong {
+  color: #f0eee4;
+  font-family: var(--font-display);
+  font-size: 21px;
+}
+.treasurer-approval-layout .approval-ring small {
+  color: #829589;
+  font-size: 7px;
+  letter-spacing: .1em;
+}
+.treasurer-approval-layout .signer-row {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-top: 1px solid #28372e;
+}
+.treasurer-approval-layout .signer-row .avatar {
+  width: 32px;
+  height: 32px;
+}
+.treasurer-approval-layout .signer-row .row-grow strong {
+  font-size: 8px;
+}
+.treasurer-approval-layout .signer-row .row-grow small {
+  font-size: 7px;
+}
+.treasurer-approval-layout .signer-row .status,
+.treasurer-approval-layout .signer-initiator {
+  font-size: 7px;
+}
+.other-approval {
+  margin-top: 14px;
+  padding: 18px;
+  border-color: #29382f;
+  background: linear-gradient(125deg, #121c17, #101914);
+}
+.other-approval .panel-heading h2 {
+  font-size: 13px;
+}
+.other-approval .panel-heading p {
+  font-size: 8px;
+}
+.other-approval .transaction-row {
+  min-height: 57px;
+  gap: 11px;
+  margin-top: 11px;
+  padding: 10px 0 0;
+  border-top: 1px solid #29372e;
+  border-bottom: 0;
+}
+.other-approval .row-grow strong {
+  font-size: 9px;
+}
+.other-approval .row-grow small {
+  font-size: 8px;
+}
+.other-approval .status {
+  font-size: 7px;
+}
+.other-approval .text-link {
+  font-size: 8px;
+}
+
+.transaction-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.transaction-controls .ledger-search {
+  width: min(310px, 40%);
+  height: 36px;
+}
+.transaction-controls .contribution-tabs {
+  margin: 0;
+}
+.treasurer-view[data-view="transactions"] .transaction-controls {
+  margin-bottom: 14px;
+  padding: 11px 12px;
+  background: linear-gradient(120deg, #121c17, #101812);
+  border: 1px solid #26352c;
+  border-radius: 11px;
+}
+.treasurer-view[data-view="transactions"] .transaction-controls .ledger-search {
+  width: min(340px, 42%);
+  height: 37px;
+  background: #0c1510;
+  border-color: #2b3a30;
+  font-size: 9px;
+}
+.treasurer-view[data-view="transactions"] .transaction-controls .contribution-tabs {
+  padding: 3px;
+  background: #0e1712;
+  border-color: #2a392f;
+}
+.treasurer-view[data-view="transactions"] .transaction-controls .contribution-tabs button {
+  min-height: 31px;
+  padding-right: 12px;
+  padding-left: 12px;
+  font-size: 9px;
+}
+.transaction-ledger {
+  margin-top: 0;
+  padding: 0;
+  overflow: hidden;
+  border-color: #29382f;
+  background: linear-gradient(145deg, #121c17, #101813);
+}
+.transaction-ledger-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 18px 15px;
+  border-bottom: 1px solid #29372e;
+}
+.transaction-ledger-heading h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+}
+.transaction-ledger-heading p {
+  margin: 4px 0 0;
+  color: #819186;
+  font-size: 8px;
+}
+.ledger-record-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  color: #b6c1b8;
+  background: #1a261e;
+  border: 1px solid #2e4033;
+  border-radius: 20px;
+  font-size: 8px;
+  white-space: nowrap;
+}
+.ledger-record-count span {
+  color: var(--gold);
+  font-weight: 700;
+}
+.transaction-ledger .admin-table-scroll {
+  overflow-x: auto;
+}
+.transaction-ledger .treasurer-transaction-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.transaction-ledger .treasurer-transaction-table th {
+  height: 40px;
+  padding: 0 15px;
+  color: #819186;
+  background: #111a14;
+  border-bottom: 1px solid #2b392f;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.transaction-ledger .treasurer-transaction-table th:first-child,
+.transaction-ledger .treasurer-transaction-table td:first-child {
+  padding-left: 19px;
+}
+.transaction-ledger .treasurer-transaction-table td {
+  height: 65px;
+  padding: 10px 15px;
+  color: #a4b0a6;
+  border-bottom: 1px solid #233129;
+  font-size: 9px;
+  transition: background .15s;
+}
+.transaction-ledger .treasurer-transaction-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.transaction-ledger .treasurer-transaction-table tbody tr:hover td {
+  background: rgba(36, 57, 43, .48);
+}
+.transaction-ledger .treasurer-transaction-table td strong {
+  color: #e4e9e3;
+  font-size: 10px;
+  font-weight: 600;
+}
+.transaction-ledger .treasurer-transaction-table td small {
+  margin-top: 4px;
+  color: #809185;
+  font-size: 8px;
+}
+.transaction-ledger .treasurer-transaction-table td:nth-child(3) {
+  color: #8d9f92;
+  font-size: 8px;
+  letter-spacing: .04em;
+}
+.transaction-ledger .treasurer-transaction-table td .status {
+  padding: 5px 8px;
+  font-size: 8px;
+}
+.transaction-ledger .treasurer-transaction-table td .status-done::before,
+.transaction-ledger .treasurer-transaction-table td .status-pending::before {
+  width: 5px;
+  height: 5px;
+  display: inline-block;
+  margin-right: 5px;
+  content: "";
+  background: currentColor;
+  border-radius: 50%;
+}
+.transaction-ledger .treasurer-transaction-table td:last-child {
+  color: #e3e9e2;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+.transaction-ledger .treasurer-transaction-table td:last-child.amount-positive {
+  color: #5ac892;
+}
+.transaction-ledger .empty-state {
+  margin: 0;
+  border-top: 1px solid #28372d;
+}
+.treasurer-transaction-table {
+  min-width: 760px;
+}
+.report-kpis article {
+  min-height: 95px;
+}
+.report-kpis article > small {
+  color: #819186;
+}
+.reports-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(290px, .9fr);
+  gap: 13px;
+  margin-top: 15px;
+}
+.report-card {
+  padding: 18px;
+}
+.report-card .panel-heading h2 {
+  font-size: 13px;
+}
+.report-card .panel-heading p {
+  font-size: 8px;
+}
+.report-bars {
+  display: grid;
+  gap: 15px;
+  margin-top: 23px;
+}
+.report-bars > div {
+  display: grid;
+  grid-template-columns: 24px minmax(50px, 1fr) 64px;
+  align-items: center;
+  gap: 10px;
+  color: #859489;
+  font-size: 8px;
+}
+.report-bars > div > strong {
+  color: #d9e0d9;
+  font-size: 8px;
+  text-align: right;
+}
+.report-bars i {
+  height: 7px;
+  display: block;
+  overflow: hidden;
+  background: #26362c;
+  border-radius: 10px;
+}
+.report-bars i b {
+  height: 100%;
+  display: block;
+  background: linear-gradient(90deg, #ab8d2a, #e1c34b);
+  border-radius: inherit;
+}
+.download-report {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-bottom: 1px solid #26342b;
+}
+.download-report:first-of-type {
+  margin-top: 12px;
+}
+.download-report:last-child {
+  border-bottom: 0;
+}
+.download-report .transaction-icon {
+  width: 31px;
+  height: 31px;
+}
+.download-report .row-grow strong {
+  font-size: 8px;
+}
+.download-report .row-grow small {
+  font-size: 7px;
+}
+.download-report .text-link {
+  font-size: 8px;
+}
+
+.treasurer-settings {
+  max-width: 760px;
+  margin-bottom: 14px;
+  padding: 19px;
+}
+.treasurer-settings .panel-heading h2 {
+  font-size: 13px;
+}
+.treasurer-settings .panel-heading p {
+  font-size: 8px;
+}
+.treasurer-settings form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+.treasurer-settings form label {
+  display: grid;
+  gap: 6px;
+  color: #c7d1c8;
+  font-size: 9px;
+  font-weight: 600;
+}
+.treasurer-settings form .input {
+  height: 40px;
+  font-size: 10px;
+}
+.treasurer-settings form .btn {
+  width: fit-content;
+  min-width: 120px;
+  height: 38px;
+  grid-column: 1 / -1;
+  font-size: 10px;
+}
+.security-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #62c79b;
+}
+.security-info .note-shield,
+.security-info .note-shield svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+.security-info h2 {
+  margin: 0;
+  color: #dce5de;
+  font-size: 11px;
+}
+.security-info p {
+  max-width: 590px;
+  margin: 5px 0 0;
+  color: #8fa194;
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+@media (max-width: 1100px) {
+  .treasurer-main {
+    padding-right: 25px;
+    padding-left: 25px;
+  }
+  .treasurer-priority-grid,
+  .treasurer-lower-grid,
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+  .fund-summary {
+    min-height: 0;
+  }
+  .transaction-controls {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .transaction-controls .ledger-search {
+    width: 100%;
+  }
+}
+@media (max-width: 900px) {
+  .treasurer-approval-layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .treasurer-main {
+    padding: 23px 14px 38px;
+  }
+  .treasurer-welcome,
+  .treasurer-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .treasurer-welcome .btn,
+  .treasurer-page-heading .btn {
+    width: 100%;
+  }
+  .treasurer-welcome h1,
+  .treasurer-page-heading h1 {
+    font-size: 27px;
+  }
+  .treasurer-kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+  .treasurer-kpis article {
+    min-height: 92px;
+    padding: 12px;
+    border-bottom: 1px solid #26342b;
+  }
+  .treasurer-kpis article:nth-child(2) {
+    border-right: 0;
+  }
+  .treasurer-kpis article:nth-child(n+3) {
+    border-bottom: 0;
+  }
+  .treasurer-kpis article > strong {
+    font-size: 17px;
+  }
+  .receipt-card,
+  .fund-summary,
+  .treasury-transactions,
+  .pending-approvals {
+    padding: 14px;
+  }
+  .receipt-row {
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 8px 0;
+  }
+  .receipt-row .row-grow {
+    min-width: calc(100% - 48px);
+  }
+  .receipt-row > b {
+    margin-left: 38px;
+    text-align: left;
+  }
+  .ledger-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .ledger-search {
+    width: 100%;
+  }
+  .contribution-ledger {
+    padding: 13px;
+  }
+  .contribution-tabs {
+    width: 100%;
+  }
+  .contribution-tabs button {
+    padding-right: 7px;
+    padding-left: 7px;
+  }
+  .ledger-row {
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 8px 0;
+  }
+  .ledger-row .row-grow {
+    min-width: calc(100% - 50px);
+  }
+  .ledger-amount {
+    margin-left: 39px;
+  }
+  .ledger-action {
+    margin-left: auto;
+  }
+  .ledger-row > .text-link {
+    margin-left: auto;
+  }
+  .admin-table-scroll {
+    overflow-x: auto;
+  }
+  .treasurer-settings {
+    padding: 15px;
+  }
+  .treasurer-settings form {
+    grid-template-columns: 1fr;
+  }
+  .treasurer-settings form .btn {
+    grid-column: auto;
+  }
+  .treasurer-view[data-view="transactions"] .transaction-controls {
+    align-items: stretch;
+  }
+  .treasurer-view[data-view="transactions"] .transaction-controls .ledger-search {
+    width: 100%;
+  }
+  .treasurer-view[data-view="transactions"] .transaction-controls .contribution-tabs {
+    width: 100%;
+  }
+  .treasurer-view[data-view="transactions"] .transaction-controls .contribution-tabs button {
+    flex: 1 0 auto;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+  .transaction-ledger-heading {
+    padding: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .treasurer-view.is-visible {
+    animation: none;
+  }
+}

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1310">
+  <meta name="description" content="Themba platform administration dashboard.">
+  <title>Overview — Themba Platform Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/theme.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="platform-admin.css">
+</head>
+<body class="dashboard-body platform-admin">
+  <div class="app-shell">
+    <aside class="sidebar" id="admin-sidebar">
+      <a class="brand sidebar-brand" href="platform-admin-dashboard.html" aria-label="Themba platform admin home">
+        <span class="brand-coin" aria-hidden="true">T</span>
+        <span class="brand-text"><span class="brand-name">THEMBA</span><span class="brand-tag">Transparent Wealth</span></span>
+      </a>
+      <button class="active-group" type="button" data-action="switch-stokvel">
+        <span class="avatar avatar-admin">UW</span>
+        <span class="group-copy"><span class="micro-label">Active stokvel</span><strong>Ubuntu Wealth Circle</strong><small>24 members</small></span>
+        <span class="chevron" aria-hidden="true">⌄</span>
+      </button>
+      <nav class="side-nav" aria-label="Platform administration">
+        <span class="nav-label">Main menu</span>
+        <button class="nav-link is-active" type="button" data-admin-page="overview"><span class="nav-icon" data-icon="grid"></span>Overview</button>
+        <button class="nav-link" type="button" data-admin-page="stokvels"><span class="nav-icon" data-icon="users"></span>My Stokvels</button>
+        <button class="nav-link" type="button" data-admin-page="transactions"><span class="nav-icon" data-icon="transfer"></span>Transactions</button>
+        <button class="nav-link" type="button" data-admin-page="approvals"><span class="nav-icon" data-icon="shield"></span>Approvals<span class="nav-badge">3</span></button>
+        <span class="nav-label nav-label-account">Management</span>
+        <button class="nav-link" type="button" data-admin-page="members"><span class="nav-icon" data-icon="users"></span>Members</button>
+        <button class="nav-link" type="button" data-admin-page="settings"><span class="nav-icon" data-icon="settings"></span>Settings</button>
+      </nav>
+      <div class="sidebar-note"><span class="note-shield" data-icon="shield"></span><div><strong>Protected by multisig</strong><p>Every group transaction requires 2 of 3 authorised approvals.</p></div></div>
+      <button class="sidebar-profile" type="button" data-admin-page="settings">
+        <span class="avatar avatar-admin-round" data-admin-initials>NM</span>
+        <span class="group-copy"><strong data-admin-name>Nomsa Mthembu</strong><small>Platform administrator</small></span>
+        <span class="profile-dots">···</span>
+      </button>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar admin-topbar">
+        <button class="mobile-menu" type="button" aria-label="Open navigation" aria-expanded="false" data-action="menu"><span data-icon="menu"></span></button>
+        <label class="admin-search"><span data-icon="search"></span><input id="global-search" type="search" placeholder="Search transactions, members..." aria-label="Search members and transactions"></label>
+        <div class="top-actions">
+          <label class="view-as">Viewing as
+            <select class="select role-select" id="admin-role-select" aria-label="Switch dashboard">
+              <option value="platform_admin" selected>Platform Admin</option><option value="treasurer">Treasurer</option><option value="member">Member</option>
+            </select>
+          </label>
+          <button class="top-icon" type="button" aria-label="View notifications" data-admin-page="approvals"><span data-icon="bell"></span><i></i></button>
+          <button class="avatar avatar-admin-round top-avatar" type="button" aria-label="Open admin settings" data-admin-page="settings" data-admin-initials>NM</button>
+        </div>
+      </header>
+
+      <main class="main-content admin-main">
+        <section class="admin-view is-visible" data-admin-view="overview">
+          <div class="admin-welcome">
+            <div><span class="eyebrow">Monday, 20 May</span><h1>Good morning, <span data-admin-first-name>Nomsa</span>.</h1><p>Here’s today’s platform overview.</p></div>
+            <button class="btn btn-gold" type="button" data-admin-action="contribution"><span data-icon="plus"></span>Make a contribution</button>
+          </div>
+          <section class="admin-kpis panel">
+            <article><span>Platform overview</span><strong>R 12.8M</strong><small>Total value monitored</small></article>
+            <article><span>Registered users</span><strong>8,429</strong><small>↑ 12.4% this month</small></article>
+            <article><span>Active stokvels</span><strong>684</strong><small>98.2% verified</small></article>
+            <article><span>Security alerts</span><strong>3</strong><small>Requires attention</small></article>
+          </section>
+          <div class="admin-overview-grid">
+            <section class="admin-balance panel">
+              <div class="admin-balance-top"><span class="micro-label">Total group balance <button type="button" class="inline-icon" aria-label="Toggle balance visibility" data-admin-action="toggle-balance"><span data-icon="eye"></span></button></span><span class="wallet-state"><i></i>Wallet not connected</span></div>
+              <strong class="admin-balance-value" data-balance="R 48 750,00">R 48 750,00</strong>
+              <div class="admin-conversion">≈ 2646.58 DEMO USDT <button type="button" data-admin-action="currency">Switch to USDT</button></div>
+              <div class="admin-contribution-total"><span class="micro-label">Your contributions</span><strong>R 18,500.00</strong></div>
+              <button class="button-outline connect-wallet" type="button" data-admin-action="connect-wallet">Connect wallet <span data-icon="arrow"></span></button>
+              <div class="admin-coin" aria-hidden="true"><span>T</span></div>
+            </section>
+            <section class="admin-target panel">
+              <div class="target-top"><span class="micro-label">Monthly target</span><span class="due-pill">Due in 11 days</span></div>
+              <h2>May contribution</h2>
+              <div class="target-amount"><strong>R 2,500</strong><span>of R 3,000</span></div>
+              <div class="progress-track"><span style="width:83%"></span></div>
+              <div class="target-progress-labels"><span>83% complete</span><span>R 500 remaining</span></div>
+              <button class="button-outline full-button" type="button" data-admin-action="contribution">Complete contribution <span data-icon="arrow"></span></button>
+            </section>
+          </div>
+          <div class="admin-shortcuts">
+            <button class="shortcut" type="button" data-admin-action="contribution"><span data-icon="plus"></span><span><strong>Contribute</strong><small>Add funds to your stokvel</small></span><span class="shortcut-arrow" data-icon="arrow"></span></button>
+            <button class="shortcut" type="button" data-admin-action="loan"><span data-icon="bank"></span><span><strong>Request loan</strong><small>Apply from group funds</small></span><span class="shortcut-arrow" data-icon="arrow"></span></button>
+            <button class="shortcut" type="button" data-admin-action="bill"><span data-icon="receipt"></span><span><strong>Split a bill</strong><small>Share an expense fairly</small></span><span class="shortcut-arrow" data-icon="arrow"></span></button>
+          </div>
+          <div class="admin-lower-grid">
+            <section class="panel admin-recent"><div class="panel-heading"><div><h2>Recent transactions</h2><p>Latest activity across the platform</p></div><button type="button" class="text-link" data-admin-page="transactions">View all <span data-icon="arrow"></span></button></div>
+              <div class="admin-transaction-list">
+                <button class="admin-transaction" type="button" data-admin-page="transactions"><span class="transaction-icon icon-admin-gold" data-icon="plus"></span><span class="row-grow"><strong>Monthly contribution</strong><small>Ubuntu Wealth Circle</small></span><span class="admin-tx-date">Today, 09:42</span><span class="status status-done">Completed</span><b class="amount-positive">+R 2 500,00</b></button>
+                <button class="admin-transaction" type="button" data-admin-page="transactions"><span class="transaction-icon icon-admin-neutral" data-icon="transfer"></span><span class="row-grow"><strong>Solar installation</strong><small>Khula Investment Club</small></span><span class="admin-tx-date">Yesterday, 14:18</span><span class="status status-done">Approved</span><b>−R 12 800,00</b></button>
+                <button class="admin-transaction" type="button" data-admin-page="transactions"><span class="transaction-icon icon-admin-neutral" data-icon="transfer"></span><span class="row-grow"><strong>Grocery collective</strong><small>Sisonke Savings</small></span><span class="admin-tx-date">18 May, 11:06</span><span class="status status-pending">Pending</span><b>−R 8 600,00</b></button>
+                <button class="admin-transaction" type="button" data-admin-page="transactions"><span class="transaction-icon icon-admin-gold" data-icon="bank"></span><span class="row-grow"><strong>Loan repayment</strong><small>Ubuntu Wealth Circle</small></span><span class="admin-tx-date">15 May, 08:30</span><span class="status status-done">Completed</span><b class="amount-positive">+R 1 250,00</b></button>
+              </div>
+            </section>
+            <section class="panel admin-security"><div class="panel-heading"><div><h2>Security alerts</h2><p>Platform items needing attention</p></div><span class="alert-count">3</span></div>
+              <button class="security-item" type="button" data-admin-page="approvals"><span class="security-mark"><span data-icon="shield"></span></span><span class="row-grow"><strong>Withdrawal awaiting signatures</strong><small>Ubuntu Wealth Circle · 1 of 2 approved</small></span><span class="status status-pending">Review</span></button>
+              <button class="security-item" type="button" data-admin-page="members"><span class="security-mark"><span data-icon="users"></span></span><span class="row-grow"><strong>New member verification</strong><small>3 profiles need review</small></span><span class="status status-pending">Review</span></button>
+              <button class="security-item" type="button" data-admin-page="stokvels"><span class="security-mark"><span data-icon="warning"></span></span><span class="row-grow"><strong>Stokvel documents expiring</strong><small>2 groups · Update registration</small></span><span class="status status-pending">Review</span></button>
+            </section>
+          </div>
+        </section>
+
+        <section class="admin-view" data-admin-view="transactions">
+          <div class="admin-page-heading"><div><span class="eyebrow">Audit trail</span><h1>Transactions</h1><p>Every movement, recorded and transparent.</p></div><button class="btn btn-gold" type="button" data-admin-action="export"><span data-icon="download"></span>Export statement</button></div>
+          <section class="panel admin-table-card">
+            <div class="admin-table-controls"><label class="table-search"><span data-icon="search"></span><input type="search" id="transaction-search" placeholder="Search by reference or description" aria-label="Search transactions"></label><div class="admin-filters" aria-label="Filter transactions"><button class="is-selected" type="button" data-filter="all">All</button><button type="button" data-filter="contribution">Contribution</button><button type="button" data-filter="withdrawal">Withdrawal</button><button type="button" data-filter="loan">Loan</button><button type="button" data-filter="bill">Bill payment</button></div></div>
+            <div class="admin-table-scroll"><table class="admin-table"><thead><tr><th>Transaction</th><th>Date</th><th>Reference</th><th>Status</th><th>Amount</th><th></th></tr></thead><tbody id="admin-transactions">
+              <tr data-kind="contribution" data-search="monthly contribution ubuntu wealth circle thm-89241"><td><strong>Monthly contribution</strong><small>Ubuntu Wealth Circle</small></td><td>Today, 09:42</td><td>THM-89241</td><td><span class="status status-done">● Completed</span></td><td class="amount-positive">+R 2 500,00</td><td><button class="row-open" type="button" aria-label="View monthly contribution" data-admin-action="transaction-detail">›</button></td></tr>
+              <tr data-kind="withdrawal" data-search="solar installation khula investment club thm-89198"><td><strong>Solar installation</strong><small>Khula Investment Club</small></td><td>Yesterday, 14:18</td><td>THM-89198</td><td><span class="status status-done">● Approved</span></td><td>−R 12 800,00</td><td><button class="row-open" type="button" aria-label="View solar installation" data-admin-action="transaction-detail">›</button></td></tr>
+              <tr data-kind="bill" data-search="grocery collective sisonke savings thm-89172"><td><strong>Grocery collective</strong><small>Sisonke Savings</small></td><td>18 May, 11:06</td><td>THM-89172</td><td><span class="status status-pending">● Pending</span></td><td>−R 8 600,00</td><td><button class="row-open" type="button" aria-label="View grocery collective" data-admin-action="transaction-detail">›</button></td></tr>
+              <tr data-kind="loan" data-search="loan repayment ubuntu wealth circle thm-89064"><td><strong>Loan repayment</strong><small>Ubuntu Wealth Circle</small></td><td>15 May, 08:30</td><td>THM-89064</td><td><span class="status status-done">● Completed</span></td><td class="amount-positive">+R 1 250,00</td><td><button class="row-open" type="button" aria-label="View loan repayment" data-admin-action="transaction-detail">›</button></td></tr>
+            </tbody></table></div>
+            <p class="empty-state" id="transaction-empty" hidden>No transactions match your search.</p>
+          </section>
+        </section>
+
+        <section class="admin-view" data-admin-view="approvals">
+          <div class="admin-page-heading"><div><span class="eyebrow">Browser-only sample</span><h1>Approvals</h1><p>This sample request is for interface testing only; it is not a Safe transaction.</p></div></div>
+          <div class="approval-layout">
+            <section class="panel approval-request">
+              <div class="request-tag"><span class="status status-pending">● Demo pending</span><small>Sample #THM-APR-2041</small></div>
+              <h2>Community hall deposit</h2><p>Deposit payment for the Ubuntu Wealth Circle annual general meeting venue.</p>
+              <div class="request-amount"><small>Requested amount</small><strong>R 8,500.00</strong><span>≈ 461.45 DEMO USDT</span></div>
+              <div class="request-meta"><div><small>Requested by</small><strong>Thabo Dlamini</strong></div><div><small>Requested on</small><strong>20 May, 08:14</strong></div><div><small>From wallet</small><strong>Ubuntu Group Treasury</strong></div><div><small>Category</small><strong>Group operations</strong></div></div>
+              <div class="approval-actions"><button class="button-outline" type="button" data-admin-action="reject-approval">Record demo rejection</button><button class="btn btn-gold" type="button" data-admin-action="approve-approval">Record demo approval</button></div>
+              <p class="approval-feedback" id="approval-feedback" aria-live="polite"></p>
+            </section>
+            <section class="panel signers-card"><h2>Sample demo votes</h2><p>Browser-only sample vote recorded</p><div class="approval-ring"><strong id="approval-count">1/2</strong><small>Demo votes</small></div>
+              <div class="signer-row"><span class="avatar avatar-admin-round">LM</span><span class="row-grow"><strong>Lerato Molefe</strong><small>Sample demo vote</small></span><span class="status status-done">● Demo vote</span></div>
+              <div class="signer-row"><span class="avatar avatar-admin-round">NM</span><span class="row-grow"><strong data-admin-name>Nomsa Mthembu</strong><small id="admin-signer-state">Awaiting demo vote</small></span><span class="status status-pending" id="admin-signer-status">● Your demo vote</span></div>
+              <div class="signer-row"><span class="avatar">TD</span><span class="row-grow"><strong>Thabo Dlamini</strong><small>Cannot approve</small></span><span class="signer-initiator">Initiator</span></div>
+            </section>
+          </div>
+          <div id="safe-panel" data-safe-mode="signer"></div>
+        </section>
+
+        <section class="admin-view" data-admin-view="members">
+          <div class="admin-page-heading"><div><span class="eyebrow">Ubuntu Wealth Circle</span><h1>Members</h1><p>24 people building wealth together.</p></div><button class="btn btn-gold" type="button" data-admin-action="copy-invite"><span data-icon="copy"></span>Copy invite code</button></div>
+          <section class="panel admin-members-card"><div class="admin-members-list" id="admin-members-list">
+            <div class="admin-member-row" data-search="nomsa mthembu treasurer"><span class="avatar avatar-admin-round">NM</span><span class="row-grow"><strong>Nomsa Mthembu</strong><small>Treasurer</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 18,500</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions" data-admin-action="member-menu">···</button></div>
+            <div class="admin-member-row" data-search="lerato molefe administrator"><span class="avatar avatar-purple">LM</span><span class="row-grow"><strong>Lerato Molefe</strong><small>Administrator</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 21,000</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions" data-admin-action="member-menu">···</button></div>
+            <div class="admin-member-row" data-search="thabo dlamini member"><span class="avatar">TD</span><span class="row-grow"><strong>Thabo Dlamini</strong><small>Member</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 16,750</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions" data-admin-action="member-menu">···</button></div>
+            <div class="admin-member-row" data-search="zanele nkosi member"><span class="avatar avatar-purple">ZN</span><span class="row-grow"><strong>Zanele Nkosi</strong><small>Member</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 19,250</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions" data-admin-action="member-menu">···</button></div>
+            <div class="admin-member-row" data-search="sipho khumalo member"><span class="avatar">SK</span><span class="row-grow"><strong>Sipho Khumalo</strong><small>Member</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 17,500</strong></span><span class="member-status pending">● Pending</span><button class="row-open" type="button" aria-label="Member actions" data-admin-action="member-menu">···</button></div>
+          </div><p class="empty-state" id="member-empty" hidden>No members match your search.</p></section>
+        </section>
+
+        <section class="admin-view" data-admin-view="stokvels">
+          <div class="admin-page-heading"><div><span class="eyebrow">Community management</span><h1>My Stokvels</h1><p>Monitor group balances, membership and verification across the platform.</p></div><button class="btn btn-gold" type="button" data-admin-action="create-stokvel"><span data-icon="plus"></span>Create stokvel</button></div>
+          <div class="admin-stokvel-grid">
+            <article class="panel admin-stokvel-card"><div><span class="avatar avatar-admin">UW</span><span class="member-status active">Verified</span></div><h2>Ubuntu Wealth Circle</h2><p>Johannesburg · Monthly savings</p><div class="stokvel-metrics"><span><small>Balance</small><strong>R 48,750</strong></span><span><small>Members</small><strong>24</strong></span></div><button class="button-outline full-button" type="button" data-admin-action="select-stokvel">Manage stokvel <span data-icon="arrow"></span></button></article>
+            <article class="panel admin-stokvel-card"><div><span class="avatar avatar-purple">KC</span><span class="member-status active">Verified</span></div><h2>Khula Investment Club</h2><p>Cape Town · Investment group</p><div class="stokvel-metrics"><span><small>Balance</small><strong>R 126,400</strong></span><span><small>Members</small><strong>18</strong></span></div><button class="button-outline full-button" type="button" data-admin-action="select-stokvel">Manage stokvel <span data-icon="arrow"></span></button></article>
+            <article class="panel admin-stokvel-card"><div><span class="avatar">SS</span><span class="member-status pending">Review</span></div><h2>Sisonke Savings</h2><p>Durban · Community savings</p><div class="stokvel-metrics"><span><small>Balance</small><strong>R 72,850</strong></span><span><small>Members</small><strong>32</strong></span></div><button class="button-outline full-button" type="button" data-admin-action="select-stokvel">Review stokvel <span data-icon="arrow"></span></button></article>
+          </div>
+          <form id="admin-create-stokvel-form" class="panel admin-settings-form" hidden>
+            <h2>Create a local demo stokvel</h2>
+            <p>This group is stored only in this browser and is not shared with platform members.</p>
+            <label>Stokvel name<input class="input" name="name" required maxlength="80"></label>
+            <label>Location<input class="input" name="location" required maxlength="80"></label>
+            <label>Monthly contribution (R)<input class="input" name="amount" type="number" min="1" step="1" required></label>
+            <button class="btn btn-gold" type="submit">Save demo stokvel</button>
+          </form>
+        </section>
+
+        <section class="admin-view" data-admin-view="settings">
+          <div class="admin-page-heading"><div><span class="eyebrow">Platform controls</span><h1>Settings</h1><p>Manage your administrator profile and platform preferences.</p></div></div>
+          <section class="panel admin-settings-card"><div class="panel-heading"><div><h2>Administrator profile</h2><p>Update your details for platform notifications.</p></div></div><form id="admin-profile-form" class="admin-settings-form"><label>Full name<input class="input" name="name" id="admin-profile-name" value="Nomsa Mthembu" required></label><label>Email address<input class="input" name="email" id="admin-profile-email" type="email" value="admin@themba.demo" required></label><button class="btn btn-gold" type="submit">Save changes</button></form></section>
+          <section class="panel admin-settings-card security-settings"><span class="security-mark"><span data-icon="shield"></span></span><div><h2>Multisignature protection</h2><p>Withdrawals require approval from 2 of 3 authorised signers.</p></div><span class="member-status active">Enabled</span></section>
+          <section class="panel admin-settings-card"><div class="panel-heading"><div><h2>Session</h2><p>Demo administration only. No real financial controls are connected.</p></div></div><button class="button-outline" type="button" data-admin-action="sign-out">Sign out</button></section>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="toast-stack" id="admin-toasts" aria-live="polite"></div>
+  <script src="../scripts/demo-state.js"></script>
+  <script src="../scripts/platform-admin.js"></script>
+  <script src="../scripts/safe-panel.bundle.js"></script>
+</body>
+</html>

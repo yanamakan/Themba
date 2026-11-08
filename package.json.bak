@@ -1,0 +1,25 @@
+{
+  "name": "themba",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Themba community wealth platform",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "build": "esbuild scripts/dashboard.js --bundle --platform=browser --format=iife --minify --outfile=scripts/dashboard.bundle.js",
+    "check": "node --check src/server.js && node --check src/data/demo-data.js && npm run build",
+    "pretest": "npm run build",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ethers": "^6.17.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}
