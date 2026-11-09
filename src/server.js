@@ -23,7 +23,7 @@ app.use(express.static(path.resolve(__dirname, ".."), {
 app.use("/api/safe-proxy", createSafeProxy());
 
 app.get("/", (_req, res) => {
-  res.redirect("/dashboards/login.html");
+  res.sendFile(path.resolve(__dirname, "..", "index.html"));
 });
 
 app.get("/login.html", (_req, res) => {
