@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0a2e1b">
+    <title>Themba — Together We Save. Together We Grow.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Newsreader:ital,wght@0,400;0,600;1,400;1,500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07150e;
+            --g8: #0a2e1b;
+            --g7: #0f4a2c;
+            --surface: #0d1d15;
+            --card: #0f1f17cc;
+            --line: #2a4234;
+            --text: #f4f1e8;
+            --dim: #a9bdb0;
+            --mute: #7d948a;
+            --gold: #e9c46a;
+            --gold-g: linear-gradient(135deg, #f0d278, #d4ae3d 55%, #b98d1f);
+            --red: #ff8f7e;
+            --ok: #6fd49a;
+            --sans: "DM Sans", system-ui, sans-serif;
+            --disp: "Manrope", "DM Sans", sans-serif;
+            --serif: "Newsreader", Georgia, serif
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-snap-type: y proximity;
+            scroll-behavior: smooth
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 16px/1.55 var(--sans);
+            -webkit-font-smoothing: antialiased
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        .nav {
+            position: fixed;
+            inset: 0 0 auto;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px clamp(16px, 4vw, 48px);
+            background: #07150ecc;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e9c46a14
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--gold-g);
+            display: grid;
+            place-items: center;
+            font: 600 22px var(--serif);
+            color: #0a2e1b;
+            box-shadow: 0 0 0 3px #e9c46a33
+        }
+
+        .brand b {
+            display: block;
+            font: 800 17px var(--disp);
+            letter-spacing: .2em
+        }
+
+        .brand small {
+            display: block;
+            font-size: 9px;
+            letter-spacing: .24em;
+            color: var(--gold);
+            text-transform: uppercase
+        }
+
+        .links {
+            display: flex;
+            align-items: center;
+            gap: 26px;
+            font-size: 15px;
+            color: var(--text)
+        }
+
+        .links a:not(.btn):hover {
+            color: var(--gold)
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font: 700 14px var(--disp);
+            border: 1px solid var(--line);
+            transition: .2s;
+            cursor: pointer;
+            background: none;
+            color: var(--text)
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--gold)
+        }
+
+        .gold {
+            background: var(--gold-g);
+            color: #0a2e1b;
+            border-color: transparent;
+            box-shadow: 0 8px 28px #e9c46a30
+        }
+
+        .gold:hover {
+            box-shadow: 0 12px 36px #e9c46a55
+        }
+
+        .lg {
+            padding: 18px 26px;
+            font-size: 16px;
+            border-radius: 12px
+        }
+
+        .slide {
+            min-height: 100svh;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            padding: 96px clamp(20px, 6vw, 100px) 60px;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(1100px 600px at 80% 30%, var(--g7), transparent 65%), linear-gradient(160deg, var(--g8), var(--bg) 75%)
+        }
+
+        .slide.alt {
+            background: radial-gradient(900px 500px at 10% 80%, #0f4a2c88, transparent 65%), var(--bg)
+        }
+
+        .slide::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(#e9c46a0a 1px, transparent 1px), linear-gradient(90deg, #e9c46a0a 1px, transparent 1px);
+            background-size: 64px 64px;
+            mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
+            pointer-events: none
+        }
+
+        .wrap {
+            max-width: 1180px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1
+        }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font: 700 12px var(--disp);
+            letter-spacing: .24em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin: 0 0 20px
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 44px;
+            height: 1px;
+            background: var(--gold)
+        }
+
+        h1,
+        h2 {
+            font-family: var(--disp);
+            font-weight: 700;
+            letter-spacing: -.035em;
+            line-height: 1.02;
+            margin: 0 0 20px
+        }
+
+        h1 {
+            font-size: clamp(44px, 7.4vw, 92px)
+        }
+
+        h2 {
+            font-size: clamp(32px, 5vw, 60px)
+        }
+
+        em {
+            font: italic 500 1.03em var(--serif);
+            color: var(--gold);
+            letter-spacing: -.02em
+        }
+
+        .lede {
+            font-size: clamp(17px, 1.8vw, 21px);
+            color: var(--dim);
+            max-width: 560px
+        }
+
+        .cta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 18px;
+            margin-top: 34px
+        }
+
+        .play {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500
+        }
+
+        .play i {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            font-size: 11px;
+            font-style: normal
+        }
+
+        .trust {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 26px;
+            margin-top: 44px;
+            color: var(--mute);
+            font-size: 13px
+        }
+
+        .i {
+            width: 1em;
+            height: 1em;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex: none
+        }
+
+        .ic .i {
+            width: 26px;
+            height: 26px;
+            color: var(--gold)
+        }
+
+        .bad .ic .i {
+            color: var(--red)
+        }
+
+        .ck .i {
+            width: 20px;
+            height: 20px
+        }
+
+        .btn .i {
+            width: 1.15em;
+            height: 1.15em
+        }
+
+        .play i .i {
+            width: 14px;
+            height: 14px
+        }
+
+        .trust span::before {
+            content: "";
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            margin-right: 8px;
+            vertical-align: -2px;
+            background: no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e9c46a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.1fr .9fr;
+            gap: 30px;
+            align-items: center
+        }
+
+        .stage {
+            position: relative;
+            height: min(62vh, 520px);
+            display: grid;
+            place-items: center
+        }
+
+        .ring {
+            position: absolute;
+            border: 1px solid #e9c46a1f;
+            border-radius: 50%;
+            animation: spin 40s linear infinite
+        }
+
+        .r1 {
+            width: 92%;
+            aspect-ratio: 1
+        }
+
+        .r2 {
+            width: 128%;
+            aspect-ratio: 1;
+            animation-duration: 70s;
+            border-style: dashed;
+            opacity: .6
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .coin {
+            position: relative;
+            width: min(36vw, 300px);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 24%, #fbe9a0, #dcb64a 42%, #a67a14 82%);
+            box-shadow: inset -16px -20px 34px #6d4e0a88, inset 10px 12px 26px #fff6c455, 0 40px 90px #000b, 0 0 100px #e9c46a33;
+            display: grid;
+            place-items: center;
+            animation: float 6s ease-in-out infinite;
+            transition: transform .15s
+        }
+
+        .coin::before {
+            content: "";
+            position: absolute;
+            inset: 11%;
+            border-radius: 50%;
+            border: 2px solid #7d5c0f66;
+            box-shadow: 0 0 0 1px #fff3b044
+        }
+
+        .coin::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: linear-gradient(115deg, transparent 35%, #fff8 48%, transparent 60%);
+            background-size: 250% 100%;
+            animation: shine 4.5s ease-in-out infinite
+        }
+
+        .coin span {
+            font: 600 clamp(90px, 14vw, 170px)/1 var(--serif);
+            color: #1d3b2a;
+            text-shadow: 0 2px 0 #f7e39a88
+        }
+
+        .mini {
+            position: absolute;
+            width: clamp(70px, 9vw, 110px);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 25%, #fbe9a0, #d6ae3f 50%, #9a7110);
+            display: grid;
+            place-items: center;
+            font: 600 40px var(--serif);
+            color: #1d3b2a;
+            box-shadow: 0 20px 40px #0009;
+            animation: float 5s ease-in-out infinite
+        }
+
+        .m1 {
+            top: 2%;
+            right: 6%;
+            animation-delay: -2s
+        }
+
+        .m2 {
+            bottom: 6%;
+            left: 10%;
+            width: clamp(44px, 6vw, 70px);
+            font-size: 26px;
+            animation-delay: -3.5s
+        }
+
+        @keyframes float {
+            50% {
+                translate: 0 -16px
+            }
+        }
+
+        @keyframes shine {
+
+            0%,
+            40% {
+                background-position: 130% 0
+            }
+
+            100% {
+                background-position: -60% 0
+            }
+        }
+
+        .fc {
+            position: absolute;
+            background: #0b1a12ea;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px 18px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 18px 50px #000a;
+            animation: float 7s ease-in-out infinite
+        }
+
+        .fc small {
+            display: block;
+            font-size: 11px;
+            color: var(--mute)
+        }
+
+        .ap {
+            top: 8%;
+            right: -2%;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            animation-delay: -1s
+        }
+
+        .ap .ck {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #0f6b43;
+            display: grid;
+            place-items: center;
+            transition: .4s
+        }
+
+        .ap.wait .ck {
+            background: #4a3d12;
+            color: var(--gold)
+        }
+
+        .ap b {
+            display: block;
+            font-size: 14px
+        }
+
+        .bal {
+            bottom: 0;
+            left: 2%;
+            animation-delay: -4s
+        }
+
+        .bal small {
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            font-size: 10px
+        }
+
+        .bal strong {
+            display: block;
+            font: 700 28px var(--disp);
+            margin: 2px 0
+        }
+
+        .bal .up {
+            color: var(--ok);
+            font-size: 12px
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px;
+            margin-top: 30px
+        }
+
+        .g3 {
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr))
+        }
+
+        .g2 {
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 22px;
+            transition: .25s;
+            backdrop-filter: blur(6px)
+        }
+
+        .card:hover {
+            transform: translateY(-6px) rotate(-.4deg);
+            border-color: var(--gold);
+            box-shadow: 0 20px 50px #0008, 0 0 0 1px #e9c46a33
+        }
+
+        .card h3 {
+            font: 700 18px var(--disp);
+            margin: 10px 0 6px
+        }
+
+        .card p {
+            margin: 0;
+            color: var(--dim);
+            font-size: 14.5px
+        }
+
+        .ic {
+            font-size: 26px;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: #e9c46a16;
+            border: 1px solid #e9c46a33;
+            display: grid;
+            place-items: center
+        }
+
+        .bad .ic {
+            background: #ff8f7e14;
+            border-color: #ff8f7e33
+        }
+
+        .demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 34px;
+            align-items: center
+        }
+
+        .panel {
+            background: #0b1a12f0;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 30px 80px #000a
+        }
+
+        .req {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--line)
+        }
+
+        .req b {
+            font: 700 20px var(--disp)
+        }
+
+        .req small {
+            color: var(--mute);
+            display: block
+        }
+
+        .tag {
+            font-size: 11px;
+            padding: 5px 11px;
+            border-radius: 99px;
+            border: 1px solid var(--line);
+            color: var(--gold);
+            white-space: nowrap
+        }
+
+        .tag.ok {
+            color: var(--ok);
+            border-color: #6fd49a55
+        }
+
+        .tag.no {
+            color: var(--red);
+            border-color: #ff8f7e55
+        }
+
+        .pips {
+            display: flex;
+            gap: 8px;
+            margin: 18px 0
+        }
+
+        .pips i {
+            flex: 1;
+            height: 8px;
+            border-radius: 9px;
+            background: #1c3326;
+            transition: .4s
+        }
+
+        .pips i.on {
+            background: var(--gold-g);
+            box-shadow: 0 0 14px #e9c46a77
+        }
+
+        .sg {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px
+        }
+
+        .sg button {
+            padding: 12px 6px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: #12261b;
+            color: var(--text);
+            font: 600 13px var(--disp);
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .sg button:hover:not(:disabled) {
+            border-color: var(--gold);
+            transform: translateY(-2px)
+        }
+
+        .sg button.done {
+            background: #0f6b43;
+            border-color: #6fd49a
+        }
+
+        .sg button small {
+            display: block;
+            font: 400 10px var(--sans);
+            color: var(--mute);
+            margin-top: 2px
+        }
+
+        .act {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap
+        }
+
+        .act .btn {
+            padding: 10px 14px;
+            font-size: 13px
+        }
+
+        .danger {
+            border-color: #ff8f7e66;
+            color: var(--red)
+        }
+
+        .log {
+            margin-top: 18px;
+            max-height: 170px;
+            overflow: auto;
+            display: grid;
+            gap: 8px;
+            font-size: 13px
+        }
+
+        .log div {
+            padding: 9px 12px;
+            border-radius: 10px;
+            background: #12261b;
+            border-left: 3px solid var(--gold);
+            animation: pop .4s
+        }
+
+        .log .a {
+            border-color: var(--red);
+            background: #2a1512;
+            color: #ffc9c0
+        }
+
+        .log .g {
+            border-color: var(--ok)
+        }
+
+        .log .i {
+            vertical-align: -2px;
+            margin-right: 4px
+        }
+
+        .log small {
+            color: var(--mute);
+            margin-left: 6px
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: translateY(-8px) scale(.97)
+            }
+        }
+
+        .shake {
+            animation: sh .4s
+        }
+
+        @keyframes sh {
+            25% {
+                translate: -6px
+            }
+
+            75% {
+                translate: 6px
+            }
+        }
+
+        .flow {
+            list-style: none;
+            padding: 0;
+            margin: 34px 0 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+            counter-reset: s;
+            position: relative
+        }
+
+        .flow li {
+            counter-increment: s;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 20px;
+            color: var(--dim);
+            font-size: 14.5px
+        }
+
+        .flow li::before {
+            content: "0" counter(s);
+            display: block;
+            font: italic 500 38px var(--serif);
+            color: var(--gold);
+            margin-bottom: 6px
+        }
+
+        .flow b {
+            color: var(--text)
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 8px 14px;
+            border: 1px solid var(--line);
+            border-radius: 99px;
+            font-size: 13px;
+            color: var(--dim);
+            margin: 6px 8px 0 0;
+            background: #0f1f17
+        }
+
+        .rv {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .7s, transform .7s
+        }
+
+        .rv.in {
+            opacity: 1;
+            transform: none
+        }
+
+        .rv:nth-child(2) {
+            transition-delay: .08s
+        }
+
+        .rv:nth-child(3) {
+            transition-delay: .16s
+        }
+
+        .rv:nth-child(4) {
+            transition-delay: .24s
+        }
+
+        .rv:nth-child(5) {
+            transition-delay: .32s
+        }
+
+        .dots {
+            position: fixed;
+            right: 18px;
+            top: 50%;
+            translate: 0 -50%;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+
+        .dots a {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            border: 1px solid var(--mute);
+            transition: .2s
+        }
+
+        .dots a.on {
+            background: var(--gold);
+            border-color: var(--gold);
+            scale: 1.4
+        }
+
+        @media(max-width:900px) {
+
+            .hero,
+            .demo {
+                grid-template-columns: 1fr
+            }
+
+            .stage {
+                height: 420px;
+                order: -1
+            }
+
+            .coin {
+                width: 220px
+            }
+
+            .links a:not(.btn) {
+                display: none
+            }
+
+            .dots {
+                display: none
+            }
+
+            .slide {
+                padding-top: 84px
+            }
+
+            .ap {
+                right: 0
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            * {
+                animation: none !important;
+                transition: none !important
+            }
+
+            html {
+                scroll-behavior: auto
+            }
+
+            .rv {
+                opacity: 1;
+                transform: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <symbol id="i-banknote" viewBox="0 0 24 24">
+                <rect width="20" height="12" x="2" y="6" rx="2" />
+                <circle cx="12" cy="12" r="2" />
+                <path d="M6 12h.01M18 12h.01" />
+            </symbol>
+            <symbol id="i-users" viewBox="0 0 24 24">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+            </symbol>
+            <symbol id="i-eyeoff" viewBox="0 0 24 24">
+                <path
+                    d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 10 8 10 8a13.2 13.2 0 0 1-1.67 2.68M6.61 6.61A13.5 13.5 0 0 0 2 12s3 8 10 8a9.7 9.7 0 0 0 5.39-1.61M2 2l20 20" />
+            </symbol>
+            <symbol id="i-receipt" viewBox="0 0 24 24">
+                <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+                <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 6v2m0 8v2" />
+            </symbol>
+            <symbol id="i-lock" viewBox="0 0 24 24">
+                <rect width="18" height="11" x="3" y="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </symbol>
+            <symbol id="i-percent" viewBox="0 0 24 24">
+                <path d="M19 5 5 19" />
+                <circle cx="6.5" cy="6.5" r="2.5" />
+                <circle cx="17.5" cy="17.5" r="2.5" />
+            </symbol>
+            <symbol id="i-trend" viewBox="0 0 24 24">
+                <path d="m22 7-8.5 8.5-5-5L2 17" />
+                <path d="M16 7h6v6" />
+            </symbol>
+            <symbol id="i-file" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6M8 13h8M8 17h8" />
+            </symbol>
+            <symbol id="i-bell" viewBox="0 0 24 24">
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            </symbol>
+            <symbol id="i-alert" viewBox="0 0 24 24">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                <path d="M12 9v4m0 4h.01" />
+            </symbol>
+            <symbol id="i-reset" viewBox="0 0 24 24">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+            </symbol>
+            <symbol id="i-play" viewBox="0 0 24 24">
+                <polygon points="7 4 20 12 7 20" fill="currentColor" />
+            </symbol>
+            <symbol id="i-check" viewBox="0 0 24 24">
+                <path d="M20 6 9 17l-5-5" />
+            </symbol>
+            <symbol id="i-clock" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+            </symbol>
+            <symbol id="i-arrow" viewBox="0 0 24 24">
+                <path d="M5 12h14m-7-7 7 7-7 7" />
+            </symbol>
+        </defs>
+    </svg>
+    <header class="nav">
+        <a class="brand" href="#top"><span class="logo">T</span><span><b>THEMBA</b><small>Transparent
+                    Wealth</small></span></a>
+        <nav class="links"><a href="#how">How it works</a><a href="#features">Features</a><a
+                href="dashboards/login.html">Log in</a><a class="btn gold" href="dashboards/signup.html">Sign up</a>
+        </nav>
+    </header>
+    <nav class="dots" aria-label="Slides"></nav>
+
+    <section class="slide" id="top" data-t="Home">
+        <div class="wrap hero">
+            <div>
+                <p class="eyebrow">Reimagining community wealth</p>
+                <h1>Together We Save.<br><em>Together We Grow.</em></h1>
+                <p class="lede">Stokvel savings run on rules everyone can see. Transparent in every transaction, secured
+                    by multi-approval, recorded forever.</p>
+                <div class="cta"><a class="btn gold lg" href="dashboards/signup.html">Start building wealth <svg
+                            class="i">
+                            <use href="#i-arrow" />
+                        </svg></a><a class="play" href="#how"><i><svg class="i">
+                                <use href="#i-play" />
+                            </svg></i>See how it works</a></div>
+                <div class="trust"><span>2-of-3 multisig security</span><span>Built for South
+                        Africa</span><span>Immutable audit trail</span></div>
+            </div>
+            <div class="stage" id="stage">
+                <div class="ring r1"></div>
+                <div class="ring r2"></div>
+                <div class="mini m1">T</div>
+                <div class="mini m2">T</div>
+                <div class="coin" id="coin"><span>T</span></div>
+                <div class="fc ap wait" id="ap">
+                    <div class="ck" id="ck"><svg class="i">
+                            <use href="#i-clock" />
+                        </svg></div>
+                    <div><b id="aptx">Awaiting approval</b><small id="apsub">1 of 3 signers confirmed</small></div>
+                </div>
+                <div class="fc bal"><small>Community balance</small><strong id="bal">R 0</strong><span class="up">+12.4%
+                        this month</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide alt" id="problem" data-t="Problem">
+        <div class="wrap">
+            <p class="eyebrow">The problem</p>
+            <h2>Stokvels run on cash and <em>blind trust.</em></h2>
+            <p class="lede">One or two people hold the money. Members can't check what happened to it.</p>
+            <div class="grid g2 bad">
+                <div class="card rv">
+                    <div class="ic"><svg class="i">
+                            <use href="#i-banknote" />
+                        </svg></div>
+                    <h3>Money goes “missing”</h3>
+                    <p>Members who paid get told they didn't.</p>
+                </div>
+                <div class="card rv">
+                    <div class="ic"><svg class="i">
+                            <use href="#i-users" />
+                        </svg></div>
+                    <h3>Loans on a handshake</h3>
+                    <p>Terms are agreed verbally, then quietly changed.</p>
+                </div>
+                <div class="card rv">
+                    <div class="ic"><svg class="i">
+                            <use href="#i-eyeoff" />
+                        </svg></div>
+                    <h3>Silent borrowing</h3>
+                    <p>Admins can dip into the pot without telling the group.</p>
+                </div>
+                <div class="card rv">
+                    <div class="ic"><svg class="i">
+                            <use href="#i-receipt" />
+                        </svg></div>
+                    <h3>Messy shared costs</h3>
+                    <p>Function, groceries, funeral support: everyone chases everyone.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" id="demo" data-t="Try it">
+        <div class="wrap demo">
+            <div>
+                <p class="eyebrow">Try it live</p>
+                <h2>No single person can <em>move the money.</em></h2>
+                <p class="lede">Sipho requests a loan. It needs 2 of 3 authorised members, and nobody approves their own
+                    request. Tap the signers, or try to cheat.</p>
+            </div>
+            <div class="panel" id="panel">
+                <div class="req">
+                    <div><b>Loan: R 5,000</b><small>Requested by Sipho · from the shared USDT pot</small></div><span
+                        class="tag" id="tag">Pending</span>
+                </div>
+                <div class="pips"><i></i><i></i><i></i></div>
+                <div class="sg">
+                    <button data-n="Thandi">Thandi<small>Treasurer</small></button>
+                    <button data-n="Lerato">Lerato<small>Chairperson</small></button>
+                    <button data-n="Sipho">Sipho<small>Requester</small></button>
+                </div>
+                <div class="act"><button class="btn danger" id="cheat"><svg class="i">
+                            <use href="#i-alert" />
+                        </svg> Withdraw without approvals</button><button class="btn" id="reset"><svg class="i">
+                            <use href="#i-reset" />
+                        </svg> Reset</button></div>
+                <div class="log" id="log">
+                    <div><b>Request created</b><small>Sipho · just now</small></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide alt" id="features" data-t="Features">
+        <div class="wrap">
+            <p class="eyebrow">Core features</p>
+            <h2>Five safeguards, <em>built in.</em></h2>
+            <div class="grid g3">
+                <div class="card rv">
+                    <div class="ic"><svg class="i">
+                            <use href="#i-lock" />
+                        </svg></div>
+                    <h3>Multi-approval wallet</h3>
+                    <p>Shared USDT pot. Withdrawals, loans and large bills need 2 of 3 members.</p>
+                </div>
+                <div class="card rv">
+                    <div class="ic"><svg class="i">
+                            <use href="#i-percent" />
+                        </svg></div>
+                    <h3>Contributions &amp; bill splitting</h3>
+                    <p>Split equally, by amount or by percentage. Cash counts once the member confirms.</p>
+                </div>
+                <div class="card rv">
+                    <div class="ic"><svg class="i">
+                            <use href="#i-trend" />
+                        </svg></div>
+                    <h3>Loan tracker</h3>
+                    <p>Repayments, balances and overdue flags. Admin loans are visible to all.</p>
+                </div>
+                <div class="card rv">
+                    <div class="ic"><svg class="i">
+                            <use href="#i-file" />
+                        </svg></div>
+                    <h3>Permanent audit trail</h3>
+                    <p>Every action logged. Nothing edited or deleted: corrections are new entries.</p>
+                </div>
+                <div class="card rv">
+                    <div class="ic"><svg class="i">
+                            <use href="#i-bell" />
+                        </svg></div>
+                    <h3>Fraud alerts</h3>
+                    <p>Every member is alerted to unapproved withdrawals and tampering attempts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" id="how" data-t="How it works">
+        <div class="wrap">
+            <p class="eyebrow">How it works</p>
+            <h2>From first contribution to <em>live audit trail.</em></h2>
+            <ol class="flow">
+                <li class="rv"><b>Create a stokvel</b> and invite members.</li>
+                <li class="rv"><b>Contribute</b> monthly in USDT, or cash confirmed by the member.</li>
+                <li class="rv"><b>Split a bill</b> like the year-end function. Everyone pays their share.</li>
+                <li class="rv"><b>Request a loan.</b> Two members approve and funds move on-chain.</li>
+                <li class="rv"><b>Cheating is blocked.</b> Unapproved withdrawals alert everyone.</li>
+            </ol>
+            <p style="margin-top:30px"><span class="pill">Mobile-first PWA</span><span class="pill">Supabase + Row Level
+                    Security</span><span class="pill">ethers.js</span><span class="pill">Testnet USDT
+                    multisig</span><span class="pill">Pegged to USD, safe from rand swings</span></p>
+        </div>
+    </section>
+
+    <section class="slide alt" id="join" data-t="Join">
+        <div class="wrap" style="text-align:center">
+            <p class="eyebrow" style="justify-content:center">Built for South Africa. Ready for Africa.</p>
+            <h2>Chamas, susus, esusus, tontines.<br><em>One transparent model.</em></h2>
+            <p class="lede" style="margin:0 auto">Next: cash on/off-ramps, mobile money, a multi-currency pot, and SMS
+                or WhatsApp reminders.</p>
+            <div class="cta" style="justify-content:center"><a class="btn gold lg" href="dashboards/signup.html">Create
+                    your account <svg class="i">
+                        <use href="#i-arrow" />
+                    </svg></a><a class="btn lg" href="dashboards/login.html">Log in</a></div>
+            <p style="margin-top:30px;color:var(--mute);font-size:13px">Prototype uses testnet USDT only. No real money
+                moves.</p>
+        </div>
+    </section>
+
+    <script>
+        (function () {
+            var $ = function (s) { return document.querySelector(s) }, S = [].slice.call(document.querySelectorAll('.slide'));
+            /* nav dots + keyboard */
+            var D = $('.dots'), cur = 0;
+            S.forEach(function (e, i) { var a = document.createElement('a'); a.href = '#' + e.id; a.title = e.dataset.t; D.appendChild(a) });
+            var io = new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { cur = S.indexOf(x.target);[].forEach.call(D.children, function (a, i) { a.classList.toggle('on', i === cur) }) } }) }, { threshold: .5 });
+            S.forEach(function (e) { io.observe(e) });
+            document.addEventListener('keydown', function (e) {
+                if (/INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName)) return; var n = null;
+                if (e.key === 'ArrowDown' || e.key === 'PageDown') n = Math.min(cur + 1, S.length - 1); if (e.key === 'ArrowUp' || e.key === 'PageUp') n = Math.max(cur - 1, 0);
+                if (n !== null) { e.preventDefault(); S[n].scrollIntoView() }
+            });
+            /* reveal */
+            var ro = new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('in'); ro.unobserve(x.target) } }) }, { threshold: .2 });
+            document.querySelectorAll('.rv').forEach(function (e) { ro.observe(e) });
+            /* balance counter */
+            var b = $('#bal'), t0 = null; function tick(t) { t0 = t0 || t; var p = Math.min((t - t0) / 1800, 1), v = Math.round(248500 * (1 - Math.pow(1 - p, 3))); b.textContent = 'R ' + v.toLocaleString('en-ZA').replace(/\s/g, ','); if (p < 1) requestAnimationFrame(tick) } requestAnimationFrame(tick);
+            /* hero approval card cycle */
+            var CLK = '<svg class="i"><use href="#i-clock"/></svg>', CHK = '<svg class="i"><use href="#i-check"/></svg>', w = true; setInterval(function () { w = !w; $('#ap').classList.toggle('wait', w); $('#ck').innerHTML = w ? CLK : CHK; $('#aptx').textContent = w ? 'Awaiting approval' : 'Transaction approved'; $('#apsub').textContent = w ? '1 of 3 signers confirmed' : '2 of 3 signers confirmed' }, 3200);
+            /* coin parallax */
+            var st = $('#stage'), c = $('#coin'); st.addEventListener('mousemove', function (e) { var r = st.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; c.style.transform = 'rotateY(' + x * 28 + 'deg) rotateX(' + -y * 28 + 'deg)' });
+            st.addEventListener('mouseleave', function () { c.style.transform = '' });
+            /* multisig demo */
+            var ap = new Set(), done = false, pips = document.querySelectorAll('.pips i'), L = $('#log'), tag = $('#tag');
+            function log(h, c) { var d = document.createElement('div'); if (c) d.className = c; d.innerHTML = h + '<small>' + new Date().toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' }) + '</small>'; L.insertBefore(d, L.firstChild) }
+            function draw() { pips.forEach(function (p, i) { p.classList.toggle('on', i < ap.size) }) }
+            document.querySelectorAll('.sg button').forEach(function (btn) {
+                btn.onclick = function () {
+                    var n = btn.dataset.n; if (done) return;
+                    if (n === 'Sipho') { $('#panel').classList.remove('shake'); void $('#panel').offsetWidth; $('#panel').classList.add('shake'); log('<b>Blocked:</b> Sipho cannot approve his own request', 'a'); return }
+                    if (ap.has(n)) return; ap.add(n); btn.classList.add('done'); log('<b>' + n + '</b> approved (' + ap.size + ' of 2 needed)'); draw();
+                    if (ap.size >= 2) { done = true; tag.textContent = 'Released'; tag.className = 'tag ok'; setTimeout(function () { log('<b>R 5,000 released on-chain</b> · recorded in the audit trail', 'g') }, 350) }
+                }
+            });
+            $('#cheat').onclick = function () { if (done) return; tag.textContent = 'Blocked'; tag.className = 'tag no'; log('<b><svg class="i"><use href="#i-bell"/></svg> ALERT sent to all members:</b> withdrawal attempted without required approvals', 'a') };
+            $('#reset').onclick = function () { ap.clear(); done = false; draw(); tag.textContent = 'Pending'; tag.className = 'tag'; document.querySelectorAll('.sg button').forEach(function (b) { b.classList.remove('done') }); L.innerHTML = '<div><b>Request created</b><small>Sipho · just now</small></div>' };
+        })();
+    </script>
+</body>
+
+</html>
