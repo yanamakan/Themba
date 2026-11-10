@@ -33,6 +33,7 @@
         confirmContribution: (id, accept = true) => rpc("confirm_contribution", { p_id: id, p_accept: accept }),
         recordUsdtContribution: (stokvel, amount, period, txHash) => rpc("record_usdt_contribution", { p_stokvel: stokvel, p_amount: amount, p_period: period, p_tx_hash: txHash }),
         createBill: (stokvel, title, total, split, shares) => rpc("create_bill", { p_stokvel: stokvel, p_title: title, p_total: total, p_split: split, p_shares: shares }),
+        confirmBillCash: (share, accept = true) => rpc("confirm_bill_cash", { p_share: share, p_accept: accept }),
         payBillShare: (share, method, txHash = null) => rpc("pay_bill_share", { p_share: share, p_method: method, p_tx_hash: txHash }),
         requestWithdrawal: (stokvel, amount, description, payee = null) => rpc("request_withdrawal", { p_stokvel: stokvel, p_amount: amount, p_description: description, p_payee: payee }),
         requestLoan: (stokvel, principal, rate, termMonths) => rpc("request_loan", { p_stokvel: stokvel, p_principal: principal, p_rate: rate, p_term_months: termMonths }),

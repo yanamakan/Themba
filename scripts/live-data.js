@@ -13,7 +13,7 @@
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
     const VIEW = (n) => $(`[data-view="${n}"]`);
     const TREAS = !!$(".treasurer-view");
-    const S = { me: session.user.id, stokvels: [], sid: null, st: null, role: "member", signer: false, members: [], names: {}, contribs: [], requests: [], alerts: [], balance: 0 };
+    const S = { me: session.user.id, stokvels: [], sid: null, st: null, role: "member", signer: false, members: [], names: {}, contribs: [], bills: [], requests: [], alerts: [], balance: 0 };
 
     /* ---------- tiny helpers ---------- */
     function h(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -54,6 +54,7 @@
         }
         const form = h("form"), fs = h("div", "dialog-fields");
         fields.forEach((f) => {
+            if (f.custom) { fs.append(f.custom(fs)); return; }
             const l = h("label", null, f.label); let inp;
             if (f.options) { inp = h("select", "select"); f.options.forEach(([v, t]) => { const o = h("option", null, t); o.value = v; inp.append(o); }); }
             else { inp = h("input", "input"); inp.type = f.type || "text"; if (f.step) inp.step = f.step; if (f.min != null) inp.min = f.min; if (f.placeholder) inp.placeholder = f.placeholder; if (f.pattern) inp.pattern = f.pattern; }
@@ -77,8 +78,8 @@
         S.sid = pick.stokvels.id; S.st = pick.stokvels; S.role = pick.role; S.signer = pick.is_signer;
     }
     async function loadData() {
-        const [members, contribs, requests, balance, alerts] = await Promise.all([api.members(S.sid), api.contributions(S.sid), api.requests(S.sid), api.balance(S.sid), api.alerts(S.sid)]);
-        Object.assign(S, { members, contribs, requests, balance, alerts });
+        const [members, contribs, requests, balance, alerts, bills] = await Promise.all([api.members(S.sid), api.contributions(S.sid), api.requests(S.sid), api.balance(S.sid), api.alerts(S.sid), api.bills(S.sid)]);
+        Object.assign(S, { members, contribs, requests, balance, alerts, bills });
         S.names = Object.fromEntries(members.map((m) => [m.user_id, (m.profiles && m.profiles.full_name) || "Member"]));
     }
     let busy = false, again = false;
@@ -113,11 +114,11 @@
         if (!S.sid) return renderOnboarding();
         $$(".live-slot[data-live='onboard']").forEach((e) => e.remove());
         const st = stats();
-        renderBalance(st); renderContributions(st); renderApprovals(st);
+        renderBalance(st); renderContributions(st); renderApprovals(st); renderBills();
     }
 
     function renderOnboarding() {
-        ["overview", "contributions", "approvals"].forEach((v) => {
+        ["overview", "contributions", "approvals", "bills"].forEach((v) => {
             const s = slot(v, "onboard"); if (!s) return; s.replaceChildren();
             const p = h("section", "panel"); p.style.padding = "22px";
             kids(p, h("h2", null, "Join or create your stokvel"), h("p", null, "Your account is live, but you are not in a stokvel yet. Create one (you become its treasurer) or join with an invite code from your treasurer."));
@@ -193,6 +194,7 @@
             const hp = $(".ledger-heading p", v); if (hp) hp.textContent = `${S.st.name} · Monthly target ${usdt(st.target)}`;
             const cnt = { "needs-confirmation": rows.filter((r) => r.dataset.contribution === "needs-confirmation").length, outstanding: rows.filter((r) => r.dataset.contribution === "outstanding").length };
             Object.entries(cnt).forEach(([f, n]) => { const sp = $(`[data-contribution-filter="${f}"] span`, v); if (sp) sp.textContent = n; });
+            renderBillCash();
             const act = slot("contributions", "actions"); act.replaceChildren(btn("Log a cash contribution", "btn btn-gold", () => logCash()));
             // overview receipt card -> cash waiting for the member to confirm
             const rc = $(".receipt-card");
@@ -296,10 +298,105 @@
         return p;
     }
 
+    /* ---------- bills ---------- */
+    const SPLIT = { equal: "Split equally", amount: "Custom amounts", percentage: "By percentage" };
+    const SHARE_ST = { paid: ["Paid", "status-done"], pending_confirmation: ["Cash awaiting treasurer", "status-pending"], unpaid: ["Owes", "status-pending"] };
+    const evenSplit = (total, n) => { const base = Math.floor((total / n) * 100) / 100, a = Array(n).fill(base); a[0] = Math.round((total - base * (n - 1)) * 100) / 100; return a; };
+
+    function billCard(b) {
+        const shares = b.bill_shares || [], total = Number(b.total_amount);
+        const paid = shares.filter((s) => s.status === "paid").reduce((a, s) => a + Number(s.amount), 0);
+        const out = Math.max(total - paid, 0), pct = total ? Math.round((paid / total) * 100) : 0, settled = out < 0.005;
+        const mine = shares.find((s) => s.user_id === S.me);
+        const card = h("article", "panel bill-card live-bill");
+        const bar = h("span"); bar.style.width = pct + "%";
+        kids(card,
+            kids(h("div", "bill-card-top"), h("small", null, when(b.created_at)), h("span", "status " + (settled ? "status-done" : "status-pending"), settled ? "Settled" : "In progress")),
+            h("h2", null, b.title),
+            h("p", null, `${S.st.name} · ${shares.length} members · ${SPLIT[b.split]} · by ${name(b.created_by)}`),
+            kids(h("div", "bill-amounts"), kids(h("div"), h("small", null, "Total bill"), h("strong", null, usdt(total))), kids(h("div"), h("small", null, "Outstanding"), h("strong", null, usdt(out)))),
+            kids(h("div", "progress-track"), bar),
+            kids(h("div", "bill-progress-caption"), h("span", null, `${usdt(paid)} paid`), h("b", null, pct + "%")));
+        const list = h("div", "member-list");
+        shares.forEach((s) => { const st = SHARE_ST[s.status]; list.append(kids(h("div", "member-row"), h("span", "avatar", initials(name(s.user_id))), kids(h("span", "row-grow"), h("strong", null, name(s.user_id) + (s.user_id === S.me ? " (you)" : "")), h("small", null, usdt(s.amount) + (s.percentage ? " · " + s.percentage + "%" : ""))), h("span", "status " + st[1], st[0]))); });
+        card.append(list);
+        if (total >= Number(S.st.large_bill_threshold)) card.append(h("small", null, "Large bill: paying the supplier from the pot also needs 2 signer approvals (see Approvals)."));
+        if (mine) {
+            if (mine.status === "unpaid") card.append(btn("Settle my share · " + usdt(mine.amount), "button-outline full-button", async () => payShare(mine, b)));
+            else { const d = h("button", "button-outline full-button", mine.status === "paid" ? "Your share is paid" : "Cash waiting for treasurer confirmation"); d.disabled = true; card.append(d); }
+        }
+        return card;
+    }
+    function renderBills() {
+        const v = VIEW("bills"), grid = v && $(".bill-grid", v); if (!grid) return;
+        grid.replaceChildren(...(S.bills.length ? S.bills.map(billCard) : [h("p", "empty-state", "No bills yet. Create the first one.")]));
+    }
+    function payShare(s, b) {
+        openForm({
+            eyebrow: "Settle up", title: "Pay your share of " + b.title, desc: `${usdt(s.amount)} goes into the group pot. Cash only counts once the treasurer confirms they received it.`, submit: "Settle my share",
+            fields: [{ name: "method", label: "How are you paying?", options: [["usdt", "USDT (from my wallet)"], ["cash", "Cash to the treasurer"]] }, { name: "tx", label: "Transaction hash (USDT only)", placeholder: "0x…", pattern: "0x[0-9a-fA-F]{64}", required: false }],
+            onSubmit: async (v) => { await api.payBillShare(s.id, v.method, v.method === "usdt" ? (v.tx || "").trim() : null); toast(v.method === "cash" ? "Recorded. The treasurer will confirm the cash." : "Share paid and added to the ledger", "success"); }
+        });
+    }
+    function buildShares(fs) {
+        const wrap = h("div"); wrap.style.cssText = "display:grid;gap:8px";
+        const sel = () => fs.querySelector('[name="split"]'), tot = () => fs.querySelector('[name="total"]');
+        const rows = S.members.map((m) => {
+            const r = h("label"); r.style.cssText = "display:flex;align-items:center;gap:10px";
+            const cb = h("input"); cb.type = "checkbox"; cb.name = "inc_" + m.user_id; cb.checked = true;
+            const nm = h("span", null, name(m.user_id)); nm.style.flex = "1";
+            const val = h("input", "input"); val.type = "number"; val.step = "0.01"; val.min = "0"; val.name = "val_" + m.user_id; val.style.width = "110px";
+            r.append(cb, nm, val); wrap.append(r); return { cb, val };
+        });
+        const note = h("small"); wrap.append(note);
+        const sync = () => {
+            const kind = sel().value, on = rows.filter((r) => r.cb.checked), t = Number(tot().value || 0);
+            rows.forEach((r) => { r.val.style.display = kind === "equal" ? "none" : ""; r.val.placeholder = kind === "percentage" ? "%" : "USDT"; r.val.disabled = !r.cb.checked; r.val.required = kind !== "equal" && r.cb.checked; });
+            if (kind === "equal") note.textContent = on.length && t ? `${on.length} people · about ${usdt(t / on.length)} each` : "";
+            else { const sum = on.reduce((a, r) => a + Number(r.val.value || 0), 0); note.textContent = kind === "percentage" ? `Allocated ${num(sum)}% of 100%` : `Allocated ${usdt(sum)} of ${usdt(t)}`; }
+        };
+        const prefill = () => {
+            const kind = sel().value, on = rows.filter((r) => r.cb.checked), t = Number(tot().value || 0);
+            const parts = !on.length || kind === "equal" ? [] : evenSplit(kind === "percentage" ? 100 : t, on.length);
+            rows.forEach((r) => (r.val.value = ""));
+            on.forEach((r, i) => { if (parts.length) r.val.value = parts[i].toFixed(2); });
+            sync();
+        };
+        wrap.addEventListener("input", sync);
+        wrap.addEventListener("change", (e) => { if (e.target.type === "checkbox") prefill(); else sync(); });
+        setTimeout(() => { sel().addEventListener("change", prefill); tot().addEventListener("input", () => { if (sel().value === "amount") prefill(); else sync(); }); sync(); });
+        return wrap;
+    }
+    function billDialog() {
+        openForm({
+            eyebrow: "Fair by design", title: "Create a bill", desc: "Split a shared cost between members. Everyone sees who has paid.", submit: "Create bill",
+            fields: [{ name: "title", label: "What is it for?", placeholder: "e.g. Year-end function" }, { name: "total", label: "Total (USDT)", type: "number", step: "0.01", min: 0.01 }, { name: "split", label: "How to split", options: [["equal", "Equally"], ["amount", "Custom amounts"], ["percentage", "By percentage"]] }, { custom: buildShares }],
+            onSubmit: async (v) => {
+                const picked = S.members.filter((m) => v["inc_" + m.user_id]);
+                if (!picked.length) throw new Error("Pick at least one member");
+                const shares = picked.map((m) => v.split === "equal" ? { user_id: m.user_id } : v.split === "amount" ? { user_id: m.user_id, amount: Number(v["val_" + m.user_id]) } : { user_id: m.user_id, percentage: Number(v["val_" + m.user_id]) });
+                await api.createBill(S.sid, v.title.trim(), Number(v.total), v.split, shares);
+                toast("Bill created and split between " + picked.length + " members", "success");
+            }
+        });
+    }
+    function renderBillCash() {   // treasurer: cash shares waiting for confirmation
+        const box = slot("contributions", "billcash"); if (!box) return; box.replaceChildren();
+        const pend = []; S.bills.forEach((b) => (b.bill_shares || []).forEach((s) => { if (s.status === "pending_confirmation") pend.push([b, s]); }));
+        if (!pend.length) return;
+        const p = h("section", "panel"); p.style.padding = "22px";
+        p.append(h("h2", null, "Bill shares paid in cash"), h("p", null, "Confirm only once you hold the cash. It then counts in the ledger."));
+        pend.forEach(([b, s]) => p.append(kids(h("div", "member-row"), h("span", "avatar", initials(name(s.user_id))), kids(h("span", "row-grow"), h("strong", null, name(s.user_id) + " · " + b.title), h("small", null, usdt(s.amount))),
+            s.user_id === S.me ? h("span", "status status-pending", "Another treasurer must confirm") : kids(h("span"), btn("Cash received", "button-outline", () => run(() => api.confirmBillCash(s.id, true), "Cash confirmed and added to the ledger")), btn("Not received", "text-link", () => run(() => api.confirmBillCash(s.id, false), "Marked as not received"))))));
+        box.append(p);
+    }
+
     /* ---------- wiring ---------- */
     document.addEventListener("click", (e) => {   // capture: replaces the demo contribution dialog
         const b = e.target.closest('[data-action="contribution"]');
-        if (b && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); TREAS ? logCash() : makeContribution(); }
+        if (b && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); TREAS ? logCash() : makeContribution(); return; }
+        const bb = e.target.closest('[data-action="bill"]');
+        if (bb && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); billDialog(); }
     }, true);
     window.addEventListener("themba:demo-state", (ev) => {   // Safe panel finished an on-chain contribution -> save it to the real ledger
         const d = ev.detail || {};
