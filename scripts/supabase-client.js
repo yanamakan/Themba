@@ -40,6 +40,8 @@
         amendLoanTerms: (loan, principal, rate, termMonths) => rpc("amend_loan_terms", { p_loan: loan, p_principal: principal, p_rate: rate, p_term_months: termMonths }),
         castApproval: (request, decision) => rpc("cast_approval", { p_request: request, p_decision: decision }),   // "approve" | "reject"
         executeRequest: (request, txHash = null) => rpc("execute_request", { p_request: request, p_tx_hash: txHash }), // -> {ok, reason?}
+        logCashRepayment: (loan, amount) => rpc("log_cash_repayment", { p_loan: loan, p_amount: amount }),
+        confirmCashRepayment: (claim, accept = true) => rpc("confirm_cash_repayment", { p_claim: claim, p_accept: accept }),
         recordLoanRepayment: (loan, amount, method, txHash = null) => rpc("record_loan_repayment", { p_loan: loan, p_amount: amount, p_method: method, p_tx_hash: txHash }),
         addCorrection: (entry, reason) => rpc("add_correction", { p_entry: entry, p_reason: reason }),
         reportTamperAttempt: (stokvel, table, record = null) => rpc("report_tamper_attempt", { p_stokvel: stokvel, p_table: table, p_record: record }),
@@ -58,6 +60,8 @@
         contributions: (stokvel) => read(sb.from("contributions").select("*").eq("stokvel_id", stokvel).order("created_at", { ascending: false })),
         bills: (stokvel) => read(sb.from("bills").select("*,bill_shares(*)").eq("stokvel_id", stokvel).order("created_at", { ascending: false })),
         loans: (stokvel) => read(sb.from("loan_balances").select("*").eq("stokvel_id", stokvel)),
+        loanTerms: () => read(sb.from("loan_terms_history").select("*").order("version")),
+        repaymentClaims: (stokvel) => read(sb.from("repayment_claims").select("*").eq("stokvel_id", stokvel).order("created_at", { ascending: false })),
         requests: (stokvel) => read(sb.from("approval_requests").select("*,approvals(approver_id,decision)").eq("stokvel_id", stokvel).order("created_at", { ascending: false })),
         ledger: (stokvel) => read(sb.from("ledger_entries").select("*").eq("stokvel_id", stokvel).order("created_at", { ascending: false })),
         auditLog: (stokvel, limit = 100) => read(sb.from("audit_log").select("*").eq("stokvel_id", stokvel).order("created_at", { ascending: false }).limit(limit)),
@@ -66,7 +70,7 @@
         /* ---- live updates: onChange(table, payload) fires for anything in this stokvel ---- */
         subscribe(stokvel, onChange) {
             const channel = sb.channel("stokvel-" + stokvel);
-            ["alerts", "approval_requests", "approvals", "ledger_entries", "contributions", "bills", "bill_shares", "loans"].forEach((table) => {
+            ["alerts", "approval_requests", "approvals", "ledger_entries", "contributions", "bills", "bill_shares", "loans", "loan_repayments", "repayment_claims"].forEach((table) => {
                 channel.on("postgres_changes", { event: "*", schema: "public", table, filter: "stokvel_id=eq." + stokvel }, (p) => onChange(table, p));
             });
             channel.subscribe();

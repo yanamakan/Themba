@@ -13,7 +13,7 @@
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
     const VIEW = (n) => $(`[data-view="${n}"]`);
     const TREAS = !!$(".treasurer-view");
-    const S = { me: session.user.id, stokvels: [], sid: null, st: null, role: "member", signer: false, members: [], names: {}, contribs: [], bills: [], requests: [], alerts: [], balance: 0 };
+    const S = { me: session.user.id, stokvels: [], sid: null, st: null, role: "member", signer: false, members: [], names: {}, contribs: [], bills: [], loans: [], terms: [], claims: [], requests: [], alerts: [], balance: 0 };
 
     /* ---------- tiny helpers ---------- */
     function h(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -78,8 +78,8 @@
         S.sid = pick.stokvels.id; S.st = pick.stokvels; S.role = pick.role; S.signer = pick.is_signer;
     }
     async function loadData() {
-        const [members, contribs, requests, balance, alerts, bills] = await Promise.all([api.members(S.sid), api.contributions(S.sid), api.requests(S.sid), api.balance(S.sid), api.alerts(S.sid), api.bills(S.sid)]);
-        Object.assign(S, { members, contribs, requests, balance, alerts, bills });
+        const [members, contribs, requests, balance, alerts, bills, loans, terms, claims] = await Promise.all([api.members(S.sid), api.contributions(S.sid), api.requests(S.sid), api.balance(S.sid), api.alerts(S.sid), api.bills(S.sid), api.loans(S.sid), api.loanTerms(), api.repaymentClaims(S.sid)]);
+        Object.assign(S, { members, contribs, requests, balance, alerts, bills, loans, terms, claims });
         S.names = Object.fromEntries(members.map((m) => [m.user_id, (m.profiles && m.profiles.full_name) || "Member"]));
     }
     let busy = false, again = false;
@@ -114,11 +114,11 @@
         if (!S.sid) return renderOnboarding();
         $$(".live-slot[data-live='onboard']").forEach((e) => e.remove());
         const st = stats();
-        renderBalance(st); renderContributions(st); renderApprovals(st); renderBills();
+        renderBalance(st); renderContributions(st); renderApprovals(st); renderBills(); renderLoans(); renderOverviewStats(st);
     }
 
     function renderOnboarding() {
-        ["overview", "contributions", "approvals", "bills"].forEach((v) => {
+        ["overview", "contributions", "approvals", "bills", "loans"].forEach((v) => {
             const s = slot(v, "onboard"); if (!s) return; s.replaceChildren();
             const p = h("section", "panel"); p.style.padding = "22px";
             kids(p, h("h2", null, "Join or create your stokvel"), h("p", null, "Your account is live, but you are not in a stokvel yet. Create one (you become its treasurer) or join with an invite code from your treasurer."));
@@ -194,7 +194,7 @@
             const hp = $(".ledger-heading p", v); if (hp) hp.textContent = `${S.st.name} · Monthly target ${usdt(st.target)}`;
             const cnt = { "needs-confirmation": rows.filter((r) => r.dataset.contribution === "needs-confirmation").length, outstanding: rows.filter((r) => r.dataset.contribution === "outstanding").length };
             Object.entries(cnt).forEach(([f, n]) => { const sp = $(`[data-contribution-filter="${f}"] span`, v); if (sp) sp.textContent = n; });
-            renderBillCash();
+            renderBillCash(); renderLoanAdmin();
             const act = slot("contributions", "actions"); act.replaceChildren(btn("Log a cash contribution", "btn btn-gold", () => logCash()));
             // overview receipt card -> cash waiting for the member to confirm
             const rc = $(".receipt-card");
@@ -391,10 +391,83 @@
         box.append(p);
     }
 
+    /* ---------- loans ---------- */
+    const LOAN_ST = { pending: ["Awaiting approvals", "status-pending"], active: ["Active", "status-done"], repaid: ["Repaid", "status-done"], rejected: ["Rejected", "status-pending"] };
+    const termsOf = (id) => S.terms.filter((t) => t.loan_id === id).sort((a, b) => a.version - b.version);
+    const installment = (l) => Math.min(Math.round((Number(l.total_due) / l.term_months) * 100) / 100, Number(l.outstanding));
+
+    function loanCard(l) {
+        const card = h("section", "panel live-loan"); card.style.cssText = "padding:20px;display:grid;gap:12px";
+        const st = l.overdue ? ["Overdue", "status-pending"] : LOAN_ST[l.status];
+        card.append(kids(h("div", "loan-row"), h("span", "avatar", initials(name(l.borrower_id))), kids(h("span", "row-grow"), h("strong", null, name(l.borrower_id) + (l.borrower_id === S.me ? " (you)" : "")), h("small", null, `${l.term_months} months · ${num(l.interest_rate)}% interest · terms v${l.terms_version}`)), h("b", null, usdt(l.principal)), h("span", "status " + st[1], st[0])));
+        if (l.borrower_is_admin) card.append(kids(h("div", "notice notice-warning live-notice"), kids(h("div"), h("strong", null, "Administrator loan"), h("p", null, `${name(l.borrower_id)} is an administrator of this stokvel. Admin loans are flagged for every member.`))));
+        if (l.status === "active" || l.status === "repaid") {
+            const pct = Number(l.total_due) ? Math.min(100, Math.round((Number(l.repaid) / Number(l.total_due)) * 100)) : 0, bar = h("span"); bar.style.width = pct + "%";
+            card.append(kids(h("div", "progress-track"), bar), kids(h("div", "bill-progress-caption"), h("span", null, `${usdt(l.repaid)} repaid of ${usdt(l.total_due)}`), h("b", null, pct + "%")));
+            if (l.status === "active") card.append(h("small", null, `Outstanding ${usdt(l.outstanding)} · due ${l.due_at}${l.overdue ? " · OVERDUE" : ""}`));
+        }
+        if (l.status === "pending") { const go = btn("See the approval", "button-outline", async () => { }); go.dataset.page = "approvals"; card.append(h("small", null, "Needs 2 signer approvals. The requester cannot approve their own loan."), go); }
+        const th = termsOf(l.loan_id);
+        if (th.length > 1) card.append(h("small", null, "Terms history (every change was alerted to members): " + th.map((t) => `v${t.version} ${num(t.principal)} @ ${num(t.interest_rate)}% / ${t.term_months}mo`).join("  →  ")));
+        if (l.borrower_id === S.me) S.claims.filter((c) => c.loan_id === l.loan_id && c.status === "pending_confirmation").forEach((c) => {
+            card.append(kids(h("div", "notice notice-warning live-notice"), kids(h("div"), h("strong", null, "Cash repayment awaiting your confirmation"), h("p", null, `${name(c.logged_by)} recorded ${usdt(c.amount)} cash from you. It only counts once you confirm it.`)),
+                btn("Confirm", "button-outline", () => run(() => api.confirmCashRepayment(c.id, true), "Repayment confirmed and added to the ledger")), btn("Dispute", "text-link", () => run(() => api.confirmCashRepayment(c.id, false), "Marked as disputed"))));
+        });
+        if (l.status === "active" && l.borrower_id === S.me) card.append(btn("Repay in USDT", "btn btn-gold", async () => repayDialog(l)));
+        return card;
+    }
+    function renderLoans() {
+        const v = VIEW("loans"), list = v && $(".loan-list", v); if (!list) return;
+        const h1 = $("h1", v); if (h1) h1.textContent = "Loans";
+        const hd = $(".page-table .panel-heading p", v); if (hd) hd.textContent = `${S.loans.length} in ${S.st.name}. Everyone sees the same terms.`;
+        list.replaceChildren(...(S.loans.length ? [...S.loans].sort((a, b) => b.created_at.localeCompare(a.created_at)).map(loanCard) : [h("p", "empty-state", "No loans yet.")]));
+        list.style.display = "grid"; list.style.gap = "14px";
+    }
+    function renderOverviewStats(st) {
+        if (TREAS || !VIEW("overview")) return;
+        const c = $$(".stats-grid .stat-card", VIEW("overview")); if (c.length < 4) return;
+        const all = S.contribs.filter((x) => x.user_id === S.me && x.status === "confirmed").reduce((a, x) => a + Number(x.amount), 0), mine = st.paidBy[S.me] || 0;
+        const my = S.loans.filter((l) => l.borrower_id === S.me && l.status === "active"), out = my.reduce((a, l) => a + Number(l.outstanding), 0);
+        setStat(c[0], null, usdt(all), "Your confirmed contributions");
+        setStat(c[1], null, usdt(st.monthly), mine >= st.monthly ? "Paid this month" : `${usdt(Math.max(st.monthly - mine, 0))} remaining`, st.monthly ? Math.min(100, Math.round((mine / st.monthly) * 100)) : 0);
+        setStat(c[2], null, usdt(out), my.length ? `Due ${my[0].due_at}` : "No active loan");
+        setStat(c[3], null, my.length ? my[0].due_at : "None", `Monthly contribution · ${usdt(st.monthly)}`);
+    }
+    function loanDialog() {
+        openForm({
+            eyebrow: "Responsible access", title: "Apply for a loan", desc: "Signers vote on it (2 approvals needed). Everyone in the stokvel sees the terms, and they are locked once voting starts.", submit: "Submit application",
+            fields: [{ name: "amount", label: "Amount (USDT)", type: "number", step: "0.01", min: 0.01 }, { name: "rate", label: "Interest %", type: "number", step: "0.01", min: 0, value: 0 }, { name: "term", label: "Term (months)", type: "number", min: 1, max: 60, value: 6 }],
+            onSubmit: async (v) => { await api.requestLoan(S.sid, Number(v.amount), Number(v.rate || 0), Number(v.term)); toast("Loan requested. Signers have been asked to vote.", "success"); }
+        });
+    }
+    function repayDialog(l) {
+        openForm({
+            eyebrow: "Repayment", title: "Repay in USDT", desc: `Outstanding ${usdt(l.outstanding)}. To repay in cash instead, ask your treasurer to log it, then confirm it here.`, submit: "Add repayment",
+            fields: [{ name: "amount", label: "Amount (USDT)", type: "number", step: "0.01", min: 0.01, value: installment(l) }, { name: "tx", label: "Transaction hash", placeholder: "0x…", pattern: "0x[0-9a-fA-F]{64}" }],
+            onSubmit: async (v) => { const left = await api.recordLoanRepayment(l.loan_id, Number(v.amount), "usdt", v.tx.trim()); toast(Number(left) <= 0 ? "Loan fully repaid" : `Repayment recorded. ${usdt(left)} left.`, "success"); }
+        });
+    }
+    function renderLoanAdmin() {   // treasurer page has no loans view, so it gets a panel under Contributions
+        const box = slot("contributions", "loans"); if (!box) return; box.replaceChildren();
+        const open = S.loans.filter((l) => l.status === "pending" || l.status === "active"); if (!open.length) return;
+        const p = h("section", "panel"); p.style.padding = "22px";
+        p.append(h("h2", null, "Loans"), h("p", null, "Cash repayments only count once the borrower confirms them. Terms can only change before voting starts, and every change alerts all members."));
+        open.forEach((l) => {
+            const mine = l.borrower_id === S.me, acts = kids(h("span"));
+            if (!mine && l.status === "active") acts.append(btn("Log cash repayment", "button-outline", async () => openForm({ eyebrow: "Cash", title: "Log a cash repayment", desc: `${name(l.borrower_id)} must confirm it in their app before it counts.`, submit: "Log repayment", fields: [{ name: "amount", label: "Amount (USDT)", type: "number", step: "0.01", min: 0.01, value: installment(l) }], onSubmit: async (v) => { await api.logCashRepayment(l.loan_id, Number(v.amount)); toast("Logged. Waiting for the borrower to confirm.", "success"); } })));
+            if (!mine && l.status === "pending") acts.append(btn("Amend terms", "text-link", async () => openForm({ eyebrow: "Before voting", title: "Amend loan terms", desc: "Previous versions are kept and every member is alerted.", submit: "Save new terms", fields: [{ name: "amount", label: "Amount (USDT)", type: "number", step: "0.01", min: 0.01, value: l.principal }, { name: "rate", label: "Interest %", type: "number", step: "0.01", min: 0, value: l.interest_rate }, { name: "term", label: "Term (months)", type: "number", min: 1, max: 60, value: l.term_months }], onSubmit: async (v) => { await api.amendLoanTerms(l.loan_id, Number(v.amount), Number(v.rate || 0), Number(v.term)); toast("Terms updated. Members were alerted.", "success"); } })));
+            const claims = S.claims.filter((c) => c.loan_id === l.loan_id && c.status === "pending_confirmation").length;
+            p.append(kids(h("div", "member-row"), h("span", "avatar", initials(name(l.borrower_id))), kids(h("span", "row-grow"), h("strong", null, name(l.borrower_id) + " · " + usdt(l.principal) + (l.borrower_is_admin ? " · administrator loan" : "")), h("small", null, l.status === "active" ? `Outstanding ${usdt(l.outstanding)}${l.overdue ? " · OVERDUE" : ""}${claims ? " · " + claims + " cash awaiting borrower" : ""}` : "Awaiting approvals")), acts));
+        });
+        box.append(p);
+    }
+
     /* ---------- wiring ---------- */
     document.addEventListener("click", (e) => {   // capture: replaces the demo contribution dialog
         const b = e.target.closest('[data-action="contribution"]');
         if (b && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); TREAS ? logCash() : makeContribution(); return; }
+        const lb = e.target.closest('[data-action="loan"]');
+        if (lb && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); loanDialog(); return; }
         const bb = e.target.closest('[data-action="bill"]');
         if (bb && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); billDialog(); }
     }, true);
