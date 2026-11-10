@@ -46,7 +46,13 @@
 
         /* ---- reads (RLS limits these to the caller's own stokvels) ---- */
         myStokvels: () => read(sb.from("stokvel_members").select("role,is_signer,stokvels(*)").eq("status", "active")),
-        members: (stokvel) => read(sb.from("stokvel_members").select("user_id,role,is_signer,profiles(full_name,email)").eq("stokvel_id", stokvel).eq("status", "active")),
+        members: async (stokvel) => {   // profiles are fetched separately: Supabase cannot embed them through auth.users
+            const rows = await read(sb.from("stokvel_members").select("user_id,role,is_signer").eq("stokvel_id", stokvel).eq("status", "active"));
+            const ids = rows.map((r) => r.user_id);
+            const profs = ids.length ? await read(sb.from("profiles").select("id,full_name,email").in("id", ids)) : [];
+            const byId = Object.fromEntries(profs.map((p) => [p.id, p]));
+            return rows.map((r) => ({ ...r, profiles: byId[r.user_id] || null }));
+        },
         balance: async (stokvel) => (await read(sb.from("pot_balances").select("balance").eq("stokvel_id", stokvel).maybeSingle()))?.balance ?? 0,
         contributions: (stokvel) => read(sb.from("contributions").select("*").eq("stokvel_id", stokvel).order("created_at", { ascending: false })),
         bills: (stokvel) => read(sb.from("bills").select("*,bill_shares(*)").eq("stokvel_id", stokvel).order("created_at", { ascending: false })),
