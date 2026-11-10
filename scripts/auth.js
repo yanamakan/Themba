@@ -14,6 +14,7 @@
     member: "members-dashboard.html"
   };
   const page = document.body.dataset.page; // "login" | "signup"
+  const sb = window.ThembaSupabase || null; // set by supabase-client.js when config.js is filled in; otherwise demo mode
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -46,7 +47,9 @@
   function signOut() {
     localStorage.removeItem(KEYS.session);
     sessionStorage.removeItem(KEYS.session);
-    window.location.href = "login.html";
+    const done = () => (window.location.href = "login.html");
+    if (window.ThembaSupabase) window.ThembaSupabase.auth.signOut().finally(done);
+    else done();
   }
 
   window.ThembaAuth = { getSession, signOut };
@@ -168,7 +171,63 @@
     setTimeout(() => (window.location.href = destination), 900);
   }
 
-  form.addEventListener("submit", (e) => {
+  /* ---------- Real auth (Supabase) ---------- */
+
+  // The role is read from the DATABASE (platform_admins / stokvel_members), never from the dropdown.
+  async function buildSession(user) {
+    const [prof, admin, mem] = await Promise.all([
+      sb.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+      sb.from("platform_admins").select("user_id").eq("user_id", user.id).maybeSingle(),
+      sb.from("stokvel_members").select("role").eq("user_id", user.id).eq("status", "active")
+    ]);
+    const roles = (mem.data || []).map((m) => m.role);
+    let role = "member";
+    if (admin.data) role = "platform_admin";
+    else if (roles.includes("treasurer") || roles.includes("chairperson")) role = "treasurer";
+    else if (!roles.length && user.user_metadata && user.user_metadata.intended_role === "treasurer") role = "treasurer"; // landing page only; grants no access
+    const name = (prof.data && prof.data.full_name) || nameFromEmail(user.email || "");
+    return { name, email: user.email, role, userId: user.id };
+  }
+
+  async function realSubmit(e) {
+    e.preventDefault();
+    if (!validate()) return;
+    const email = els.email.value.trim().toLowerCase();
+    const password = els.password.value;
+    const remember = els.remember ? els.remember.checked : true;
+    const idleLabel = page === "signup" ? "Create secure account" : "Sign in securely";
+    try {
+      if (page === "signup") {
+        setLoading(els.submit, true, "Creating account…");
+        const { data, error } = await sb.auth.signUp({
+          email, password,
+          options: {
+            data: { full_name: els.name.value.trim(), intended_role: els.role.value === "treasurer" ? "treasurer" : "member" },
+            emailRedirectTo: window.location.origin + "/dashboards/login.html"
+          }
+        });
+        if (error) throw error;
+        if (!data.session) {
+          toast("Account created. Check your email to confirm it, then log in.", "success", 7000);
+          setLoading(els.submit, false, idleLabel);
+          return;
+        }
+        goToDashboard(await buildSession(data.user), true);
+        return;
+      }
+      setLoading(els.submit, true, "Signing in…");
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      goToDashboard(await buildSession(data.user), remember);
+    } catch (err) {
+      setLoading(els.submit, false, idleLabel);
+      setError(page === "signup" ? els.email : els.password, err.message || "Something went wrong. Please try again.");
+    }
+  }
+
+  /* ---------- Demo mode (no Supabase keys yet) ---------- */
+
+  function mockSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
 
@@ -209,7 +268,9 @@
       const name = existing ? existing.name : defaultNames[role] || nameFromEmail(email);
       goToDashboard({ name, email, role }, remember);
     }, 700);
-  });
+  }
+
+  form.addEventListener("submit", (e) => (sb ? realSubmit(e) : mockSubmit(e)));
 
   /* ---------- Demo wallet ---------- */
 
@@ -219,6 +280,10 @@
   }
 
   els.wallet.addEventListener("click", () => {
+    if (sb) {
+      toast("Wallet sign-in arrives with the Safe integration. Please use email and password.", "info", 4500);
+      return; // the demo wallet shortcut skips authentication, so it is off when the real backend is on
+    }
     const role = els.role.value;
     const remember = els.remember ? els.remember.checked : true;
     const wallet = fakeAddress();
@@ -244,7 +309,12 @@
         els.email.focus();
         return;
       }
-      // TODO(supabase): supabase.auth.resetPasswordForEmail(email)
+      if (sb) {
+        sb.auth
+          .resetPasswordForEmail(els.email.value.trim(), { redirectTo: window.location.origin + "/dashboards/login.html" })
+          .then(({ error }) => toast(error ? error.message : "If that email has an account, a reset link is on its way.", error ? "error" : "success", 5000));
+        return;
+      }
       toast(`Reset link sent to ${els.email.value.trim()} (demo).`, "success");
     });
   }
