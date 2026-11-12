@@ -21,6 +21,7 @@
         window.location.href = "login.html";
         return;
     }
+    if (window.ThembaBindUser) window.ThembaBindUser(session.user.id);   // writes from this tab must run as the user it shows
     { const va = document.querySelector(".view-as"); if (va) va.style.display = "none"; }   // the role comes from the database, not a demo switcher
 
     const $ = (s, r = document) => r.querySelector(s);
@@ -287,6 +288,16 @@
         });
         const actions = h("div", "approval-buttons");
         const canVote = r.status === "pending" && S.signer && r.requested_by !== S.me && !votes.some((a) => a.approver_id === S.me);
+        const notes = [];
+        if (r.status === "pending" && !canVote) {   // say why there is no Approve button instead of silently hiding it
+            const why = r.requested_by === S.me ? "You made this request, so someone else has to approve it."
+                : votes.some((a) => a.approver_id === S.me) ? "You have already voted on this request."
+                    : !S.signer ? "You are not an authorised signer for this stokvel. A treasurer can make you one under Signers & invites."
+                        : "";
+            if (why) notes.push(h("small", "approval-why", why));
+            const others = S.members.filter((m) => m.is_signer && m.user_id !== r.requested_by).length;
+            if (others < r.required_approvals) notes.push(h("small", "approval-why", `This request needs ${r.required_approvals} approvals but only ${others} signer(s) other than ${name(r.requested_by)} exist. Make more members signers so it can be approved.`));
+        }
         if (canVote) { actions.append(btn("Reject", "btn btn-danger", () => run(() => api.castApproval(r.id, "reject"), "Your rejection was recorded")), btn("Approve", "btn btn-gold", () => run(() => api.castApproval(r.id, "approve"), "Your approval was recorded"))); }
         if (r.status === "approved" && S.signer) {
             if (r.safe_tx_hash) actions.append(btn("Check Safe status", "button-outline", () => syncSafe(true)));
@@ -294,7 +305,7 @@
             else actions.append(btn("Release funds", "btn btn-gold", () => release(r)));
         }
         if (r.status === "pending") actions.append(btn("Try to release now", "button-outline", () => release(r)));
-        card.append(head, prog, list);
+        card.append(head, prog, list, ...notes.map((n) => { n.style.display = "block"; n.style.margin = "8px 0"; return n; }));
         if (r.safe_tx_hash && r.status === "approved") card.append(h("small", null, "Sent to the Safe. Waiting for Safe signatures and execution (use the Safe panel below). The ledger is updated automatically once it executes on-chain."));
         if (r.status === "executed" && r.tx_hash && window.ThembaSafe) { const a = h("a", null, "View the on-chain transfer on Etherscan"); a.href = window.ThembaSafe.explorerTx(r.tx_hash); a.target = "_blank"; a.rel = "noopener noreferrer"; card.append(a); }
         if (actions.children.length) card.append(actions);
@@ -692,7 +703,13 @@
     });
     window.addEventListener("themba:safe-contribution", (ev) => recordOnchain(ev.detail.amount, ev.detail.txHash));
     window.addEventListener("themba:safe-executed", () => { setTimeout(() => syncSafe(false), 4000); setTimeout(() => syncSafe(false), 12000); });
-    sb.auth.onAuthStateChange((evt) => { if (evt === "SIGNED_OUT") window.location.href = "login.html"; });
+    sb.auth.onAuthStateChange((evt, sess) => {
+        if (evt === "SIGNED_OUT") { window.location.href = "login.html"; return; }
+        if (sess && sess.user && sess.user.id !== S.me && !document.getElementById("themba-account-switched")) {   // another account signed in from a different tab
+            banner("A different account just signed in on this browser, so this tab is no longer safe to use. Reload to continue as that account, or use a separate browser profile / private window for each user.");
+            const b = document.body.firstElementChild; if (b) { b.id = "themba-account-switched"; const r = document.createElement("button"); r.type = "button"; r.textContent = "Reload"; r.style.cssText = "margin-left:14px;padding:4px 12px;border-radius:6px;border:0;font-weight:700;cursor:pointer"; r.onclick = () => location.reload(); b.append(r); }
+        }
+    });
 
     await refresh();
     if (S.sid) {

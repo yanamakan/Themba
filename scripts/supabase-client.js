@@ -10,9 +10,18 @@
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
     });
     window.ThembaSupabase = sb;
+    window.ThembaBindUser = (id) => { boundUser = id; };
 
     // Every write goes through a database function that checks who is calling.
+    // A page binds itself to the user it is showing. Supabase keeps ONE session per browser, so if a second
+    // account signs in from another tab, writes from this tab would silently run as that other account
+    // (e.g. a member's loan request being recorded as the treasurer's, so nobody can approve it).
+    let boundUser = null;
     async function rpc(name, args) {
+        if (boundUser) {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session || session.user.id !== boundUser) throw new Error("This tab belongs to a different account than the one now signed in on this browser. Reload the page, or use a separate browser profile / private window for each test user.");
+        }
         const { data, error } = await sb.rpc(name, args);
         if (error) throw new Error(error.message);
         return data;

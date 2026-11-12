@@ -333,7 +333,7 @@
       }
       if (sb) {
         sb.auth
-          .resetPasswordForEmail(els.email.value.trim(), { redirectTo: window.location.origin + "/dashboards/login.html" })
+          .resetPasswordForEmail(els.email.value.trim(), { redirectTo: window.location.origin + "/dashboards/reset-password.html" })
           .then(({ error }) => toast(error ? error.message : "If that email has an account, a reset link is on its way.", error ? "error" : "success", 5000));
         return;
       }
