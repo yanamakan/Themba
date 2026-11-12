@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,152 +9,539 @@
   <title>Overview — Themba Treasurer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="../styles/theme.css">
   <link rel="stylesheet" href="dashboard.css">
   <link rel="stylesheet" href="treasurer.css">
+  <style>
+    .live-slot {
+      display: grid;
+      gap: 16px;
+      margin: 16px 0
+    }
+
+    .live-slot:empty {
+      display: none
+    }
+
+    .live-slot h2 {
+      margin: 8px 0 0
+    }
+  </style>
 </head>
+
 <body class="dashboard-body treasurer-dashboard">
   <div class="app-shell">
     <aside class="sidebar treasurer-sidebar" id="treasurer-sidebar">
       <a class="brand sidebar-brand" href="treasurer-dashboard.html" aria-label="Themba treasurer dashboard">
         <span class="brand-coin" aria-hidden="true">T</span>
-        <span class="brand-text"><span class="brand-name">THEMBA</span><span class="brand-tag">Transparent Wealth</span></span>
+        <span class="brand-text"><span class="brand-name">THEMBA</span><span class="brand-tag">Transparent
+            Wealth</span></span>
       </a>
       <button class="active-group" type="button" data-action="stokvel">
-        <span class="avatar avatar-green">KC</span><span class="group-copy"><span class="micro-label">Treasurer · Active stokvel</span><strong>Khula Savings Circle</strong><small>12 members · Monthly</small></span><span class="chevron">⌄</span>
+        <span class="avatar avatar-green">KC</span><span class="group-copy"><span class="micro-label">Treasurer · Active
+            stokvel</span><strong>Khula Savings Circle</strong><small>12 members · Monthly</small></span><span
+          class="chevron">⌄</span>
       </button>
       <nav class="side-nav" aria-label="Treasurer navigation">
         <span class="nav-label">Finance</span>
-        <button class="nav-link is-active" type="button" data-page="overview"><span class="nav-icon" data-icon="grid"></span>Overview</button>
-        <button class="nav-link" type="button" data-page="contributions"><span class="nav-icon" data-icon="coin"></span>Contributions<span class="nav-badge">3</span></button>
-        <button class="nav-link" type="button" data-page="approvals"><span class="nav-icon" data-icon="check"></span>Approvals<span class="nav-badge">2</span></button>
-        <button class="nav-link" type="button" data-page="transactions"><span class="nav-icon" data-icon="history"></span>Transactions</button>
-        <button class="nav-link" type="button" data-page="reports"><span class="nav-icon" data-icon="receipt"></span>Reports</button>
+        <button class="nav-link is-active" type="button" data-page="overview"><span class="nav-icon"
+            data-icon="grid"></span>Overview</button>
+        <button class="nav-link" type="button" data-page="contributions"><span class="nav-icon"
+            data-icon="coin"></span>Contributions<span class="nav-badge">3</span></button>
+        <button class="nav-link" type="button" data-page="approvals"><span class="nav-icon"
+            data-icon="check"></span>Approvals<span class="nav-badge">2</span></button>
+        <button class="nav-link" type="button" data-page="transactions"><span class="nav-icon"
+            data-icon="history"></span>Transactions</button>
+        <button class="nav-link" type="button" data-page="reports"><span class="nav-icon"
+            data-icon="receipt"></span>Reports</button>
         <span class="nav-label nav-label-account">Community</span>
-        <button class="nav-link" type="button" data-page="members"><span class="nav-icon" data-icon="users"></span>Members</button>
-        <button class="nav-link" type="button" data-page="settings"><span class="nav-icon" data-icon="settings"></span>Profile &amp; settings</button>
+        <button class="nav-link" type="button" data-page="members"><span class="nav-icon"
+            data-icon="users"></span>Members</button>
+        <button class="nav-link" type="button" data-page="settings"><span class="nav-icon"
+            data-icon="settings"></span>Profile &amp; settings</button>
       </nav>
-      <div class="sidebar-note"><span class="note-shield" data-icon="shield"></span><div><strong>Every rand accounted for.</strong><p>Cash receipts and group activity are visible to members.</p></div></div>
-      <button class="sidebar-profile" type="button" data-page="settings"><span class="avatar avatar-gold" data-user-initials>NM</span><span class="group-copy"><strong data-user-name>Nokuthula Maseko</strong><small>Stokvel treasurer</small></span><span class="profile-dots">···</span></button>
+      <div class="sidebar-note"><span class="note-shield" data-icon="shield"></span>
+        <div><strong>Every rand accounted for.</strong>
+          <p>Cash receipts and group activity are visible to members.</p>
+        </div>
+      </div>
+      <button class="sidebar-profile" type="button" data-page="settings"><span class="avatar avatar-gold"
+          data-user-initials>NM</span><span class="group-copy"><strong data-user-name>Nokuthula
+            Maseko</strong><small>Stokvel treasurer</small></span><span class="profile-dots">···</span></button>
     </aside>
 
     <div class="workspace">
       <header class="topbar treasurer-topbar">
-        <button class="mobile-menu" type="button" aria-label="Open navigation" aria-expanded="false" data-action="menu"><span data-icon="menu"></span></button>
+        <button class="mobile-menu" type="button" aria-label="Open navigation" aria-expanded="false"
+          data-action="menu"><span data-icon="menu"></span></button>
         <div class="breadcrumbs"><span>THEMBA</span><b>/</b><strong id="treasurer-breadcrumb">Overview</strong></div>
         <div class="top-actions">
-          <label class="view-as">View as<select class="select role-select" id="treasurer-role" aria-label="Switch dashboard"><option value="treasurer" selected>Treasurer</option><option value="member">Member</option><option value="platform_admin">Platform Admin</option></select></label>
-          <button class="top-icon" type="button" aria-label="Open approvals" data-page="approvals"><span data-icon="bell"></span><i></i></button>
-          <button class="avatar avatar-gold top-avatar" type="button" aria-label="Open profile" data-page="settings" data-user-initials>NM</button>
+          <label class="view-as">View as<select class="select role-select" id="treasurer-role"
+              aria-label="Switch dashboard">
+              <option value="treasurer" selected>Treasurer</option>
+              <option value="member">Member</option>
+              <option value="platform_admin">Platform Admin</option>
+            </select></label>
+          <button class="top-icon" type="button" aria-label="Open approvals" data-page="approvals"><span
+              data-icon="bell"></span><i></i></button>
+          <button class="avatar avatar-gold top-avatar" type="button" aria-label="Open profile" data-page="settings"
+            data-user-initials>NM</button>
         </div>
       </header>
 
       <main class="main-content treasurer-main">
         <section class="treasurer-view is-visible" data-view="overview">
-          <div class="treasurer-welcome"><div><span class="eyebrow">Treasurer workspace · Monday, 20 May</span><h1>Good morning, <span data-first-name>Nokuthula</span>.</h1><p>Here’s the financial health of Khula Savings Circle.</p></div><button class="btn btn-gold" type="button" data-action="export"><span data-icon="download"></span>Export monthly report</button></div>
+          <div class="treasurer-welcome">
+            <div><span class="eyebrow">Treasurer workspace · Monday, 20 May</span>
+              <h1>Good morning, <span data-first-name>Nokuthula</span>.</h1>
+              <p>Here’s the financial health of Khula Savings Circle.</p>
+            </div><button class="btn btn-gold" type="button" data-action="export"><span
+                data-icon="download"></span>Export monthly report</button>
+          </div>
           <section class="treasurer-kpis panel">
-            <article><span>This month collected</span><strong>R 28,500</strong><small>81% of R 35,000 target</small><div class="progress-track"><span style="width:81%"></span></div></article>
+            <article><span>This month collected</span><strong>R 28,500</strong><small>81% of R 35,000 target</small>
+              <div class="progress-track"><span style="width:81%"></span></div>
+            </article>
             <article><span>Group balance</span><strong>R 248,500</strong><small>Across 12 members</small></article>
-            <article><span>Outstanding contributions</span><strong>R 6,500</strong><small>3 members to follow up</small></article>
-            <article><span>Awaiting your review</span><strong>5 items</strong><small>3 receipts · 2 approvals</small></article>
+            <article><span>Outstanding contributions</span><strong>R 6,500</strong><small>3 members to follow up</small>
+            </article>
+            <article><span>Awaiting your review</span><strong>5 items</strong><small>3 receipts · 2 approvals</small>
+            </article>
           </section>
           <div class="treasurer-priority-grid">
             <section class="panel receipt-card">
-              <div class="panel-heading"><div><span class="eyebrow">Action required</span><h2>Cash receipts to confirm</h2><p>Confirm cash payments against the group ledger.</p></div><span class="priority-count">3 pending</span></div>
-              <div class="receipt-list">
-                <article class="receipt-row" data-receipt><span class="transaction-icon icon-positive" data-icon="download"></span><div class="row-grow"><strong>Cash contribution</strong><small>Nomsa Dlamini · Recorded 17 Jun</small></div><b>R 1,000</b><button class="button-outline" type="button" data-action="confirm-receipt">Confirm</button></article>
-                <article class="receipt-row" data-receipt><span class="transaction-icon icon-positive" data-icon="download"></span><div class="row-grow"><strong>Monthly contribution</strong><small>Sipho Khumalo · Recorded 17 Jun</small></div><b>R 2,500</b><button class="button-outline" type="button" data-action="confirm-receipt">Confirm</button></article>
-                <article class="receipt-row" data-receipt><span class="transaction-icon icon-positive" data-icon="download"></span><div class="row-grow"><strong>Cash contribution</strong><small>Zanele Nkosi · Recorded 16 Jun</small></div><b>R 1,000</b><button class="button-outline" type="button" data-action="confirm-receipt">Confirm</button></article>
+              <div class="panel-heading">
+                <div><span class="eyebrow">Action required</span>
+                  <h2>Cash receipts to confirm</h2>
+                  <p>Confirm cash payments against the group ledger.</p>
+                </div><span class="priority-count">3 pending</span>
               </div>
-              <button class="text-link" type="button" data-page="contributions">Review all contributions <span data-icon="arrow"></span></button>
+              <div class="receipt-list">
+                <article class="receipt-row" data-receipt><span class="transaction-icon icon-positive"
+                    data-icon="download"></span>
+                  <div class="row-grow"><strong>Cash contribution</strong><small>Nomsa Dlamini · Recorded 17 Jun</small>
+                  </div><b>R 1,000</b><button class="button-outline" type="button"
+                    data-action="confirm-receipt">Confirm</button>
+                </article>
+                <article class="receipt-row" data-receipt><span class="transaction-icon icon-positive"
+                    data-icon="download"></span>
+                  <div class="row-grow"><strong>Monthly contribution</strong><small>Sipho Khumalo · Recorded 17
+                      Jun</small></div><b>R 2,500</b><button class="button-outline" type="button"
+                    data-action="confirm-receipt">Confirm</button>
+                </article>
+                <article class="receipt-row" data-receipt><span class="transaction-icon icon-positive"
+                    data-icon="download"></span>
+                  <div class="row-grow"><strong>Cash contribution</strong><small>Zanele Nkosi · Recorded 16 Jun</small>
+                  </div><b>R 1,000</b><button class="button-outline" type="button"
+                    data-action="confirm-receipt">Confirm</button>
+                </article>
+              </div>
+              <button class="text-link" type="button" data-page="contributions">Review all contributions <span
+                  data-icon="arrow"></span></button>
             </section>
             <section class="panel fund-summary">
-              <div class="panel-heading"><div><span class="eyebrow">Contribution performance</span><h2>Monthly target</h2><p>Khula Savings Circle · June 2025</p></div></div>
+              <div class="panel-heading">
+                <div><span class="eyebrow">Contribution performance</span>
+                  <h2>Monthly target</h2>
+                  <p>Khula Savings Circle · June 2025</p>
+                </div>
+              </div>
               <div class="target-number"><strong>R 28,500</strong><span>of R 35,000</span></div>
               <div class="progress-track"><span style="width:81%"></span></div>
               <div class="target-captions"><span>81% collected</span><b>R 6,500 remaining</b></div>
               <div class="fund-divider"></div>
               <div class="fund-stat"><span>Members paid</span><strong>9 <small>/ 12</small></strong></div>
               <div class="fund-stat"><span>Next contribution due</span><strong>25 Jun</strong></div>
-              <button class="button-green full-button" type="button" data-page="contributions">View contribution ledger <span data-icon="arrow"></span></button>
+              <button class="button-green full-button" type="button" data-page="contributions">View contribution ledger
+                <span data-icon="arrow"></span></button>
             </section>
           </div>
           <div class="treasurer-lower-grid">
-            <section class="panel treasury-transactions"><div class="panel-heading"><div><h2>Recent transactions</h2><p>Recorded activity in your stokvel</p></div><button class="text-link" type="button" data-page="transactions">View ledger <span data-icon="arrow"></span></button></div>
+            <section class="panel treasury-transactions">
+              <div class="panel-heading">
+                <div>
+                  <h2>Recent transactions</h2>
+                  <p>Recorded activity in your stokvel</p>
+                </div><button class="text-link" type="button" data-page="transactions">View ledger <span
+                    data-icon="arrow"></span></button>
+              </div>
               <div class="transaction-list">
-                <div class="transaction-row"><span class="transaction-icon icon-positive" data-icon="download"></span><div class="row-grow"><strong>Monthly contribution</strong><small>Khula Savings Circle · 18 Jun</small></div><b class="amount-positive">+R 2,500</b><span class="status status-done">Verified</span></div>
-                <div class="transaction-row"><span class="transaction-icon icon-pending" data-icon="send"></span><div class="row-grow"><strong>Community hall deposit</strong><small>Requested by Thabo K. · 18 Jun</small></div><b>−R 12,500</b><span class="status status-pending">1/2 approved</span></div>
-                <div class="transaction-row"><span class="transaction-icon icon-positive" data-icon="download"></span><div class="row-grow"><strong>Cash contribution</strong><small>Recorded by Nomsa D. · 17 Jun</small></div><b class="amount-positive">+R 1,000</b><span class="status status-pending">Needs review</span></div>
-                <div class="transaction-row"><span class="transaction-icon icon-gold" data-icon="bank"></span><div class="row-grow"><strong>Loan repayment</strong><small>Future Minds · 15 Jun</small></div><b class="amount-positive">+R 1,025</b><span class="status status-done">Completed</span></div>
+                <div class="transaction-row"><span class="transaction-icon icon-positive" data-icon="download"></span>
+                  <div class="row-grow"><strong>Monthly contribution</strong><small>Khula Savings Circle · 18
+                      Jun</small></div><b class="amount-positive">+R 2,500</b><span
+                    class="status status-done">Verified</span>
+                </div>
+                <div class="transaction-row"><span class="transaction-icon icon-pending" data-icon="send"></span>
+                  <div class="row-grow"><strong>Community hall deposit</strong><small>Requested by Thabo K. · 18
+                      Jun</small></div><b>−R 12,500</b><span class="status status-pending">1/2 approved</span>
+                </div>
+                <div class="transaction-row"><span class="transaction-icon icon-positive" data-icon="download"></span>
+                  <div class="row-grow"><strong>Cash contribution</strong><small>Recorded by Nomsa D. · 17 Jun</small>
+                  </div><b class="amount-positive">+R 1,000</b><span class="status status-pending">Needs review</span>
+                </div>
+                <div class="transaction-row"><span class="transaction-icon icon-gold" data-icon="bank"></span>
+                  <div class="row-grow"><strong>Loan repayment</strong><small>Future Minds · 15 Jun</small></div><b
+                    class="amount-positive">+R 1,025</b><span class="status status-done">Completed</span>
+                </div>
               </div>
             </section>
-            <section class="panel pending-approvals"><div class="panel-heading"><div><h2>Pending approvals</h2><p>Group withdrawals needing sign-off</p></div><span class="priority-count">2</span></div>
-              <div class="approval-preview"><span class="transaction-icon icon-gold" data-icon="send"></span><div class="row-grow"><strong>Community hall deposit</strong><small>Requested by Thabo Khumalo</small><b>R 12,500</b></div></div>
-              <div class="progress-track approval-progress"><span style="width:50%"></span></div><small class="approval-progress-label">1 of 2 required signers approved</small>
-              <button class="button-outline full-button" type="button" data-page="approvals">Review approval request <span data-icon="arrow"></span></button>
+            <section class="panel pending-approvals">
+              <div class="panel-heading">
+                <div>
+                  <h2>Pending approvals</h2>
+                  <p>Group withdrawals needing sign-off</p>
+                </div><span class="priority-count">2</span>
+              </div>
+              <div class="approval-preview"><span class="transaction-icon icon-gold" data-icon="send"></span>
+                <div class="row-grow"><strong>Community hall deposit</strong><small>Requested by Thabo
+                    Khumalo</small><b>R 12,500</b></div>
+              </div>
+              <div class="progress-track approval-progress"><span style="width:50%"></span></div><small
+                class="approval-progress-label">1 of 2 required signers approved</small>
+              <button class="button-outline full-button" type="button" data-page="approvals">Review approval request
+                <span data-icon="arrow"></span></button>
             </section>
           </div>
         </section>
 
         <section class="treasurer-view" data-view="contributions">
-          <div class="treasurer-page-heading"><div><span class="eyebrow">Contribution oversight</span><h1>Contributions</h1><p>Track payments, confirm cash receipts and follow up on outstanding member contributions.</p></div><button class="btn btn-gold" type="button" data-action="export"><span data-icon="download"></span>Export ledger</button></div>
-          <div class="treasurer-kpis contribution-kpis panel"><article><span>Collected this month</span><strong>R 28,500</strong><small>81% of group target</small></article><article><span>Confirmed by you</span><strong>R 4,500</strong><small>Across 3 cash receipts</small></article><article><span>Outstanding</span><strong>R 6,500</strong><small>3 member payments</small></article></div>
-          <div class="contribution-tabs" role="group" aria-label="Filter contributions"><button class="is-selected" type="button" data-contribution-filter="all">All records</button><button type="button" data-contribution-filter="needs-confirmation">Needs confirmation <span>3</span></button><button type="button" data-contribution-filter="outstanding">Outstanding <span>3</span></button></div>
-          <section class="panel contribution-ledger"><div class="ledger-heading"><div><h2>June 2025 contribution ledger</h2><p>Khula Savings Circle · Monthly target R 35,000</p></div><label class="ledger-search"><span data-icon="search"></span><input id="contribution-search" type="search" placeholder="Search members..." aria-label="Search contribution records"></label></div>
+          <div class="treasurer-page-heading">
+            <div><span class="eyebrow">Contribution oversight</span>
+              <h1>Contributions</h1>
+              <p>Track payments, confirm cash receipts and follow up on outstanding member contributions.</p>
+            </div><button class="btn btn-gold" type="button" data-action="export"><span
+                data-icon="download"></span>Export ledger</button>
+          </div>
+          <div class="treasurer-kpis contribution-kpis panel">
+            <article><span>Collected this month</span><strong>R 28,500</strong><small>81% of group target</small>
+            </article>
+            <article><span>Confirmed by you</span><strong>R 4,500</strong><small>Across 3 cash receipts</small>
+            </article>
+            <article><span>Outstanding</span><strong>R 6,500</strong><small>3 member payments</small></article>
+          </div>
+          <div class="contribution-tabs" role="group" aria-label="Filter contributions"><button class="is-selected"
+              type="button" data-contribution-filter="all">All records</button><button type="button"
+              data-contribution-filter="needs-confirmation">Needs confirmation <span>3</span></button><button
+              type="button" data-contribution-filter="outstanding">Outstanding <span>3</span></button></div>
+          <section class="panel contribution-ledger">
+            <div class="ledger-heading">
+              <div>
+                <h2>June 2025 contribution ledger</h2>
+                <p>Khula Savings Circle · Monthly target R 35,000</p>
+              </div><label class="ledger-search"><span data-icon="search"></span><input id="contribution-search"
+                  type="search" placeholder="Search members..." aria-label="Search contribution records"></label>
+            </div>
             <div class="ledger-list">
-              <article class="ledger-row" data-contribution="paid" data-search="nokuthula maseko"><span class="avatar">NM</span><span class="row-grow"><strong>Nokuthula Maseko</strong><small>Monthly contribution · 18 Jun</small></span><b class="ledger-amount">R 3,500</b><span class="status status-done">Paid</span><span class="ledger-action">Verified</span></article>
-              <article class="ledger-row" data-contribution="paid" data-search="thabo khumalo"><span class="avatar">TK</span><span class="row-grow"><strong>Thabo Khumalo</strong><small>Monthly contribution · 18 Jun</small></span><b class="ledger-amount">R 3,500</b><span class="status status-done">Paid</span><span class="ledger-action">Verified</span></article>
-              <article class="ledger-row" data-contribution="needs-confirmation" data-search="nomsa dlamini cash"><span class="avatar avatar-purple">ND</span><span class="row-grow"><strong>Nomsa Dlamini</strong><small>Cash contribution · Recorded 17 Jun</small></span><b class="ledger-amount">R 1,000</b><span class="status status-pending">Confirm cash</span><button class="text-link" type="button" data-action="confirm-receipt">Confirm receipt</button></article>
-              <article class="ledger-row" data-contribution="needs-confirmation" data-search="sipho khumalo cash"><span class="avatar">SK</span><span class="row-grow"><strong>Sipho Khumalo</strong><small>Cash contribution · Recorded 17 Jun</small></span><b class="ledger-amount">R 2,500</b><span class="status status-pending">Confirm cash</span><button class="text-link" type="button" data-action="confirm-receipt">Confirm receipt</button></article>
-              <article class="ledger-row" data-contribution="needs-confirmation" data-search="zanele nkosi cash"><span class="avatar avatar-purple">ZN</span><span class="row-grow"><strong>Zanele Nkosi</strong><small>Cash contribution · Recorded 16 Jun</small></span><b class="ledger-amount">R 1,000</b><span class="status status-pending">Confirm cash</span><button class="text-link" type="button" data-action="confirm-receipt">Confirm receipt</button></article>
-              <article class="ledger-row" data-contribution="outstanding" data-search="ayanda ndlovu outstanding"><span class="avatar">AN</span><span class="row-grow"><strong>Ayanda Ndlovu</strong><small>Monthly contribution · Due 25 Jun</small></span><b class="ledger-amount">R 3,500</b><span class="status status-pending">Outstanding</span><button class="text-link" type="button" data-action="remind">Send reminder</button></article>
-              <article class="ledger-row" data-contribution="outstanding" data-search="sipho dlamini outstanding"><span class="avatar">SD</span><span class="row-grow"><strong>Sipho Dlamini</strong><small>Monthly contribution · Due 25 Jun</small></span><b class="ledger-amount">R 2,000</b><span class="status status-pending">Outstanding</span><button class="text-link" type="button" data-action="remind">Send reminder</button></article>
-              <article class="ledger-row" data-contribution="outstanding" data-search="thandi molefe outstanding"><span class="avatar">TM</span><span class="row-grow"><strong>Thandi Molefe</strong><small>Monthly contribution · Due 25 Jun</small></span><b class="ledger-amount">R 1,000</b><span class="status status-pending">Outstanding</span><button class="text-link" type="button" data-action="remind">Send reminder</button></article>
-            </div><p class="empty-state" id="ledger-empty" hidden>No contribution records match your filter.</p>
+              <article class="ledger-row" data-contribution="paid" data-search="nokuthula maseko"><span
+                  class="avatar">NM</span><span class="row-grow"><strong>Nokuthula Maseko</strong><small>Monthly
+                    contribution · 18 Jun</small></span><b class="ledger-amount">R 3,500</b><span
+                  class="status status-done">Paid</span><span class="ledger-action">Verified</span></article>
+              <article class="ledger-row" data-contribution="paid" data-search="thabo khumalo"><span
+                  class="avatar">TK</span><span class="row-grow"><strong>Thabo Khumalo</strong><small>Monthly
+                    contribution · 18 Jun</small></span><b class="ledger-amount">R 3,500</b><span
+                  class="status status-done">Paid</span><span class="ledger-action">Verified</span></article>
+              <article class="ledger-row" data-contribution="needs-confirmation" data-search="nomsa dlamini cash"><span
+                  class="avatar avatar-purple">ND</span><span class="row-grow"><strong>Nomsa Dlamini</strong><small>Cash
+                    contribution · Recorded 17 Jun</small></span><b class="ledger-amount">R 1,000</b><span
+                  class="status status-pending">Confirm cash</span><button class="text-link" type="button"
+                  data-action="confirm-receipt">Confirm receipt</button></article>
+              <article class="ledger-row" data-contribution="needs-confirmation" data-search="sipho khumalo cash"><span
+                  class="avatar">SK</span><span class="row-grow"><strong>Sipho Khumalo</strong><small>Cash contribution
+                    · Recorded 17 Jun</small></span><b class="ledger-amount">R 2,500</b><span
+                  class="status status-pending">Confirm cash</span><button class="text-link" type="button"
+                  data-action="confirm-receipt">Confirm receipt</button></article>
+              <article class="ledger-row" data-contribution="needs-confirmation" data-search="zanele nkosi cash"><span
+                  class="avatar avatar-purple">ZN</span><span class="row-grow"><strong>Zanele Nkosi</strong><small>Cash
+                    contribution · Recorded 16 Jun</small></span><b class="ledger-amount">R 1,000</b><span
+                  class="status status-pending">Confirm cash</span><button class="text-link" type="button"
+                  data-action="confirm-receipt">Confirm receipt</button></article>
+              <article class="ledger-row" data-contribution="outstanding" data-search="ayanda ndlovu outstanding"><span
+                  class="avatar">AN</span><span class="row-grow"><strong>Ayanda Ndlovu</strong><small>Monthly
+                    contribution · Due 25 Jun</small></span><b class="ledger-amount">R 3,500</b><span
+                  class="status status-pending">Outstanding</span><button class="text-link" type="button"
+                  data-action="remind">Send reminder</button></article>
+              <article class="ledger-row" data-contribution="outstanding" data-search="sipho dlamini outstanding"><span
+                  class="avatar">SD</span><span class="row-grow"><strong>Sipho Dlamini</strong><small>Monthly
+                    contribution · Due 25 Jun</small></span><b class="ledger-amount">R 2,000</b><span
+                  class="status status-pending">Outstanding</span><button class="text-link" type="button"
+                  data-action="remind">Send reminder</button></article>
+              <article class="ledger-row" data-contribution="outstanding" data-search="thandi molefe outstanding"><span
+                  class="avatar">TM</span><span class="row-grow"><strong>Thandi Molefe</strong><small>Monthly
+                    contribution · Due 25 Jun</small></span><b class="ledger-amount">R 1,000</b><span
+                  class="status status-pending">Outstanding</span><button class="text-link" type="button"
+                  data-action="remind">Send reminder</button></article>
+            </div>
+            <p class="empty-state" id="ledger-empty" hidden>No contribution records match your filter.</p>
           </section>
         </section>
 
         <section class="treasurer-view" data-view="approvals">
-          <div class="treasurer-page-heading"><div><span class="eyebrow">Shared financial decisions</span><h1>Approvals</h1><p>Review treasury requests and cast your signer vote.</p></div></div>
+          <div class="treasurer-page-heading">
+            <div><span class="eyebrow">Shared financial decisions</span>
+              <h1>Approvals</h1>
+              <p>Review treasury requests and cast your signer vote.</p>
+            </div>
+          </div>
           <div class="approval-layout treasurer-approval-layout">
             <section class="panel approval-request treasurer-request">
-              <div class="request-tag"><span class="status status-pending">● Pending</span><small>Request #KSC-2041</small></div><h2>Community hall venue deposit</h2><p>Deposit for the Khula Savings Circle annual community celebration.</p>
-              <div class="request-amount"><small>Requested amount</small><strong>R 12,500.00</strong><span>Requested by Thabo Khumalo · 18 Jun, 09:42</span></div>
-              <div class="request-meta"><div><small>From</small><strong>Khula group treasury</strong></div><div><small>Category</small><strong>Community event</strong></div><div><small>Sample approvals</small><strong>Browser demo only</strong></div><div><small>Current status</small><strong id="treasurer-approval-status">1 demo vote</strong></div></div>
-              <div class="approval-actions"><button class="button-outline" type="button" data-action="reject-approval">Record demo rejection</button><button class="btn btn-gold" type="button" data-action="approve-approval"><span data-icon="check"></span>Record demo approval</button></div><p class="approval-feedback" id="treasurer-approval-feedback" aria-live="polite"></p>
+              <div class="request-tag"><span class="status status-pending">● Pending</span><small>Request
+                  #KSC-2041</small></div>
+              <h2>Community hall venue deposit</h2>
+              <p>Deposit for the Khula Savings Circle annual community celebration.</p>
+              <div class="request-amount"><small>Requested amount</small><strong>R 12,500.00</strong><span>Requested by
+                  Thabo Khumalo · 18 Jun, 09:42</span></div>
+              <div class="request-meta">
+                <div><small>From</small><strong>Khula group treasury</strong></div>
+                <div><small>Category</small><strong>Community event</strong></div>
+                <div><small>Sample approvals</small><strong>Browser demo only</strong></div>
+                <div><small>Current status</small><strong id="treasurer-approval-status">1 demo vote</strong></div>
+              </div>
+              <div class="approval-actions"><button class="button-outline" type="button"
+                  data-action="reject-approval">Record demo rejection</button><button class="btn btn-gold" type="button"
+                  data-action="approve-approval"><span data-icon="check"></span>Record demo approval</button></div>
+              <p class="approval-feedback" id="treasurer-approval-feedback" aria-live="polite"></p>
             </section>
-            <section class="panel signers-card"><h2>Sample approval request</h2><p>Browser demo only · no on-chain transaction</p><div class="approval-ring" id="treasurer-approval-ring"><strong>1/2</strong><small>Demo votes</small></div><div class="signer-row"><span class="avatar">LM</span><span class="row-grow"><strong>Lerato Molefe</strong><small>Sample vote · 10:08</small></span><span class="status status-done">Demo vote</span></div><div class="signer-row"><span class="avatar avatar-gold" data-user-initials>NM</span><span class="row-grow"><strong data-user-name>Nokuthula Maseko</strong><small id="treasurer-signer-state">Your decision is required</small></span><span class="status status-pending" id="treasurer-signer-status">Your demo vote</span></div><div class="signer-row"><span class="avatar">TK</span><span class="row-grow"><strong>Thabo Khumalo</strong><small>Request initiator</small></span><span class="signer-initiator">Cannot approve</span></div></section>
+            <section class="panel signers-card">
+              <h2>Sample approval request</h2>
+              <p>Browser demo only · no on-chain transaction</p>
+              <div class="approval-ring" id="treasurer-approval-ring"><strong>1/2</strong><small>Demo votes</small>
+              </div>
+              <div class="signer-row"><span class="avatar">LM</span><span class="row-grow"><strong>Lerato
+                    Molefe</strong><small>Sample vote · 10:08</small></span><span class="status status-done">Demo
+                  vote</span></div>
+              <div class="signer-row"><span class="avatar avatar-gold" data-user-initials>NM</span><span
+                  class="row-grow"><strong data-user-name>Nokuthula Maseko</strong><small
+                    id="treasurer-signer-state">Your decision is required</small></span><span
+                  class="status status-pending" id="treasurer-signer-status">Your demo vote</span></div>
+              <div class="signer-row"><span class="avatar">TK</span><span class="row-grow"><strong>Thabo
+                    Khumalo</strong><small>Request initiator</small></span><span class="signer-initiator">Cannot
+                  approve</span></div>
+            </section>
           </div>
-          <section class="panel other-approval"><div class="panel-heading"><div><h2>Other requests</h2><p>Requests in your group approval queue</p></div></div><div class="transaction-row"><span class="transaction-icon icon-gold" data-icon="bank"></span><div class="row-grow"><strong>Emergency member loan</strong><small>Requested by Ayanda Ndlovu · R 5,000</small></div><span class="status status-pending">Awaiting signers</span><button class="text-link" type="button" data-action="review-request">Review</button></div></section>
+          <section class="panel other-approval">
+            <div class="panel-heading">
+              <div>
+                <h2>Other requests</h2>
+                <p>Requests in your group approval queue</p>
+              </div>
+            </div>
+            <div class="transaction-row"><span class="transaction-icon icon-gold" data-icon="bank"></span>
+              <div class="row-grow"><strong>Emergency member loan</strong><small>Requested by Ayanda Ndlovu · R
+                  5,000</small></div><span class="status status-pending">Awaiting signers</span><button
+                class="text-link" type="button" data-action="review-request">Review</button>
+            </div>
+          </section>
           <div id="safe-panel" data-safe-mode="signer"></div>
         </section>
 
         <section class="treasurer-view" data-view="transactions">
-          <div class="treasurer-page-heading"><div><span class="eyebrow">Transparent group ledger</span><h1>Transactions</h1><p>Review all money in and out of Khula Savings Circle.</p></div><button class="btn btn-gold" type="button" data-action="export"><span data-icon="download"></span>Export statement</button></div>
-          <div class="transaction-controls"><label class="ledger-search"><span data-icon="search"></span><input id="transaction-search" type="search" placeholder="Search reference, description or member..." aria-label="Search transactions"></label><div class="contribution-tabs" role="group" aria-label="Filter transactions"><button class="is-selected" type="button" data-transaction-filter="all">All</button><button type="button" data-transaction-filter="contribution">Contributions</button><button type="button" data-transaction-filter="withdrawal">Withdrawals</button><button type="button" data-transaction-filter="loan">Loans</button><button type="button" data-transaction-filter="bill">Bills</button></div></div>
+          <div class="treasurer-page-heading">
+            <div><span class="eyebrow">Transparent group ledger</span>
+              <h1>Transactions</h1>
+              <p>Review all money in and out of Khula Savings Circle.</p>
+            </div><button class="btn btn-gold" type="button" data-action="export"><span
+                data-icon="download"></span>Export statement</button>
+          </div>
+          <div class="transaction-controls"><label class="ledger-search"><span data-icon="search"></span><input
+                id="transaction-search" type="search" placeholder="Search reference, description or member..."
+                aria-label="Search transactions"></label>
+            <div class="contribution-tabs" role="group" aria-label="Filter transactions"><button class="is-selected"
+                type="button" data-transaction-filter="all">All</button><button type="button"
+                data-transaction-filter="contribution">Contributions</button><button type="button"
+                data-transaction-filter="withdrawal">Withdrawals</button><button type="button"
+                data-transaction-filter="loan">Loans</button><button type="button"
+                data-transaction-filter="bill">Bills</button></div>
+          </div>
           <section class="panel contribution-ledger transaction-ledger">
-            <div class="transaction-ledger-heading"><div><h2>Activity ledger</h2><p>Verified and pending entries for Khula Savings Circle</p></div><span class="ledger-record-count"><span data-visible-transactions>5</span> records</span></div>
-            <div class="admin-table-scroll"><table class="admin-table treasurer-transaction-table"><thead><tr><th>Transaction</th><th>Date</th><th>Reference</th><th>Status</th><th>Amount</th></tr></thead><tbody><tr data-kind="contribution" data-search="monthly contribution nokuthula thm-89241"><td><strong>Monthly contribution</strong><small>Nokuthula Maseko · Khula Circle</small></td><td>18 Jun, 10:15</td><td>THM-89241</td><td><span class="status status-done">Verified</span></td><td class="amount-positive">+R 2,500</td></tr><tr data-kind="contribution" data-search="cash contribution nomsa dlamini thm-89237"><td><strong>Cash contribution</strong><small>Nomsa Dlamini · Khula Circle</small></td><td>17 Jun, 14:02</td><td>THM-89237</td><td><span class="status status-pending">Awaiting confirmation</span></td><td class="amount-positive">+R 1,000</td></tr><tr data-kind="withdrawal" data-search="community hall deposit thabo khumalo thm-89210"><td><strong>Community hall deposit</strong><small>Thabo Khumalo · Khula Circle</small></td><td>18 Jun, 09:42</td><td>THM-89210</td><td><span class="status status-pending">Pending approval</span></td><td>−R 12,500</td></tr><tr data-kind="loan" data-search="loan repayment future minds thm-89190"><td><strong>Loan repayment</strong><small>Future Minds · Group treasury</small></td><td>15 Jun, 08:30</td><td>THM-89190</td><td><span class="status status-done">Completed</span></td><td class="amount-positive">+R 1,025</td></tr><tr data-kind="bill" data-search="winter drive groceries bill thm-89162"><td><strong>Winter drive groceries</strong><small>Bill settlement · Khula Circle</small></td><td>14 Jun, 12:20</td><td>THM-89162</td><td><span class="status status-done">Completed</span></td><td>−R 600</td></tr></tbody></table></div><p class="empty-state" id="transaction-empty" hidden>No transactions match your search.</p>
+            <div class="transaction-ledger-heading">
+              <div>
+                <h2>Activity ledger</h2>
+                <p>Verified and pending entries for Khula Savings Circle</p>
+              </div><span class="ledger-record-count"><span data-visible-transactions>5</span> records</span>
+            </div>
+            <div class="admin-table-scroll">
+              <table class="admin-table treasurer-transaction-table">
+                <thead>
+                  <tr>
+                    <th>Transaction</th>
+                    <th>Date</th>
+                    <th>Reference</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-kind="contribution" data-search="monthly contribution nokuthula thm-89241">
+                    <td><strong>Monthly contribution</strong><small>Nokuthula Maseko · Khula Circle</small></td>
+                    <td>18 Jun, 10:15</td>
+                    <td>THM-89241</td>
+                    <td><span class="status status-done">Verified</span></td>
+                    <td class="amount-positive">+R 2,500</td>
+                  </tr>
+                  <tr data-kind="contribution" data-search="cash contribution nomsa dlamini thm-89237">
+                    <td><strong>Cash contribution</strong><small>Nomsa Dlamini · Khula Circle</small></td>
+                    <td>17 Jun, 14:02</td>
+                    <td>THM-89237</td>
+                    <td><span class="status status-pending">Awaiting confirmation</span></td>
+                    <td class="amount-positive">+R 1,000</td>
+                  </tr>
+                  <tr data-kind="withdrawal" data-search="community hall deposit thabo khumalo thm-89210">
+                    <td><strong>Community hall deposit</strong><small>Thabo Khumalo · Khula Circle</small></td>
+                    <td>18 Jun, 09:42</td>
+                    <td>THM-89210</td>
+                    <td><span class="status status-pending">Pending approval</span></td>
+                    <td>−R 12,500</td>
+                  </tr>
+                  <tr data-kind="loan" data-search="loan repayment future minds thm-89190">
+                    <td><strong>Loan repayment</strong><small>Future Minds · Group treasury</small></td>
+                    <td>15 Jun, 08:30</td>
+                    <td>THM-89190</td>
+                    <td><span class="status status-done">Completed</span></td>
+                    <td class="amount-positive">+R 1,025</td>
+                  </tr>
+                  <tr data-kind="bill" data-search="winter drive groceries bill thm-89162">
+                    <td><strong>Winter drive groceries</strong><small>Bill settlement · Khula Circle</small></td>
+                    <td>14 Jun, 12:20</td>
+                    <td>THM-89162</td>
+                    <td><span class="status status-done">Completed</span></td>
+                    <td>−R 600</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="empty-state" id="transaction-empty" hidden>No transactions match your search.</p>
           </section>
         </section>
 
         <section class="treasurer-view" data-view="reports">
-          <div class="treasurer-page-heading"><div><span class="eyebrow">Clear records, shared trust</span><h1>Financial reports</h1><p>Review group performance and export a transparent financial summary.</p></div><button class="btn btn-gold" type="button" data-action="export" data-export-type="summary"><span data-icon="download"></span>Export CSV report</button></div>
-          <div class="treasurer-kpis report-kpis panel"><article><span>Opening balance</span><strong>R 226,000</strong><small>1 Jun 2025</small></article><article><span>Total contributions</span><strong>R 28,500</strong><small>June to date</small></article><article><span>Total withdrawals</span><strong>R 6,000</strong><small>Approved group spending</small></article><article><span>Closing balance</span><strong>R 248,500</strong><small>As of 20 Jun 2025</small></article></div>
-          <div class="reports-grid"><section class="panel report-card"><div class="panel-heading"><div><h2>Monthly contribution summary</h2><p>Contribution collection by month</p></div></div><div class="report-bars"><div><span>Jan</span><i><b style="width:54%"></b></i><strong>R 19,000</strong></div><div><span>Feb</span><i><b style="width:64%"></b></i><strong>R 22,500</strong></div><div><span>Mar</span><i><b style="width:73%"></b></i><strong>R 25,500</strong></div><div><span>Apr</span><i><b style="width:69%"></b></i><strong>R 24,000</strong></div><div><span>May</span><i><b style="width:88%"></b></i><strong>R 30,750</strong></div><div><span>Jun</span><i><b style="width:81%"></b></i><strong>R 28,500</strong></div></div></section><section class="panel report-card"><div class="panel-heading"><div><h2>Downloadable reports</h2><p>Export records for your group members</p></div></div><div class="download-report"><span class="transaction-icon icon-positive" data-icon="receipt"></span><div class="row-grow"><strong>Monthly transaction statement</strong><small>CSV · June 2025</small></div><button class="text-link" type="button" data-action="export" data-export-type="transactions">Download <span data-icon="download"></span></button></div><div class="download-report"><span class="transaction-icon icon-gold" data-icon="users"></span><div class="row-grow"><strong>Member contribution summary</strong><small>CSV · June 2025</small></div><button class="text-link" type="button" data-action="export" data-export-type="members">Download <span data-icon="download"></span></button></div></section></div>
+          <div class="treasurer-page-heading">
+            <div><span class="eyebrow">Clear records, shared trust</span>
+              <h1>Financial reports</h1>
+              <p>Review group performance and export a transparent financial summary.</p>
+            </div><button class="btn btn-gold" type="button" data-action="export" data-export-type="summary"><span
+                data-icon="download"></span>Export CSV report</button>
+          </div>
+          <div class="treasurer-kpis report-kpis panel">
+            <article><span>Opening balance</span><strong>R 226,000</strong><small>1 Jun 2025</small></article>
+            <article><span>Total contributions</span><strong>R 28,500</strong><small>June to date</small></article>
+            <article><span>Total withdrawals</span><strong>R 6,000</strong><small>Approved group spending</small>
+            </article>
+            <article><span>Closing balance</span><strong>R 248,500</strong><small>As of 20 Jun 2025</small></article>
+          </div>
+          <div class="reports-grid">
+            <section class="panel report-card">
+              <div class="panel-heading">
+                <div>
+                  <h2>Monthly contribution summary</h2>
+                  <p>Contribution collection by month</p>
+                </div>
+              </div>
+              <div class="report-bars">
+                <div><span>Jan</span><i><b style="width:54%"></b></i><strong>R 19,000</strong></div>
+                <div><span>Feb</span><i><b style="width:64%"></b></i><strong>R 22,500</strong></div>
+                <div><span>Mar</span><i><b style="width:73%"></b></i><strong>R 25,500</strong></div>
+                <div><span>Apr</span><i><b style="width:69%"></b></i><strong>R 24,000</strong></div>
+                <div><span>May</span><i><b style="width:88%"></b></i><strong>R 30,750</strong></div>
+                <div><span>Jun</span><i><b style="width:81%"></b></i><strong>R 28,500</strong></div>
+              </div>
+            </section>
+            <section class="panel report-card">
+              <div class="panel-heading">
+                <div>
+                  <h2>Downloadable reports</h2>
+                  <p>Export records for your group members</p>
+                </div>
+              </div>
+              <div class="download-report"><span class="transaction-icon icon-positive" data-icon="receipt"></span>
+                <div class="row-grow"><strong>Monthly transaction statement</strong><small>CSV · June 2025</small></div>
+                <button class="text-link" type="button" data-action="export" data-export-type="transactions">Download
+                  <span data-icon="download"></span></button>
+              </div>
+              <div class="download-report"><span class="transaction-icon icon-gold" data-icon="users"></span>
+                <div class="row-grow"><strong>Member contribution summary</strong><small>CSV · June 2025</small></div>
+                <button class="text-link" type="button" data-action="export" data-export-type="members">Download <span
+                    data-icon="download"></span></button>
+              </div>
+            </section>
+          </div>
         </section>
 
         <section class="treasurer-view" data-view="members">
-          <div class="treasurer-page-heading"><div><span class="eyebrow">Khula Savings Circle</span><h1>Member contributions</h1><p>See who has paid and follow up on outstanding monthly contributions.</p></div></div>
-          <section class="panel contribution-ledger"><div class="ledger-heading"><div><h2>Member payment status</h2><p>June 2025 · 9 of 12 members complete</p></div><label class="ledger-search"><span data-icon="search"></span><input id="member-search" type="search" placeholder="Search members..." aria-label="Search members"></label></div><div class="ledger-list"><article class="ledger-row member-ledger-row" data-search="nokuthula maseko"><span class="avatar">NM</span><span class="row-grow"><strong>Nokuthula Maseko</strong><small>Treasurer · Payment received 18 Jun</small></span><b class="ledger-amount">R 3,500</b><span class="status status-done">Paid</span></article><article class="ledger-row member-ledger-row" data-search="thabo khumalo"><span class="avatar">TK</span><span class="row-grow"><strong>Thabo Khumalo</strong><small>Administrator · Payment received 18 Jun</small></span><b class="ledger-amount">R 3,500</b><span class="status status-done">Paid</span></article><article class="ledger-row member-ledger-row" data-search="ayanda ndlovu"><span class="avatar">AN</span><span class="row-grow"><strong>Ayanda Ndlovu</strong><small>Member · Due 25 Jun</small></span><b class="ledger-amount">R 3,500</b><span class="status status-pending">Outstanding</span><button class="text-link" type="button" data-action="remind">Send reminder</button></article><article class="ledger-row member-ledger-row" data-search="sipho dlamini"><span class="avatar">SD</span><span class="row-grow"><strong>Sipho Dlamini</strong><small>Member · Due 25 Jun</small></span><b class="ledger-amount">R 2,000</b><span class="status status-pending">Outstanding</span><button class="text-link" type="button" data-action="remind">Send reminder</button></article></div><p class="empty-state" id="member-empty" hidden>No members match your search.</p></section>
+          <div class="treasurer-page-heading">
+            <div><span class="eyebrow">Khula Savings Circle</span>
+              <h1>Member contributions</h1>
+              <p>See who has paid and follow up on outstanding monthly contributions.</p>
+            </div>
+          </div>
+          <section class="panel contribution-ledger">
+            <div class="ledger-heading">
+              <div>
+                <h2>Member payment status</h2>
+                <p>June 2025 · 9 of 12 members complete</p>
+              </div><label class="ledger-search"><span data-icon="search"></span><input id="member-search" type="search"
+                  placeholder="Search members..." aria-label="Search members"></label>
+            </div>
+            <div class="ledger-list">
+              <article class="ledger-row member-ledger-row" data-search="nokuthula maseko"><span
+                  class="avatar">NM</span><span class="row-grow"><strong>Nokuthula Maseko</strong><small>Treasurer ·
+                    Payment received 18 Jun</small></span><b class="ledger-amount">R 3,500</b><span
+                  class="status status-done">Paid</span></article>
+              <article class="ledger-row member-ledger-row" data-search="thabo khumalo"><span
+                  class="avatar">TK</span><span class="row-grow"><strong>Thabo Khumalo</strong><small>Administrator ·
+                    Payment received 18 Jun</small></span><b class="ledger-amount">R 3,500</b><span
+                  class="status status-done">Paid</span></article>
+              <article class="ledger-row member-ledger-row" data-search="ayanda ndlovu"><span
+                  class="avatar">AN</span><span class="row-grow"><strong>Ayanda Ndlovu</strong><small>Member · Due 25
+                    Jun</small></span><b class="ledger-amount">R 3,500</b><span
+                  class="status status-pending">Outstanding</span><button class="text-link" type="button"
+                  data-action="remind">Send reminder</button></article>
+              <article class="ledger-row member-ledger-row" data-search="sipho dlamini"><span
+                  class="avatar">SD</span><span class="row-grow"><strong>Sipho Dlamini</strong><small>Member · Due 25
+                    Jun</small></span><b class="ledger-amount">R 2,000</b><span
+                  class="status status-pending">Outstanding</span><button class="text-link" type="button"
+                  data-action="remind">Send reminder</button></article>
+            </div>
+            <p class="empty-state" id="member-empty" hidden>No members match your search.</p>
+          </section>
         </section>
 
         <section class="treasurer-view" data-view="settings">
-          <div class="treasurer-page-heading"><div><span class="eyebrow">Your account</span><h1>Profile &amp; settings</h1><p>Manage your treasurer profile and dashboard preferences.</p></div></div>
-          <section class="panel treasurer-settings"><div class="panel-heading"><div><h2>Treasurer profile</h2><p>Contact details for your stokvel membership.</p></div></div><form id="treasurer-profile-form"><label>Full name<input class="input" id="treasurer-name" value="Nokuthula Maseko" required></label><label>Email address<input class="input" id="treasurer-email" type="email" value="treasurer@themba.demo" required></label><button class="btn btn-gold" type="submit">Save changes</button></form></section>
-          <section class="panel treasurer-settings security-info"><span class="note-shield" data-icon="shield"></span><div><h2>Shared financial responsibility</h2><p>Treasurer actions are visible to your group. Withdrawals need two authorised signers, and cash receipts should only be confirmed after you verify the payment.</p></div></section>
-          <section class="panel treasurer-settings"><div class="panel-heading"><div><h2>Session</h2><p>This is a demo dashboard; no real funds are moved.</p></div></div><button class="button-outline" type="button" data-action="sign-out">Sign out</button></section>
+          <div class="treasurer-page-heading">
+            <div><span class="eyebrow">Your account</span>
+              <h1>Profile &amp; settings</h1>
+              <p>Manage your treasurer profile and dashboard preferences.</p>
+            </div>
+          </div>
+          <section class="panel treasurer-settings">
+            <div class="panel-heading">
+              <div>
+                <h2>Treasurer profile</h2>
+                <p>Contact details for your stokvel membership.</p>
+              </div>
+            </div>
+            <form id="treasurer-profile-form"><label>Full name<input class="input" id="treasurer-name"
+                  value="Nokuthula Maseko" required></label><label>Email address<input class="input"
+                  id="treasurer-email" type="email" value="treasurer@themba.demo" required></label><button
+                class="btn btn-gold" type="submit">Save changes</button></form>
+          </section>
+          <section class="panel treasurer-settings security-info"><span class="note-shield" data-icon="shield"></span>
+            <div>
+              <h2>Shared financial responsibility</h2>
+              <p>Treasurer actions are visible to your group. Withdrawals need two authorised signers, and cash receipts
+                should only be confirmed after you verify the payment.</p>
+            </div>
+          </section>
+          <section class="panel treasurer-settings">
+            <div class="panel-heading">
+              <div>
+                <h2>Session</h2>
+                <p>This is a demo dashboard; no real funds are moved.</p>
+              </div>
+            </div><button class="button-outline" type="button" data-action="sign-out">Sign out</button>
+          </section>
         </section>
       </main>
     </div>
@@ -162,5 +550,10 @@
   <script src="../scripts/demo-state.js"></script>
   <script src="../scripts/treasurer.js"></script>
   <script src="../scripts/safe-panel.bundle.js"></script>
+  <script src="../scripts/config.js"></script>
+  <script src="../scripts/supabase.js"></script>
+  <script src="../scripts/supabase-client.js"></script>
+  <script src="../scripts/live-data.js"></script>
 </body>
+
 </html>

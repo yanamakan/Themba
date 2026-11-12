@@ -25,6 +25,14 @@ const DEFAULT_BASE = "https://api.safe.global/tx-service/sep";
 const ALLOWED_PATH = /^\/api\/v[12]\/(safes|multisig-transactions|about)(\/|$)/;
 
 function createSafeProxy() {
+  if (!process.env.SAFE_API_KEY) {
+    console.warn("\n  WARNING: SAFE_API_KEY is not set, so the Safe panel cannot load pending/executed requests (HTTP 500).");
+    console.warn("  Create a file named exactly .env in the project root (next to package.json) containing:");
+    console.warn("    SAFE_API_KEY=your_key_here");
+    console.warn("  then restart the server. (On Windows check it is not called .env.txt.)\n");
+  } else {
+    console.log(`  Safe proxy: SAFE_API_KEY loaded (${process.env.SAFE_API_KEY.length} characters).`);
+  }
   const router = express.Router();
   router.use(express.json({ limit: "100kb" }));
 
