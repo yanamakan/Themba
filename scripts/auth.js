@@ -15,6 +15,8 @@
   };
   const page = document.body.dataset.page; // "login" | "signup"
   const sb = window.ThembaSupabase || null; // set by supabase-client.js when config.js is filled in; otherwise demo mode
+  const liveConfigured = !!((window.THEMBA_CONFIG || {}).SUPABASE_URL && (window.THEMBA_CONFIG || {}).SUPABASE_ANON_KEY);
+  const libraryMissing = liveConfigured && !sb; // keys are set but the Supabase library did not load: never fall back to demo silently
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -129,6 +131,19 @@
     wallet: $("#wallet-btn"),
     forgot: $("#forgot"),
   };
+
+  // Real mode: no demo credentials, and the "Demo role" picker is hidden on the login page (the role comes from the database).
+  if (sb) {
+    if (page === "login") {
+      if (els.email) els.email.value = "";
+      if (els.password) els.password.value = "";
+      const roleField = els.role && els.role.closest(".field");
+      if (roleField) roleField.style.display = "none";
+    } else if (page === "signup") {
+      if (els.email) els.email.value = "";
+      if (els.password) els.password.value = "";
+    }
+  }
 
   // Clear an error as soon as the user starts fixing it
   $$(".input", form).forEach((i) => i.addEventListener("input", () => setError(i, "")));
@@ -270,7 +285,14 @@
     }, 700);
   }
 
-  form.addEventListener("submit", (e) => (sb ? realSubmit(e) : mockSubmit(e)));
+  form.addEventListener("submit", (e) => {
+    if (libraryMissing) {
+      e.preventDefault();
+      toast("Cannot reach the database: the Supabase library did not load. Reload the page and check scripts/supabase.js.", "error", 7000);
+      return;
+    }
+    return sb ? realSubmit(e) : mockSubmit(e);
+  });
 
   /* ---------- Demo wallet ---------- */
 
@@ -280,7 +302,7 @@
   }
 
   els.wallet.addEventListener("click", () => {
-    if (sb) {
+    if (sb || libraryMissing) {
       toast("Wallet sign-in arrives with the Safe integration. Please use email and password.", "info", 4500);
       return; // the demo wallet shortcut skips authentication, so it is off when the real backend is on
     }

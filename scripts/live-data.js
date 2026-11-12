@@ -5,15 +5,31 @@
 (async () => {
     "use strict";
     const sb = window.ThembaSupabase, api = window.ThembaAPI;
-    if (!sb || !api) return;
+    const cfg = window.THEMBA_CONFIG || {};
+    function banner(msg) {
+        const b = document.createElement("div"); b.setAttribute("role", "alert");
+        b.style.cssText = "position:sticky;top:0;z-index:9999;padding:12px 18px;background:#6b1f1f;color:#fff;font:600 14px system-ui,sans-serif;text-align:center";
+        b.textContent = msg; document.body.prepend(b);
+    }
+    if (!sb || !api) {   // keys are filled in but the Supabase library did not load: say so instead of silently showing demo data
+        if (cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY) banner("The live database is not connected (the Supabase library did not load), so you are seeing demo data. Reload the page, or check that scripts/supabase.js is being served.");
+        return;
+    }
     const { data: { session } } = await sb.auth.getSession();
-    if (!session) return;
+    if (!session) {   // real mode is on, so a leftover demo session is not allowed
+        for (const storage of [localStorage, sessionStorage]) { try { storage.removeItem("themba_session"); } catch (e) { /* ignore */ } }
+        window.location.href = "login.html";
+        return;
+    }
+    { const va = document.querySelector(".view-as"); if (va) va.style.display = "none"; }   // the role comes from the database, not a demo switcher
 
     const $ = (s, r = document) => r.querySelector(s);
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
     const VIEW = (n) => $(`[data-view="${n}"]`);
     const TREAS = !!$(".treasurer-view");
-    const S = { me: session.user.id, stokvels: [], sid: null, st: null, role: "member", signer: false, members: [], names: {}, contribs: [], bills: [], loans: [], terms: [], claims: [], requests: [], alerts: [], balance: 0 };
+    // What the person chose at signup. Members join a stokvel by invite; only people who signed up as a Treasurer are offered "Create a stokvel".
+    const WANTS_TO_CREATE = ((session.user && session.user.user_metadata) || {}).intended_role === "treasurer" || TREAS;
+    const S = { me: session.user.id, stokvels: [], sid: null, st: null, role: "member", signer: false, members: [], names: {}, contribs: [], bills: [], loans: [], terms: [], claims: [], ledger: [], audit: [], profile: null, requests: [], alerts: [], balance: 0 };
 
     /* ---------- tiny helpers ---------- */
     function h(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -78,16 +94,28 @@
         S.sid = pick.stokvels.id; S.st = pick.stokvels; S.role = pick.role; S.signer = pick.is_signer;
     }
     async function loadData() {
-        const [members, contribs, requests, balance, alerts, bills, loans, terms, claims] = await Promise.all([api.members(S.sid), api.contributions(S.sid), api.requests(S.sid), api.balance(S.sid), api.alerts(S.sid), api.bills(S.sid), api.loans(S.sid), api.loanTerms(), api.repaymentClaims(S.sid)]);
-        Object.assign(S, { members, contribs, requests, balance, alerts, bills, loans, terms, claims });
+        const [members, contribs, requests, balance, alerts, bills, loans, terms, claims, ledger, audit] = await Promise.all([api.members(S.sid), api.contributions(S.sid), api.requests(S.sid), api.balance(S.sid), api.alerts(S.sid), api.bills(S.sid), api.loans(S.sid), api.loanTerms(), api.repaymentClaims(S.sid), api.ledger(S.sid), api.auditLog(S.sid, 80)]);
+        S.profile = await api.myProfile().catch(() => null);
+        Object.assign(S, { members, contribs, requests, balance, alerts, bills, loans, terms, claims, ledger, audit });
         S.names = Object.fromEntries(members.map((m) => [m.user_id, (m.profiles && m.profiles.full_name) || "Member"]));
     }
     let busy = false, again = false;
     async function refresh() {
         if (busy) { again = true; return; }
         busy = true;
-        try { await loadStokvels(); if (S.sid) await loadData(); render(); } catch (e) { console.error(e); toast(e.message || "Could not load live data", "error"); }
-        busy = false; if (again) { again = false; refresh(); }
+        try { await loadStokvels(); if (S.sid && ensureDashboard()) return; if (S.sid) await loadData(); render(); } catch (e) { console.error(e); toast(e.message || "Could not load live data", "error"); }
+        busy = false; if (again) { again = false; refresh(); } else syncSafe(false);
+    }
+
+    // A user's dashboard follows their role in the database. Creating a stokvel makes you its treasurer, so move you to the right page.
+    function ensureDashboard() {
+        const wantTreasurer = isAdmin();
+        if (wantTreasurer === TREAS) return false;
+        for (const storage of [localStorage, sessionStorage]) {
+            try { const raw = storage.getItem("themba_session"); if (raw) { const s = JSON.parse(raw); s.role = wantTreasurer ? "treasurer" : "member"; storage.setItem("themba_session", JSON.stringify(s)); } } catch (e) { /* storage unavailable */ }
+        }
+        window.location.href = wantTreasurer ? "treasurer-dashboard.html" : "members-dashboard.html";
+        return true;
     }
 
     /* ---------- derived numbers ---------- */
@@ -114,17 +142,19 @@
         if (!S.sid) return renderOnboarding();
         $$(".live-slot[data-live='onboard']").forEach((e) => e.remove());
         const st = stats();
-        renderBalance(st); renderContributions(st); renderApprovals(st); renderBills(); renderLoans(); renderOverviewStats(st);
+        renderBalance(st); renderContributions(st); renderApprovals(st); renderBills(); renderLoans(); renderOverviewStats(st); renderTransactions(); renderNotifications(st); renderMembersView(st);
+        const cb = $('[data-page="contributions"] .nav-badge'); if (cb && TREAS) { cb.textContent = st.pending.length; cb.style.display = st.pending.length ? "" : "none"; }
     }
 
     function renderOnboarding() {
+        $$(".balance-value, #group-balance-value").forEach((e) => (e.textContent = "0 USDT"));
         ["overview", "contributions", "approvals", "bills", "loans"].forEach((v) => {
             const s = slot(v, "onboard"); if (!s) return; s.replaceChildren();
             const p = h("section", "panel"); p.style.padding = "22px";
-            kids(p, h("h2", null, "Join or create your stokvel"), h("p", null, "Your account is live, but you are not in a stokvel yet. Create one (you become its treasurer) or join with an invite code from your treasurer."));
+            kids(p, h("h2", null, WANTS_TO_CREATE ? "Create or join your stokvel" : "Join your stokvel"), h("p", null, WANTS_TO_CREATE ? "Your account is live, but you are not in a stokvel yet. Create one (you become its treasurer) or join with an invite code from your treasurer." : "Your account is live. Ask your stokvel's treasurer for an invite code and join with it. Invites only work with the email you signed up with."));
             const row = h("div", "approval-buttons");
             row.append(btn("Join with invite code", "button-outline", async () => openForm({ eyebrow: "Join", title: "Invite code", desc: "Paste the code your treasurer sent you. It only works with the email you signed up with.", fields: [{ name: "token", label: "Invite code", placeholder: "xxxxxxxx-xxxx-…" }], submit: "Join stokvel", onSubmit: async (v) => { await api.acceptInvite(v.token.trim()); toast("You joined the stokvel", "success"); } })));
-            row.append(btn("Create a stokvel", "btn btn-gold", async () => openForm({ eyebrow: "New stokvel", title: "Create your stokvel", desc: "You will be its treasurer and first signer. You can invite members afterwards.", fields: [{ name: "name", label: "Stokvel name" }, { name: "monthly", label: "Monthly contribution (USDT)", type: "number", step: "0.01", min: 0, value: 100 }], submit: "Create stokvel", onSubmit: async (v) => { await api.createStokvel(v.name, Number(v.monthly)); toast("Stokvel created", "success"); } })));
+            if (WANTS_TO_CREATE) row.append(btn("Create a stokvel", "btn btn-gold", async () => openForm({ eyebrow: "New stokvel", title: "Create your stokvel", desc: "You will be its treasurer and first signer. You can invite members afterwards.", fields: [{ name: "name", label: "Stokvel name" }, { name: "monthly", label: "Monthly contribution (USDT)", type: "number", step: "0.01", min: 0, value: 100 }], submit: "Create stokvel", onSubmit: async (v) => { await api.createStokvel(v.name, Number(v.monthly)); toast("Stokvel created", "success"); } })));
             s.append(kids(p, row));
         });
     }
@@ -214,11 +244,24 @@
             onSubmit: async (v) => { await api.logCashContribution(S.sid, v.member, Number(v.amount), monthStart()); toast("Logged. Waiting for the member to confirm.", "success"); }
         });
     }
+    const recorded = new Set();   // tx hashes already saved, so events never double-record
+    async function recordOnchain(amount, hash) {
+        if (!S.sid || !/^0x[0-9a-fA-F]{64}$/.test(hash || "") || recorded.has(hash.toLowerCase())) return;
+        recorded.add(hash.toLowerCase());
+        await run(() => api.recordUsdtContribution(S.sid, Number(amount), monthStart(), hash), "On-chain contribution saved to the ledger");
+    }
     function makeContribution() {
+        const canPay = !!(window.ThembaSafe && window.ethereum);
         openForm({
-            eyebrow: "USDT", title: "Record a USDT contribution", desc: "Paste the transaction hash of your payment to the group wallet. Each hash can only be used once.", submit: "Add to ledger",
-            fields: [{ name: "amount", label: "Amount (USDT)", type: "number", step: "0.01", min: 0.01, value: S.st.monthly_contribution }, { name: "tx", label: "Transaction hash", placeholder: "0x…", pattern: "0x[0-9a-fA-F]{64}" }],
-            onSubmit: async (v) => { await api.recordUsdtContribution(S.sid, Number(v.amount), monthStart(), v.tx.trim()); toast("Contribution added to the ledger", "success"); }
+            eyebrow: "USDT", title: "Contribute to the pot", desc: canPay ? "Leave the hash empty to pay from your connected wallet (Sepolia test USDT). Or paste the hash of a payment you already made. Each hash counts once." : "Paste the transaction hash of your payment to the group wallet. Each hash counts once.", submit: canPay ? "Pay and add to ledger" : "Add to ledger",
+            fields: [{ name: "amount", label: "Amount (USDT)", type: "number", step: "0.01", min: 0.01, value: S.st.monthly_contribution }, { name: "tx", label: canPay ? "Transaction hash (optional)" : "Transaction hash", placeholder: "0x…", pattern: "0x[0-9a-fA-F]{64}", required: !canPay }],
+            onSubmit: async (v) => {
+                let hash = (v.tx || "").trim();
+                if (!hash) { toast("Confirm the transfer in your wallet…"); hash = await window.ThembaSafe.contributeToSafe(window.ethereum, v.amount); }
+                recorded.add(hash.toLowerCase());
+                await api.recordUsdtContribution(S.sid, Number(v.amount), monthStart(), hash);
+                toast("Contribution added to the ledger", "success");
+            }
         });
     }
 
@@ -245,9 +288,16 @@
         const actions = h("div", "approval-buttons");
         const canVote = r.status === "pending" && S.signer && r.requested_by !== S.me && !votes.some((a) => a.approver_id === S.me);
         if (canVote) { actions.append(btn("Reject", "btn btn-danger", () => run(() => api.castApproval(r.id, "reject"), "Your rejection was recorded")), btn("Approve", "btn btn-gold", () => run(() => api.castApproval(r.id, "approve"), "Your approval was recorded"))); }
-        if (r.status === "approved" && S.signer) actions.append(btn("Release funds", "btn btn-gold", () => release(r)));
+        if (r.status === "approved" && S.signer) {
+            if (r.safe_tx_hash) actions.append(btn("Check Safe status", "button-outline", () => syncSafe(true)));
+            else if (window.ThembaSafe) { actions.append(btn("Send from Safe", "btn btn-gold", () => sendFromSafe(r))); if (!S.st.require_onchain_release) actions.append(btn("Record without on-chain transfer", "text-link", () => release(r))); }
+            else actions.append(btn("Release funds", "btn btn-gold", () => release(r)));
+        }
         if (r.status === "pending") actions.append(btn("Try to release now", "button-outline", () => release(r)));
-        card.append(head, prog, list); if (actions.children.length) card.append(actions);
+        card.append(head, prog, list);
+        if (r.safe_tx_hash && r.status === "approved") card.append(h("small", null, "Sent to the Safe. Waiting for Safe signatures and execution (use the Safe panel below). The ledger is updated automatically once it executes on-chain."));
+        if (r.status === "executed" && r.tx_hash && window.ThembaSafe) { const a = h("a", null, "View the on-chain transfer on Etherscan"); a.href = window.ThembaSafe.explorerTx(r.tx_hash); a.target = "_blank"; a.rel = "noopener noreferrer"; card.append(a); }
+        if (actions.children.length) card.append(actions);
         return card;
     }
     async function release(r) {
@@ -255,6 +305,7 @@
             const res = await api.executeRequest(r.id, null);
             if (res.ok) toast("Funds released and recorded in the ledger", "success");
             else if (res.reason === "insufficient_funds") toast("Not enough in the pot for this request", "error");
+            else if (res.reason === "onchain_required") toast("This request must be sent through the Safe so the real transaction hash can be recorded.", "error");
             else if (res.reason === "not_a_signer") toast("Blocked: only authorised signers can release funds. Every member was alerted.", "error");
             else toast(`Blocked: ${res.approvals} of ${res.required} approvals. Every member was alerted.`, "error");
         } catch (e) { toast(e.message, "error"); }
@@ -263,13 +314,64 @@
     function newRequest() {
         openForm({
             eyebrow: "New request", title: "Ask the group", desc: "Needs 2 approvals from authorised signers. You cannot approve your own request.", submit: "Submit request",
-            fields: [{ name: "kind", label: "Type", options: [["withdrawal", "Withdrawal"], ["loan", "Loan (for yourself)"]] }, { name: "amount", label: "Amount (USDT)", type: "number", step: "0.01", min: 0.01 }, { name: "what", label: "Purpose (withdrawals)", placeholder: "e.g. Community hall deposit", required: false }, { name: "rate", label: "Interest % (loans)", type: "number", step: "0.01", min: 0, value: 0, required: false }, { name: "term", label: "Term in months (loans)", type: "number", min: 1, value: 6, required: false }],
+            fields: [{ name: "kind", label: "Type", options: [["withdrawal", "Withdrawal"], ["loan", "Loan (for yourself)"]] }, { name: "amount", label: "Amount (USDT)", type: "number", step: "0.01", min: 0.01 }, { name: "what", label: "Purpose (withdrawals)", placeholder: "e.g. Community hall deposit", required: false }, { name: "payee", label: "Recipient wallet (needed to send from the Safe)", placeholder: "0x…", pattern: "0x[0-9a-fA-F]{40}", required: false }, { name: "rate", label: "Interest % (loans)", type: "number", step: "0.01", min: 0, value: 0, required: false }, { name: "term", label: "Term in months (loans)", type: "number", min: 1, value: 6, required: false }],
             onSubmit: async (v) => {
                 if (v.kind === "loan") await api.requestLoan(S.sid, Number(v.amount), Number(v.rate || 0), Number(v.term || 6));
-                else { if (!v.what || v.what.trim().length < 2) throw new Error("Please describe what the money is for"); await api.requestWithdrawal(S.sid, Number(v.amount), v.what.trim()); }
+                else { if (!v.what || v.what.trim().length < 2) throw new Error("Please describe what the money is for"); await api.requestWithdrawal(S.sid, Number(v.amount), v.what.trim(), (v.payee || "").trim() || null); }
                 toast("Request created. Signers have been asked to vote.", "success");
             }
         });
+    }
+
+    /* ---------- Safe: send approved releases on-chain and record the real tx hash ---------- */
+    async function ensureWallet() {
+        if (!window.ethereum) throw new Error("Install a wallet such as MetaMask to send from the Safe");
+        return (await window.ethereum.request({ method: "eth_requestAccounts" }))[0];
+    }
+    function askPayee(r) {
+        return new Promise((resolve, reject) => {
+            openForm({ eyebrow: "Safe", title: "Who receives the funds?", desc: "Wallet address that will receive " + usdt(r.amount) + ".", submit: "Continue", fields: [{ name: "addr", label: "Recipient wallet", placeholder: "0x…", pattern: "0x[0-9a-fA-F]{40}" }], onSubmit: async (v) => resolve(v.addr.trim()) });
+            $("#live-dialog").addEventListener("close", () => reject(new Error("Cancelled")), { once: true });
+        });
+    }
+    async function sendFromSafe(r) {
+        try {
+            const account = await ensureWallet();
+            const payee = r.payee_address || (await askPayee(r));
+            toast("Confirm the proposal in your wallet…");
+            const safeTxHash = await window.ThembaSafe.proposeTransfer(window.ethereum, account, payee, r.amount);
+            await api.linkSafeTx(r.id, safeTxHash);
+            toast("Proposed on the Safe. Another Safe signer must approve and execute it in the Safe panel.", "success");
+            await refresh();
+        } catch (e) { toast(window.ThembaSafe ? window.ThembaSafe.describeError(e) : e.message, "error"); }
+    }
+    let syncing = false;
+    async function syncSafe(manual) {   // when a linked Safe tx has executed on-chain, record its real hash in the ledger
+        if (syncing || !window.ThembaSafe || !S.signer || !S.sid) return;
+        const linked = S.requests.filter((r) => r.status === "approved" && r.safe_tx_hash);
+        if (!linked.length) { if (manual) toast("Nothing is waiting on the Safe", "info"); return; }
+        syncing = true; let n = 0;
+        try {
+            const done = await window.ThembaSafe.listExecuted(25);
+            for (const r of linked) {
+                const tx = done.find((t) => t.safeTxHash && t.safeTxHash.toLowerCase() === r.safe_tx_hash.toLowerCase());
+                if (!tx || !tx.txHash) continue;
+                const okAmt = Math.abs(Number(tx.amount) - Number(r.amount)) < 0.005, okTo = !r.payee_address || (tx.recipient || "").toLowerCase() === r.payee_address.toLowerCase();
+                if (!okAmt || !okTo) { toast("The on-chain transfer does not match the approved request. It was NOT recorded.", "error"); continue; }
+                const res = await api.executeRequest(r.id, tx.txHash);
+                if (res.ok) { n++; toast("Transfer confirmed on-chain and recorded in the ledger", "success"); } else toast("Could not record the transfer: " + res.reason, "error");
+            }
+            if (n) { syncing = false; await refresh(); } else if (manual) toast("Still waiting for Safe signatures or execution", "info");
+        } catch (e) { if (manual) toast(e.message || "Could not reach the Safe service", "error"); }
+        finally { syncing = false; }
+    }
+    function walletCard() {
+        const p = h("section", "panel"); p.style.padding = "22px";
+        p.append(h("h2", null, "Wallet & pot check"), h("p", null, S.profile && S.profile.wallet_address ? "Your saved wallet: " + S.profile.wallet_address.slice(0, 8) + "…" + S.profile.wallet_address.slice(-6) : "Save your wallet so loans can be sent to you."));
+        p.append(kids(h("div", "approval-buttons"),
+            btn("Save my connected wallet", "button-outline", async () => { try { const a = await ensureWallet(); await api.saveWallet(a); toast("Wallet saved", "success"); await refresh(); } catch (e) { toast(e.message, "error"); } }),
+            btn("Compare ledger with Safe balance", "button-outline", async () => { try { await ensureWallet(); const bal = await window.ThembaSafe.getSafeTokenBalance(window.ethereum), ok = Math.abs(Number(bal) - Number(S.balance)) < 0.005; toast(ok ? `Ledger and Safe match: ${usdt(bal)}` : `Safe holds ${usdt(bal)} but the ledger shows ${usdt(S.balance)}`, ok ? "success" : "error"); } catch (e) { toast(window.ThembaSafe.describeError(e), "error"); } })));
+        return p;
     }
 
     function renderApprovals(st) {
@@ -284,6 +386,7 @@
         if (!S.requests.length) box.append(h("p", "empty-state", "No requests yet."));
         open.forEach((r) => box.append(requestCard(r)));
         if (done.length) { box.append(h("h2", null, "History")); done.forEach((r) => box.append(requestCard(r))); }
+        if (window.ThembaSafe) box.append(walletCard());
         if (isAdmin()) box.append(signersCard());
     }
     function signersCard() {
@@ -291,7 +394,7 @@
         p.append(h("h2", null, "Signers & invites"), h("p", null, "Signers can approve requests. Keep three, and require two."));
         const list = h("div", "member-list");
         S.members.forEach((m) => list.append(kids(h("div", "member-row"), h("span", "avatar", initials(name(m.user_id))), kids(h("span", "row-grow"), h("strong", null, name(m.user_id)), h("small", null, m.role + (m.is_signer ? " · signer" : ""))), btn(m.is_signer ? "Remove signer" : "Make signer", "text-link", () => run(() => api.setSigner(S.sid, m.user_id, !m.is_signer), "Signers updated")))));
-        p.append(list, btn("Invite a member", "button-outline", async () => openForm({
+        p.append(list, btn(S.st.require_onchain_release ? "Strict on-chain mode: ON (turn off)" : "Require on-chain release (strict mode)", "button-outline", () => run(() => api.setOnchainRelease(S.sid, !S.st.require_onchain_release), "Setting updated")), btn("Invite a member", "button-outline", async () => openForm({
             eyebrow: "Invite", title: "Invite a member", desc: "They must sign up with this exact email. The invite lasts 7 days.", fields: [{ name: "email", label: "Their email", type: "email" }], submit: "Create invite code",
             onSubmit: async (v) => { const token = await api.inviteMember(S.sid, v.email); try { await navigator.clipboard.writeText(token); } catch (e) { /* clipboard not available */ } toast("Invite code copied: " + token, "success"); window.prompt("Send this invite code to " + v.email, token); }
         })));
@@ -436,8 +539,8 @@
     function loanDialog() {
         openForm({
             eyebrow: "Responsible access", title: "Apply for a loan", desc: "Signers vote on it (2 approvals needed). Everyone in the stokvel sees the terms, and they are locked once voting starts.", submit: "Submit application",
-            fields: [{ name: "amount", label: "Amount (USDT)", type: "number", step: "0.01", min: 0.01 }, { name: "rate", label: "Interest %", type: "number", step: "0.01", min: 0, value: 0 }, { name: "term", label: "Term (months)", type: "number", min: 1, max: 60, value: 6 }],
-            onSubmit: async (v) => { await api.requestLoan(S.sid, Number(v.amount), Number(v.rate || 0), Number(v.term)); toast("Loan requested. Signers have been asked to vote.", "success"); }
+            fields: [{ name: "amount", label: "Amount (USDT)", type: "number", step: "0.01", min: 0.01 }, { name: "rate", label: "Interest %", type: "number", step: "0.01", min: 0, value: 0 }, { name: "term", label: "Term (months)", type: "number", min: 1, max: 60, value: 6 }, { name: "wallet", label: "Payout wallet (where the Safe sends the loan)", placeholder: "0x…", pattern: "0x[0-9a-fA-F]{40}", value: (S.profile && S.profile.wallet_address) || "", required: false }],
+            onSubmit: async (v) => { if (v.wallet && v.wallet.trim() && v.wallet.trim() !== (S.profile && S.profile.wallet_address)) await api.saveWallet(v.wallet.trim()); await api.requestLoan(S.sid, Number(v.amount), Number(v.rate || 0), Number(v.term)); toast("Loan requested. Signers have been asked to vote.", "success"); }
         });
     }
     function repayDialog(l) {
@@ -462,20 +565,133 @@
         box.append(p);
     }
 
+    /* ---------- transactions + audit trail ---------- */
+    const TX_KIND = { contribution: "contribution", withdrawal: "withdrawal", loan_disbursement: "loan", loan_repayment: "loan", bill_share: "bill", bill_payout: "bill", correction: "correction" };
+    const REQ_WORD = { withdrawal: "a withdrawal", loan: "a loan", bill: "a bill payout" };
+    const when2 = (iso) => new Date(iso).toLocaleString("en-ZA", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    const txRef = (e) => (e.tx_hash ? e.tx_hash.slice(0, 10) + "…" : "LEDGER-" + e.id.slice(0, 6).toUpperCase());
+    function txLink(e) {
+        if (!e.tx_hash || !window.ThembaSafe) return null;
+        const a = h("a", null, txRef(e)); a.href = window.ThembaSafe.explorerTx(e.tx_hash); a.target = "_blank"; a.rel = "noopener noreferrer"; return a;
+    }
+    function auditLine(a) {
+        const who = a.actor_id ? name(a.actor_id) : "The system", n = a.new_data || {}, o = a.old_data || {}, t = a.table_name, op = a.action;
+        if (t === "stokvels" && op === "INSERT") return `${who} created the stokvel “${n.name}”`;
+        if (t === "stokvel_members") return op === "INSERT" ? `${who} added ${name(n.user_id)} as ${n.role}` : o.is_signer !== n.is_signer ? `${who} ${n.is_signer ? "made" : "removed"} ${name(n.user_id)} ${n.is_signer ? "an authorised signer" : "as a signer"}` : null;
+        if (t === "contributions") return op === "INSERT" ? `${who} recorded a ${n.method === "cash" ? "cash" : "USDT"} contribution of ${usdt(n.amount)} for ${name(n.user_id)}${n.status === "pending_confirmation" ? " (awaiting the member)" : ""}` : `${who} ${n.status === "confirmed" ? "confirmed" : "disputed"} a ${usdt(n.amount)} contribution`;
+        if (t === "bills" && op === "INSERT") return `${who} created the bill “${n.title}” for ${usdt(n.total_amount)}`;
+        if (t === "bill_shares" && op === "UPDATE") return n.status === "paid" ? `${name(n.user_id)}’s ${usdt(n.amount)} bill share was paid` : n.status === "pending_confirmation" ? `${who} says they paid ${usdt(n.amount)} cash for a bill share (awaiting the treasurer)` : `${who} marked a cash bill share as not received`;
+        if (t === "approval_requests") {
+            if (op === "INSERT") return `${who} requested ${REQ_WORD[n.kind]} of ${usdt(n.amount)}: ${n.description}`;
+            if (o.status !== n.status) return `Request “${n.description}” is now ${n.status}${n.status === "executed" ? " (funds released)" : ""}`;
+            if (o.safe_tx_hash !== n.safe_tx_hash) return `${who} sent “${n.description}” to the Safe for signing`;
+            return null;
+        }
+        if (t === "approvals") { const r = S.requests.find((x) => x.id === n.request_id); return `${who} ${n.decision === "approve" ? "approved" : "rejected"} “${r ? r.description : "a request"}”`; }
+        if (t === "loans") return op === "INSERT" ? `${who} applied for a loan of ${usdt(n.principal)}` : o.status !== n.status ? `Loan of ${usdt(n.principal)} is now ${n.status}` : o.terms_version !== n.terms_version ? `${who} changed loan terms (now version ${n.terms_version})` : null;
+        if (t === "loan_repayments") return `${usdt(n.amount)} ${n.method} loan repayment recorded`;
+        if (t === "repayment_claims") return op === "INSERT" ? `${who} logged a ${usdt(n.amount)} cash loan repayment (awaiting the borrower)` : `A ${usdt(n.amount)} cash loan repayment was ${n.status}`;
+        return null;
+    }
+    function auditPanel() {
+        const p = h("section", "panel"); p.style.padding = "22px";
+        p.append(h("h2", null, "Audit trail"), h("p", null, "Who started, approved or rejected every action, and when. Entries cannot be edited or deleted."));
+        const lines = S.audit.map((a) => [a, auditLine(a)]).filter((x) => x[1]).slice(0, 30);
+        const list = h("div", "member-list");
+        lines.forEach(([a, text]) => list.append(kids(h("div", "member-row"), h("span", "avatar", a.actor_id ? initials(name(a.actor_id)) : "·"), kids(h("span", "row-grow"), h("strong", null, text), h("small", null, when2(a.created_at))))));
+        p.append(lines.length ? list : h("p", "empty-state", "Nothing recorded yet."));
+        return p;
+    }
+    function renderTransactions() {
+        const v = VIEW("transactions"); if (!v) return;
+        const box = slot("transactions", "audit"); box.replaceChildren(auditPanel());
+        if (!TREAS) {
+            const nt = $(".audit-notice", v);
+            if (nt) { const s = $("strong", nt), p = $("p", nt); if (s) s.textContent = "Permanent ledger"; if (p) p.textContent = "Every entry is written once and can never be edited or deleted. Mistakes are fixed with a new correcting entry."; }
+            const intro = $(".page-title-row p", v); if (intro) intro.textContent = `Every movement of money in ${S.st.name}. Sepolia transactions link to Etherscan.`;
+            const list = $(".transaction-list", v); if (!list) return;
+            list.replaceChildren(...(S.ledger.length ? S.ledger.map((e) => {
+                const row = h("div", "transaction-row"); row.dataset.transaction = TX_KIND[e.entry_type];
+                const sub = h("small", null, `${e.member_id ? name(e.member_id) + " · " : ""}${when2(e.created_at)} · `); const l = txLink(e); sub.append(l || document.createTextNode(txRef(e)));
+                kids(row, h("span", "transaction-icon " + (Number(e.amount) > 0 ? "icon-positive" : "icon-pending"), Number(e.amount) > 0 ? "↓" : "↑"), kids(h("div", "row-grow"), h("strong", null, e.description || e.entry_type.replace(/_/g, " ")), sub), h("b", Number(e.amount) > 0 ? "amount-positive" : null, (Number(e.amount) > 0 ? "+" : "−") + usdt(Math.abs(e.amount))), h("span", "status status-done", "Recorded"));
+                return row;
+            }) : [h("p", "empty-state", "No transactions yet.")]));
+        } else {
+            const hd = $(".treasurer-page-heading p", v); if (hd) hd.textContent = `Review all money in and out of ${S.st.name}.`;
+            const lp = $(".transaction-ledger-heading p", v); if (lp) lp.textContent = `Permanent ledger entries for ${S.st.name}`;
+            const tb = $(".treasurer-transaction-table tbody", v); if (!tb) return;
+            tb.replaceChildren(...S.ledger.map((e) => {
+                const tr = h("tr"); tr.dataset.kind = TX_KIND[e.entry_type]; tr.dataset.search = ((e.description || "") + " " + (e.member_id ? name(e.member_id) : "") + " " + txRef(e) + " " + e.entry_type).toLowerCase();
+                const ref = h("td"), l = txLink(e); ref.append(l || document.createTextNode(txRef(e)));
+                const amt = h("td", Number(e.amount) > 0 ? "amount-positive" : null, (Number(e.amount) > 0 ? "+" : "−") + usdt(Math.abs(e.amount)));
+                kids(tr, kids(h("td"), h("strong", null, e.description || e.entry_type.replace(/_/g, " ")), h("small", null, `${e.member_id ? name(e.member_id) + " · " : ""}${S.st.name}`)), h("td", null, when2(e.created_at)), ref, kids(h("td"), h("span", "status status-done", "Recorded")), amt);
+                return tr;
+            }));
+            const c = $("[data-visible-transactions]", v); if (c) c.textContent = S.ledger.length;
+        }
+    }
+
+    /* ---------- notifications (member dashboard) ---------- */
+    const seenKey = () => "themba_alerts_seen_" + S.me;
+    function notifRow(n) {
+        const r = h("div", "notification-row" + (n.unread ? " unread" : ""));
+        kids(r, h("span", "notification-mark", n.mark || "!"), kids(h("div", "row-grow"), h("strong", null, n.title), h("p", null, n.text), h("small", null, n.when)));
+        if (n.page) { const b = h("button", "text-link", n.label); b.type = "button"; b.dataset.page = n.page; r.append(b); }
+        return r;
+    }
+    function renderNotifications(st) {
+        const v = VIEW("notifications"); if (!v) return;
+        const seen = Number(localStorage.getItem(seenKey()) || 0), items = [];
+        st.toVote.forEach((r) => items.push({ title: "Approval needed: " + r.description, text: `${name(r.requested_by)} asked for ${usdt(r.amount)}. Your vote is needed.`, when: when2(r.created_at), unread: true, mark: "→", page: "approvals", label: "Review" }));
+        st.pending.filter((c) => c.user_id === S.me).forEach((c) => items.push({ title: "Confirm your cash contribution", text: `${name(c.logged_by)} recorded ${usdt(c.amount)} cash from you.`, when: when2(c.created_at), unread: true, mark: "→", page: "contributions", label: "Confirm" }));
+        S.bills.forEach((b) => (b.bill_shares || []).filter((s) => s.user_id === S.me && s.status === "unpaid").forEach((s) => items.push({ title: "You owe " + usdt(s.amount), text: `Your share of “${b.title}”.`, when: when2(b.created_at), unread: true, mark: "→", page: "bills", label: "Settle up" })));
+        S.claims.filter((c) => c.status === "pending_confirmation" && S.loans.some((l) => l.loan_id === c.loan_id && l.borrower_id === S.me)).forEach((c) => items.push({ title: "Confirm your cash loan repayment", text: `${name(c.logged_by)} recorded ${usdt(c.amount)} cash from you.`, when: when2(c.created_at), unread: true, mark: "→", page: "loans", label: "Confirm" }));
+        S.alerts.forEach((a) => items.push({ title: "Security alert", text: a.message, when: when2(a.created_at), unread: new Date(a.created_at).getTime() > seen, mark: "!" }));
+        const panel = $(".page-table", v); if (panel) panel.replaceChildren(...(items.length ? items.map(notifRow) : [h("p", "empty-state", "You are all caught up.")]));
+        const unread = items.filter((i) => i.unread).length;
+        const nb = $('[data-page="notifications"] .nav-badge'); if (nb) { nb.textContent = unread; nb.style.display = unread ? "" : "none"; }
+        const ab = $('[data-page="approvals"] .nav-badge'); if (ab) { ab.textContent = st.toVote.length; ab.style.display = st.toVote.length ? "" : "none"; }
+    }
+
+    /* ---------- treasurer: member payment status ---------- */
+    function renderMembersView(st) {
+        const v = VIEW("members"); if (!v || !TREAS) return;
+        const eb = $(".treasurer-page-heading .eyebrow", v); if (eb) eb.textContent = S.st.name;
+        const hp = $(".ledger-heading p", v); if (hp) hp.textContent = `${monthLabel()} · ${st.complete.length} of ${S.members.length} members complete`;
+        const list = $(".ledger-list", v); if (!list) return;
+        list.replaceChildren(...S.members.map((m) => {
+            const n = name(m.user_id), paid = st.paidBy[m.user_id] || 0, done = st.complete.includes(m), pend = st.pending.some((c) => c.user_id === m.user_id);
+            const row = h("article", "ledger-row member-ledger-row"); row.dataset.search = n.toLowerCase();
+            kids(row, h("span", "avatar", initials(n)), kids(h("span", "row-grow"), h("strong", null, n), h("small", null, (m.role[0].toUpperCase() + m.role.slice(1)) + (m.is_signer ? " · signer" : "") + (done ? " · paid this month" : ` · due ${usdt(Math.max(st.monthly - paid, 0))}`))), h("b", "ledger-amount", usdt(done ? paid : st.monthly)), h("span", "status " + (done ? "status-done" : "status-pending"), done ? "Paid" : pend ? "Awaiting member" : "Outstanding"));
+            if (!done && !pend) row.append(btn("Log cash", "text-link", async () => logCash(m.user_id)));
+            return row;
+        }));
+    }
+
     /* ---------- wiring ---------- */
     document.addEventListener("click", (e) => {   // capture: replaces the demo contribution dialog
         const b = e.target.closest('[data-action="contribution"]');
         if (b && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); TREAS ? logCash() : makeContribution(); return; }
+        const so = e.target.closest('[data-action="sign-out"]');
+        if (so) { e.preventDefault(); e.stopImmediatePropagation(); signOutEverywhere(); return; }
+        const mr = e.target.closest('[data-action="mark-read"]');
+        if (mr && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); localStorage.setItem(seenKey(), String(Date.now())); render(); toast("Notifications marked as read", "success"); return; }
         const lb = e.target.closest('[data-action="loan"]');
         if (lb && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); loanDialog(); return; }
         const bb = e.target.closest('[data-action="bill"]');
         if (bb && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); billDialog(); }
     }, true);
-    window.addEventListener("themba:demo-state", (ev) => {   // Safe panel finished an on-chain contribution -> save it to the real ledger
+    async function signOutEverywhere() {   // end the real Supabase session too, not just the demo one
+        try { await sb.auth.signOut(); } catch (e) { /* still leave */ }
+        for (const storage of [localStorage, sessionStorage]) { try { storage.removeItem("themba_session"); } catch (e) { /* ignore */ } }
+        window.location.href = "login.html";
+    }
+    window.addEventListener("themba:demo-state", (ev) => {   // dashboard.js finished an on-chain contribution
         const d = ev.detail || {};
-        if (S.sid && d.name === "contributions" && d.record && d.record.status === "confirmed-on-chain" && /^0x[0-9a-fA-F]{64}$/.test(d.record.txHash || ""))
-            run(() => api.recordUsdtContribution(S.sid, Number(d.record.amount), monthStart(), d.record.txHash), "On-chain contribution saved to the ledger");
+        if (d.name === "contributions" && d.record && d.record.status === "confirmed-on-chain") recordOnchain(d.record.amount, d.record.txHash);
     });
+    window.addEventListener("themba:safe-contribution", (ev) => recordOnchain(ev.detail.amount, ev.detail.txHash));
+    window.addEventListener("themba:safe-executed", () => { setTimeout(() => syncSafe(false), 4000); setTimeout(() => syncSafe(false), 12000); });
     sb.auth.onAuthStateChange((evt) => { if (evt === "SIGNED_OUT") window.location.href = "login.html"; });
 
     await refresh();

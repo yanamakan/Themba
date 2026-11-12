@@ -9,6 +9,12 @@ import {
   explorerTx, explorerAddress, describeError
 } from "./safe-transfer.js";
 
+// Expose the Safe helpers so live-data.js can send approved releases through the Safe and record the real tx hash.
+window.ThembaSafe = {
+  SAFE_CONFIG, getSafeSummary, getSafeTokenBalance, contributeToSafe, proposeTransfer, approveTransfer,
+  executeTransfer, listPending, listExecuted, explorerTx, explorerAddress, describeError
+};
+
 (() => {
   "use strict";
   const root = document.querySelector("#safe-panel");
@@ -217,6 +223,7 @@ import {
       case "execute":
         run("Confirm the transaction in your wallet…", async () => {
           const txHash = await executeTransfer(provider, state.account, hash);
+          window.dispatchEvent(new CustomEvent("themba:safe-executed", { detail: { txHash, safeTxHash: hash } }));
           await refresh();
           return { text: "Transfer executed on Sepolia.", href: explorerTx(txHash) };
         });
@@ -234,6 +241,7 @@ import {
     if (form.dataset.safeForm === "contribute") {
       run("Confirm the transfer in your wallet…", async () => {
         const hash = await contributeToSafe(provider, amount);
+        window.dispatchEvent(new CustomEvent("themba:safe-contribution", { detail: { amount: Number(amount), txHash: hash } }));
         await refresh();
         return { text: "Contribution sent to the pot.", href: explorerTx(hash) };
       });

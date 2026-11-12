@@ -17,6 +17,11 @@
         if (error) throw new Error(error.message);
         return data;
     }
+    async function uid() {   // local session (no network call)
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) throw new Error("Not signed in");
+        return session.user.id;
+    }
     async function read(query) {
         const { data, error } = await query;
         if (error) throw new Error(error.message);
@@ -45,10 +50,15 @@
         recordLoanRepayment: (loan, amount, method, txHash = null) => rpc("record_loan_repayment", { p_loan: loan, p_amount: amount, p_method: method, p_tx_hash: txHash }),
         addCorrection: (entry, reason) => rpc("add_correction", { p_entry: entry, p_reason: reason }),
         reportTamperAttempt: (stokvel, table, record = null) => rpc("report_tamper_attempt", { p_stokvel: stokvel, p_table: table, p_record: record }),
+        linkSafeTx: (request, safeTxHash) => rpc("link_safe_tx", { p_request: request, p_safe_tx_hash: safeTxHash }),
+        setOnchainRelease: (stokvel, value) => rpc("set_onchain_release", { p_stokvel: stokvel, p_value: value }),
+        myProfile: async () => read(sb.from("profiles").select("full_name,wallet_address").eq("id", await uid()).maybeSingle()),
+        saveWallet: async (address) => { const { error } = await sb.from("profiles").update({ wallet_address: address }).eq("id", await uid()); if (error) throw new Error(error.message); },
         platformOverview: () => rpc("platform_overview", {}),
 
         /* ---- reads (RLS limits these to the caller's own stokvels) ---- */
-        myStokvels: () => read(sb.from("stokvel_members").select("role,is_signer,stokvels(*)").eq("status", "active")),
+        // RLS lets you read every member of your stokvels, so filter to YOUR OWN membership rows
+        myStokvels: async () => read(sb.from("stokvel_members").select("role,is_signer,stokvels(*)").eq("user_id", await uid()).eq("status", "active")),
         members: async (stokvel) => {   // profiles are fetched separately: Supabase cannot embed them through auth.users
             const rows = await read(sb.from("stokvel_members").select("user_id,role,is_signer").eq("stokvel_id", stokvel).eq("status", "active"));
             const ids = rows.map((r) => r.user_id);
