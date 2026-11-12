@@ -143,8 +143,41 @@
         if (!S.sid) return renderOnboarding();
         $$(".live-slot[data-live='onboard']").forEach((e) => e.remove());
         const st = stats();
-        renderBalance(st); renderContributions(st); renderApprovals(st); renderBills(); renderLoans(); renderOverviewStats(st); renderTransactions(); renderNotifications(st); renderMembersView(st);
+        renderGroupHeader(); renderStokvelsView(); renderBalance(st); renderContributions(st); renderApprovals(st); renderBills(); renderLoans(); renderOverviewStats(st); renderTransactions(); renderNotifications(st); renderMembersView(st);
         const cb = $('[data-page="contributions"] .nav-badge'); if (cb && TREAS) { cb.textContent = st.pending.length; cb.style.display = st.pending.length ? "" : "none"; }
+    }
+
+    // Sidebar "active stokvel" button: show the real stokvel, and let the person switch between the ones they belong to.
+    function renderGroupHeader() {
+        const g = $(".active-group"); if (!g || !S.st) return;
+        const av = $(".avatar", g); if (av) av.textContent = initials(S.st.name);
+        const nm = $(".group-copy strong", g); if (nm) nm.textContent = S.st.name;
+        const sm = $(".group-copy small", g); if (sm) sm.textContent = `${S.members.length} member${S.members.length === 1 ? "" : "s"} · Monthly`;
+        const ml = $(".group-copy .micro-label", g); if (ml) ml.textContent = (TREAS ? S.role[0].toUpperCase() + S.role.slice(1) + " · " : "") + "Active stokvel";
+        const ch = $(".chevron", g); if (ch) ch.style.display = S.stokvels.length > 1 ? "" : "none";
+    }
+    // "My stokvels" page on the member dashboard: real stokvels, real members, no sample groups.
+    function renderStokvelsView() {
+        const v = VIEW("stokvels"); if (!v || TREAS || !S.st) return;
+        const tabs = $(".group-tabs", v);
+        if (tabs) tabs.replaceChildren(...S.stokvels.map((m) => {
+            const t = h("button", "group-tab" + (m.stokvels.id === S.sid ? " is-selected" : "")); t.type = "button"; t.dataset.sid = m.stokvels.id;
+            kids(t, h("span", "avatar avatar-green", initials(m.stokvels.name)), kids(h("span"), h("b", null, m.stokvels.name), h("small", null, m.role[0].toUpperCase() + m.role.slice(1))));
+            return t;
+        }));
+        const stack = $(".member-stack", v);
+        if (stack) { stack.replaceChildren(...S.members.slice(0, 5).map((m) => h("span", null, initials(name(m.user_id))))); if (S.members.length > 5) stack.append(h("span", null, "+" + (S.members.length - 5))); }
+        const list = $(".group-details-grid .panel .member-list", v);
+        if (list) list.replaceChildren(...S.members.map((m) => kids(h("div", "member-row"), h("span", "avatar", initials(name(m.user_id))), kids(h("span", "row-grow"), h("strong", null, name(m.user_id) + (m.user_id === S.me ? " (you)" : "")), h("small", null, m.role[0].toUpperCase() + m.role.slice(1) + (m.is_signer ? " · signer" : ""))), h("span", "verified", "Active"))));
+        const inv = $(".invite-panel", v); if (inv) inv.style.display = "none";   // sample invite code and request; the treasurer invites people from Approvals
+    }
+    function switchStokvel() {
+        if (S.stokvels.length < 2) { toast("You only belong to one stokvel so far.", "info"); return; }
+        openForm({
+            eyebrow: "Your communities", title: "Switch stokvel", desc: "Choose the stokvel you want to see.", submit: "Switch",
+            fields: [{ name: "sid", label: "Stokvel", options: S.stokvels.map((m) => [m.stokvels.id, `${m.stokvels.name} · ${m.role}`]), value: S.sid }],
+            onSubmit: async (v) => { try { localStorage.setItem("themba_live_stokvel", v.sid); } catch (e) { /* storage unavailable */ } }
+        });
     }
 
     function renderOnboarding() {
@@ -683,6 +716,10 @@
     document.addEventListener("click", (e) => {   // capture: replaces the demo contribution dialog
         const b = e.target.closest('[data-action="contribution"]');
         if (b && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); TREAS ? logCash() : makeContribution(); return; }
+        const gt = e.target.closest(".group-tab[data-sid]");
+        if (gt) { e.preventDefault(); e.stopImmediatePropagation(); if (gt.dataset.sid !== S.sid) { try { localStorage.setItem("themba_live_stokvel", gt.dataset.sid); } catch (err) { /* storage unavailable */ } refresh(); } return; }
+        const sw = e.target.closest('[data-action="switch-group"], [data-action="stokvel"]');
+        if (sw && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); switchStokvel(); return; }
         const so = e.target.closest('[data-action="sign-out"]');
         if (so) { e.preventDefault(); e.stopImmediatePropagation(); signOutEverywhere(); return; }
         const mr = e.target.closest('[data-action="mark-read"]');
