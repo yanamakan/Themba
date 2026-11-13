@@ -62,6 +62,7 @@
         linkSafeTx: (request, safeTxHash) => rpc("link_safe_tx", { p_request: request, p_safe_tx_hash: safeTxHash }),
         setOnchainRelease: (stokvel, value) => rpc("set_onchain_release", { p_stokvel: stokvel, p_value: value }),
         myProfile: async () => read(sb.from("profiles").select("full_name,wallet_address").eq("id", await uid()).maybeSingle()),
+        saveProfileName: async (name) => { const { error } = await sb.from("profiles").update({ full_name: name }).eq("id", await uid()); if (error) throw new Error(error.message); },
         saveWallet: async (address) => { const { error } = await sb.from("profiles").update({ wallet_address: address }).eq("id", await uid()); if (error) throw new Error(error.message); },
         platformOverview: () => rpc("platform_overview", {}),
         adminDirectory: () => rpc("admin_directory", {}),

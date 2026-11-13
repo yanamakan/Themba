@@ -104,7 +104,7 @@
     async function refresh() {
         if (busy) { again = true; return; }
         busy = true;
-        try { await loadStokvels(); if (S.sid && ensureDashboard()) return; if (S.sid) await loadData(); render(); } catch (e) { console.error(e); toast(e.message || "Could not load live data", "error"); }
+        try { await loadStokvels(); if (!S.profile) S.profile = await api.myProfile().catch(() => null); renderProfile(); if (S.sid && ensureDashboard()) return; if (S.sid) await loadData(); render(); } catch (e) { console.error(e); toast(e.message || "Could not load live data", "error"); }
         busy = false; if (again) { again = false; refresh(); } else syncSafe(false);
     }
 
@@ -146,6 +146,36 @@
         renderGroupHeader(); renderStokvelsView(); renderBalance(st); renderContributions(st); renderApprovals(st); renderBills(); renderLoans(); renderOverviewStats(st); renderTransactions(); renderNotifications(st); renderMembersView(st);
         const cb = $('[data-page="contributions"] .nav-badge'); if (cb && TREAS) { cb.textContent = st.pending.length; cb.style.display = st.pending.length ? "" : "none"; }
     }
+
+    /* ---------- profile & settings ---------- */
+    function renderProfile() {
+        const name = (S.profile && S.profile.full_name) || (session.user.user_metadata && session.user.user_metadata.full_name) || "";
+        $$("[data-user-name]").forEach((e) => (e.textContent = name || "Member"));
+        $$("[data-user-initials]").forEach((e) => (e.textContent = initials(name || "Member")));
+        $$("[data-first-name]").forEach((e) => (e.textContent = (name.trim().split(/\s+/)[0]) || "there"));
+        const sp = $(".sidebar-profile small"); if (sp) sp.textContent = S.sid ? (S.role[0].toUpperCase() + S.role.slice(1)) : "Member";
+        const form = $("#profile-form"); if (!form) return;
+        const nm = $("#profile-name", form), em = $("#profile-email", form), rl = $("#profile-role", form);
+        if (nm && document.activeElement !== nm) nm.value = name;
+        if (em) { em.value = session.user.email || ""; em.readOnly = true; em.title = "Your sign-in email can't be changed here"; }
+        if (rl) { const lab = rl.closest("label"); if (lab) lab.style.display = "none"; }   // the role comes from the database, not a setting
+        const cards = $$(".settings-card", VIEW("settings") || document);
+        const p = cards[1] && $(".panel-heading p", cards[1]); if (p) p.textContent = `Signed in as ${session.user.email}. Your browser wallet connection is separate from your Themba account.`;
+    }
+    document.addEventListener("submit", async (e) => {   // capture: replaces the demo profile save
+        if (!e.target || e.target.id !== "profile-form") return;
+        e.preventDefault(); e.stopImmediatePropagation();
+        const name = ($("#profile-name").value || "").trim();
+        if (name.length < 1 || name.length > 100) { toast("Enter a name between 1 and 100 characters.", "error"); return; }
+        const b = $('button[type="submit"]', e.target); if (b) b.disabled = true;
+        try {
+            await api.saveProfileName(name);
+            S.profile = Object.assign({}, S.profile, { full_name: name });
+            for (const storage of [localStorage, sessionStorage]) { try { const raw = storage.getItem("themba_session"); if (raw) { const x = JSON.parse(raw); x.name = name; storage.setItem("themba_session", JSON.stringify(x)); } } catch (err) { /* storage unavailable */ } }
+            renderProfile(); await refresh(); toast("Your profile has been updated.", "success");
+        } catch (err) { toast(err.message || "Could not save your profile.", "error"); }
+        finally { if (b) b.disabled = false; }
+    }, true);
 
     // Sidebar "active stokvel" button: show the real stokvel, and let the person switch between the ones they belong to.
     function renderGroupHeader() {
