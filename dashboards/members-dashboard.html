@@ -676,7 +676,7 @@
       <span class="eyebrow">Grow your stokvel</span>
       <h2 id="invite-title" style="font-family: var(--font-display); font-size: 22px; margin-bottom: 10px;">Invite a
         Member</h2>
-      <p style="color: #7d948a; margin-bottom: 20px; font-size: 14px;">Generate an authenticated invitation link for a new or existing member. Share the link privately.</p>
+      <p style="color: #7d948a; margin-bottom: 20px; font-size: 14px;">Enter their email address and we will send them a personalised invitation with a button to join. Existing members sign in; new members create an account.</p>
 
       <div class="field" style="margin-bottom: 20px;">
         <label for="invite-email"
@@ -687,7 +687,7 @@
 
       <button class="btn btn-gold full-button" type="button" id="send-invite-btn"
         style="width: 100%; justify-content: center; height: 42px;">
-        Generate Invite Link
+        Send Invitation
       </button>
 
       <div style="text-align: center; margin: 20px 0; font-size: 12px; color: #7d948a;">OR SHARE CODE</div>
@@ -719,6 +719,16 @@
       const sendBtn = document.getElementById('send-invite-btn');
       const emailInput = document.getElementById('invite-email');
 
+      function notify(message) {
+        const stack = document.getElementById('toasts');
+        if (!stack) return alert(message);
+        const toast = document.createElement('div');
+        toast.className = 'toast success';
+        toast.textContent = message;
+        stack.append(toast);
+        setTimeout(() => toast.remove(), 6000);
+      }
+
       // 1. Open the modal
       if (openBtn) {
         openBtn.addEventListener('click', () => {
@@ -741,24 +751,29 @@
           sendBtn.textContent = "Sending...";
 
           try {
-            if (!window.ThembaAPI || !window.ThembaSupabase) throw Error('Live sign-in is required to create invitations.');
+            if (!window.ThembaAPI || !window.ThembaSupabase) throw Error('Live sign-in is required to send invitations.');
             const memberships = await window.ThembaAPI.myStokvels();
             const selected = localStorage.getItem('themba_live_stokvel');
             const membership = memberships.find(m => m.stokvels && m.stokvels.id === selected) || (memberships.length === 1 ? memberships[0] : null);
             if (!membership || !membership.stokvels || !['treasurer', 'chairperson'].includes(membership.role)) throw Error('Select a stokvel where you are treasurer or chairperson.');
-            const token = await window.ThembaAPI.inviteMember(membership.stokvels.id, email.toLowerCase());
-            const link = new URL('login.html', window.location.href);
-            link.searchParams.set('invite', token);
-            try { await navigator.clipboard.writeText(link.href); } catch (e) { /* clipboard can be blocked */ }
-            window.prompt('Share this private invitation link with ' + email + ':', link.href);
+
+            // The backend has Supabase create the invitation token as you, then emails the recipient.
+            const result = await window.ThembaAPI.sendInvitation(membership.stokvels.id, email.toLowerCase());
+            if (result.emailed) {
+              notify('Invitation emailed to ' + email.toLowerCase() + '.');
+            } else {
+              // Email is unavailable or failed: fall back to the private link, as before.
+              try { await navigator.clipboard.writeText(result.link); } catch (e) { /* clipboard can be blocked */ }
+              window.prompt(result.reason + '\n\nShare this private invitation link with ' + email + ':', result.link);
+            }
             emailInput.value = '';
             inviteDialog.close();
           } catch (error) {
             console.error(error);
-            alert(error.message || 'Could not create the invitation.');
+            alert(error.message || 'Could not send the invitation.');
           } finally {
             sendBtn.disabled = false;
-            sendBtn.textContent = "Generate Invite Link";
+            sendBtn.textContent = "Send Invitation";
           }
         }, true);
       }

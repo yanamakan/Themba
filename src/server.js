@@ -3,6 +3,7 @@
 const path = require("node:path");
 const express = require("express");
 const { createSafeProxy } = require("../scripts/safe-proxy");
+const { ROUTE: INVITATION_EMAIL_ROUTE, createInvitationEmailHandler } = require("../scripts/invitation-email");
 const {
   approvals,
   contributions,
@@ -21,6 +22,9 @@ app.use(express.static(path.resolve(__dirname, ".."), {
   index: false
 }));
 app.use("/api/safe-proxy", createSafeProxy());
+// Authenticated invitation email: verifies the caller's Supabase session, creates the invite via the
+// existing invite_member RPC as that user, then emails the recipient. See docs/INVITATION_EMAIL.md.
+app.post(INVITATION_EMAIL_ROUTE, createInvitationEmailHandler());
 app.post('/api/send-invite', (_req, res) => {
   return res.status(503).json({ error: 'Use the authenticated invitation-link flow.' });
 });
