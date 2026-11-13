@@ -22,7 +22,6 @@
         return;
     }
     if (window.ThembaBindUser) window.ThembaBindUser(session.user.id);   // writes from this tab must run as the user it shows
-    { const va = document.querySelector(".view-as"); if (va) va.style.display = "none"; }   // the role comes from the database, not a demo switcher
 
     const $ = (s, r = document) => r.querySelector(s);
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];

@@ -802,12 +802,21 @@ import { contributeToSafe, proposeTransfer, explorerTx, describeError } from "./
   });
 
   roleSelect.addEventListener("change", () => {
-    if (roleSelect.value === "platform_admin" || roleSelect.value === "treasurer") {
-      updateSession({ role: roleSelect.value });
-      window.location.href = roleSelect.value === "platform_admin" ? "platform-admin-dashboard.html" : "treasurer-dashboard.html";
+    const role = roleSelect.value;
+    updateSession({ role });
+
+    const destinations = {
+      member: "members-dashboard.html",
+      treasurer: "treasurer-dashboard.html",
+      platform_admin: "platform-admin-dashboard.html",
+      insurance: "insurance-dashboard.html"
+    };
+
+    if (destinations[role] && role !== "member") {
+      window.location.href = destinations[role];
       return;
     }
-    updateSession({ role: roleSelect.value });
+
     applyProfile();
     showToast(`Viewing as ${roleSelect.options[roleSelect.selectedIndex].text}.`, "success");
   });
@@ -826,3 +835,53 @@ import { contributeToSafe, proposeTransfer, explorerTx, describeError } from "./
     openDialog(requestedAction);
   }
 })();
+
+// ... [keep all your existing code above this] ...
+
+// --- NEW CODE: Handle sending the email invite ---
+const sendInviteBtn = document.querySelector('#send-invite-btn');
+const inviteEmailInput = document.querySelector('#invite-email');
+const inviteCodeDisplay = document.querySelector('#invite-code');
+
+if (sendInviteBtn) {
+  sendInviteBtn.addEventListener('click', async () => {
+    const email = inviteEmailInput.value.trim();
+    const inviteCode = inviteCodeDisplay ? inviteCodeDisplay.innerText : 'KHULA-8X4P';
+
+    // Basic email validation
+    if (!email || !email.includes('@')) {
+      showToast("Please enter a valid email address.", "error");
+      return;
+    }
+
+    const originalText = sendInviteBtn.innerText;
+    sendInviteBtn.disabled = true;
+    sendInviteBtn.innerText = "Sending...";
+
+    try {
+      const response = await fetch('/api/send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          stokvelName: "Khula Savings Circle", // Hardcoded for now, could be dynamic
+          inviteCode: inviteCode
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || "Failed to send");
+
+      showToast("Invite sent successfully! Check your email.", "success");
+      inviteEmailInput.value = ""; // Clear input after success
+
+    } catch (error) {
+      console.error(error);
+      showToast(error.message, "error");
+    } finally {
+      sendInviteBtn.disabled = false;
+      sendInviteBtn.innerText = originalText;
+    }
+  });
+}

@@ -11,7 +11,8 @@
   const DASHBOARD_URLS = {
     platform_admin: "platform-admin-dashboard.html",
     treasurer: "treasurer-dashboard.html",
-    member: "members-dashboard.html"
+    member: "members-dashboard.html",
+    insurance: "insurance-dashboard.html"
   };
   const page = document.body.dataset.page; // "login" | "signup"
   const sb = window.ThembaSupabase || null; // set by supabase-client.js when config.js is filled in; otherwise demo mode
@@ -126,6 +127,7 @@
     email: $("#email"),
     password: $("#password"),
     role: $("#role"),
+    invite: $("#invite-code"), // Added invite code input
     remember: $("#remember"),
     submit: $("#submit-btn"),
     wallet: $("#wallet-btn"),
@@ -211,13 +213,23 @@
     const password = els.password.value;
     const remember = els.remember ? els.remember.checked : true;
     const idleLabel = page === "signup" ? "Create secure account" : "Sign in securely";
+
+    // Get the invite code if they entered one
+    const inviteCode = els.invite ? els.invite.value.trim() : "";
+
     try {
       if (page === "signup") {
         setLoading(els.submit, true, "Creating account…");
+
+        // Pass invite_code to Supabase metadata
         const { data, error } = await sb.auth.signUp({
           email, password,
           options: {
-            data: { full_name: els.name.value.trim(), intended_role: els.role.value === "treasurer" ? "treasurer" : "member" },
+            data: {
+              full_name: els.name.value.trim(),
+              intended_role: els.role.value === "treasurer" ? "treasurer" : "member",
+              invite_code: inviteCode || null
+            },
             emailRedirectTo: window.location.origin + "/dashboards/login.html"
           }
         });
@@ -230,10 +242,36 @@
         goToDashboard(await buildSession(data.user), true);
         return;
       }
+
+      // --- LOGIN FLOW ---
       setLoading(els.submit, true, "Signing in…");
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) throw error;
+
+      // Check if there is a pending invite from the URL/sessionStorage
+      const pendingInvite = sessionStorage.getItem('pending_invite');
+      if (pendingInvite) {
+        try {
+          // Call the SQL function we created in Supabase
+          const { data: joinData, error: joinError } = await sb.rpc('join_stokvel_with_code', {
+            p_code: pendingInvite
+          });
+
+          if (!joinError && joinData && joinData.startsWith('Successfully')) {
+            toast(joinData, "success", 5000);
+          } else {
+            console.error("Failed to join stokvel:", joinData || joinError);
+          }
+        } catch (rpcErr) {
+          console.error("RPC Error:", rpcErr);
+        } finally {
+          // Always clear the code so it doesn't try to join again next time they log in
+          sessionStorage.removeItem('pending_invite');
+        }
+      }
+
       goToDashboard(await buildSession(data.user), remember);
+
     } catch (err) {
       setLoading(els.submit, false, idleLabel);
       setError(page === "signup" ? els.email : els.password, err.message || "Something went wrong. Please try again.");

@@ -672,7 +672,12 @@
   document.querySelector("#admin-role-select").addEventListener("change", (event) => {
     const role = event.target.value;
     updateSession({ role });
-    const destinations = { member: "members-dashboard.html", treasurer: "treasurer-dashboard.html", platform_admin: "platform-admin-dashboard.html" };
+    const destinations = {
+      member: "members-dashboard.html",
+      treasurer: "treasurer-dashboard.html",
+      platform_admin: "platform-admin-dashboard.html",
+      insurance: "insurance-dashboard.html"
+    };
     window.location.href = destinations[role] || destinations.platform_admin;
   });
 

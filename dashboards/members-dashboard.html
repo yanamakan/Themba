@@ -14,21 +14,6 @@
     rel="stylesheet">
   <link rel="stylesheet" href="../styles/theme.css">
   <link rel="stylesheet" href="dashboard.css">
-  <style>
-    .live-slot {
-      display: grid;
-      gap: 16px;
-      margin: 16px 0
-    }
-
-    .live-slot:empty {
-      display: none
-    }
-
-    .live-slot h2 {
-      margin: 8px 0 0
-    }
-  </style>
 </head>
 
 <body class="dashboard-body">
@@ -274,19 +259,33 @@
           </div>
         </section>
 
+        <!-- MY STOKVELS PAGE -->
         <section class="page-view" data-view="stokvels">
           <div class="page-title-row">
-            <div><span class="eyebrow">Your communities</span>
+            <div>
+              <span class="eyebrow">Your communities</span>
               <h1>My stokvels</h1>
               <p>Switch groups, see shared finances and manage invitations.</p>
-            </div><button class="btn btn-gold" type="button" data-action="create-stokvel"><span
-                data-icon="plus"></span>Create stokvel</button>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-outline" type="button" id="open-invite-modal">
+                <span data-icon="users"></span> Invite Member
+              </button>
+              <button class="btn btn-gold" type="button" data-action="create-stokvel">
+                <span data-icon="plus"></span>Create stokvel
+              </button>
+            </div>
           </div>
-          <div class="group-tabs"><button class="group-tab is-selected" type="button" data-group="khula"><span
-                class="avatar avatar-green">KC</span><span><b>Khula Savings Circle</b><small>12
-                  members</small></span></button><button class="group-tab" type="button" data-group="future"><span
-                class="avatar avatar-purple">FM</span><span><b>Future Minds Investment Club</b><small>8
-                  members</small></span></button></div>
+          <div class="group-tabs">
+            <button class="group-tab is-selected" type="button" data-group="khula">
+              <span class="avatar avatar-green">KC</span>
+              <span><b>Khula Savings Circle</b><small>12 members</small></span>
+            </button>
+            <button class="group-tab" type="button" data-group="future">
+              <span class="avatar avatar-purple">FM</span>
+              <span><b>Future Minds Investment Club</b><small>8 members</small></span>
+            </button>
+          </div>
           <section class="group-balance panel">
             <div><span class="eyebrow">Group balance</span><strong id="group-balance-value">R 248,500</strong><small
                 id="group-balance-caption">Khula Savings Circle · Monthly contribution R 3,500</small></div>
@@ -316,15 +315,16 @@
               <div class="panel-heading">
                 <div>
                   <h2>Invitation-only membership</h2>
-                  <p>Securely invite trusted members</p>
+                  <p>Share this code to invite trusted members</p>
                 </div>
               </div>
-              <div class="invite-code"><strong id="invite-code">KHULA-8X4P</strong><button class="text-link"
-                  type="button" data-action="copy-code"><span data-icon="copy"></span>Copy</button></div><button
-                class="btn btn-gold full-button" type="button" data-action="generate-code">Generate new code</button>
-              <div class="member-row invite-request"><span class="avatar">ZN</span><span class="row-grow"><strong>Zinhle
-                    Ngwenya</strong><small>Requested 2 hours ago</small></span><button class="text-link" type="button"
-                  data-action="approve-member">Approve</button></div>
+              <div class="invite-code" style="margin-top: 20px;">
+                <strong id="invite-code">KHULA-8X4P</strong>
+                <button class="text-link" type="button"
+                  onclick="navigator.clipboard.writeText('KHULA-8X4P'); alert('Code copied!')">
+                  <span data-icon="copy"></span>Copy
+                </button>
+              </div>
             </section>
           </div>
         </section>
@@ -332,10 +332,13 @@
         <section class="page-view" data-view="contributions">
           <div class="page-title-row">
             <div>
+              <span class="eyebrow">Your contributions</span>
               <h1>Contributions</h1>
               <p>Track digital and cash contributions with complete visibility.</p>
-            </div><button class="btn btn-gold" type="button" data-action="contribution"><span
-                data-icon="plus"></span>Make contribution</button>
+            </div>
+            <button class="btn btn-gold" type="button" data-action="contribution">
+              <span data-icon="plus"></span>Make contribution
+            </button>
           </div>
           <div class="stats-grid three-stats">
             <article class="stat-card panel">
@@ -660,7 +663,47 @@
     </form>
     <div id="dialog-content"></div>
   </dialog>
+
   <div class="toast-stack" id="toasts" aria-live="polite"></div>
+
+  <!-- INVITE MODAL -->
+  <dialog class="action-dialog" id="invite-dialog" aria-labelledby="invite-title"
+    style="max-width: 450px; width: 100%;">
+    <form method="dialog" class="dialog-close-form">
+      <button class="dialog-close" aria-label="Close dialog">×</button>
+    </form>
+    <div class="dialog-content">
+      <span class="eyebrow">Grow your stokvel</span>
+      <h2 id="invite-title" style="font-family: var(--font-display); font-size: 22px; margin-bottom: 10px;">Invite a
+        Member</h2>
+      <p style="color: #7d948a; margin-bottom: 20px; font-size: 14px;">Send a secure invite link via email.</p>
+
+      <div class="field" style="margin-bottom: 20px;">
+        <label for="invite-email"
+          style="display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600;">Friend's Email Address</label>
+        <input class="input" id="invite-email" type="email" placeholder="friend@example.com" required
+          style="width: 100%; height: 42px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: #101914; color: white;">
+      </div>
+
+      <button class="btn btn-gold full-button" type="button" id="send-invite-btn"
+        style="width: 100%; justify-content: center; height: 42px;">
+        Send Invite Email
+      </button>
+
+      <div style="text-align: center; margin: 20px 0; font-size: 12px; color: #7d948a;">OR SHARE CODE</div>
+
+      <div class="invite-code"
+        style="display: flex; justify-content: space-between; align-items: center; background: #101812; padding: 15px; border-radius: 8px; border: 1px dashed #46523a;">
+        <strong id="modal-invite-code"
+          style="color: var(--gold); font-size: 22px; letter-spacing: 2px;">KHULA-8X4P</strong>
+        <button class="text-link" type="button"
+          onclick="navigator.clipboard.writeText('KHULA-8X4P'); alert('Code copied!')" style="font-size: 12px;">Copy
+          Code</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- SCRIPTS -->
   <script src="../scripts/demo-state.js"></script>
   <script src="../scripts/dashboard.bundle.js"></script>
   <script src="../scripts/safe-panel.bundle.js"></script>
@@ -668,6 +711,62 @@
   <script src="../scripts/supabase.js"></script>
   <script src="../scripts/supabase-client.js"></script>
   <script src="../scripts/live-data.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const inviteDialog = document.getElementById('invite-dialog');
+      const openBtn = document.getElementById('open-invite-modal');
+      const sendBtn = document.getElementById('send-invite-btn');
+      const emailInput = document.getElementById('invite-email');
+
+      // 1. Open the modal
+      if (openBtn) {
+        openBtn.addEventListener('click', () => {
+          inviteDialog.showModal();
+        });
+      }
+
+      // 2. Send the email
+      if (sendBtn) {
+        sendBtn.addEventListener('click', async () => {
+          const email = emailInput.value.trim();
+
+          if (!email || !email.includes('@')) {
+            alert("Please enter a valid email address.");
+            return;
+          }
+
+          sendBtn.disabled = true;
+          sendBtn.textContent = "Sending...";
+
+          try {
+            const response = await fetch('/api/send-invite', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: email,
+                stokvelName: document.querySelector('.group-tab.is-selected b').innerText || "Themba Stokvel",
+                inviteCode: document.getElementById('modal-invite-code').innerText
+              })
+            });
+
+            if (!response.ok) throw new Error("Failed to send");
+
+            alert("Invite sent successfully! Check your email.");
+            emailInput.value = "";
+            inviteDialog.close();
+
+          } catch (error) {
+            console.error(error);
+            alert("Error sending invite. Make sure your Node server is running.");
+          } finally {
+            sendBtn.disabled = false;
+            sendBtn.textContent = "Send Invite Email";
+          }
+        });
+      }
+    });
+  </script>
 </body>
 
 </html>

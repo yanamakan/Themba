@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#07150e">
+    <title>Themba · Community Wealth Lab</title>
+    <link rel="stylesheet" href="../extensions/themba-v17/web/theme.css">
+</head>
+
+<body>
+    <div class="shell">
+        <aside class="side" id="side">
+            <div class="brand"><span class="coin">T</span>
+                <div><b>THEMBA</b><small>Community Wealth</small></div>
+            </div>
+            <div class="eyebrow">YOUR WORKSPACE</div>
+            <nav id="nav" aria-label="Feature navigation"><button data-tab="overview" class="active">◈
+                    Overview</button><button data-tab="loans">▤ Loans & guarantors</button><button data-tab="saving">◉
+                    Inflation protection</button><button data-tab="phones">▦ Inclusive access</button><button
+                    data-tab="insurance">♧ Insurance literacy</button><button data-tab="security">◇ Blockchain &
+                    trust</button><button data-tab="business">▥ Business model</button></nav>
+            <button type="button" id="sign-out-btn">Sign out</button>
+            <div class="sidefoot">Demo environment · No money moves</div>
+        </aside>
+        <main>
+            <header><button id="toggle" aria-label="Toggle sidebar" aria-expanded="true">☰</button>
+                <div class="crumb">THEMBA <span>/</span> <strong id="crumb">Overview</strong></div>
+                <div class="toolbar">
+                    <label class="hide-small">View as
+                        <select id="role" class="select role-select" aria-label="Switch dashboard">
+                            <option value="member">Member</option>
+                            <option value="treasurer">Treasurer</option>
+                            <option value="platform_admin">Platform Admin</option>
+                            <option value="insurance" selected>Insurance</option>
+                        </select>
+                    </label>
+
+                    <button id="large">A+</button>
+                </div>
+            </header>
+            <div class="content">
+                <div class="kicker">COMMUNITY FINANCE · SIMULATION</div>
+                <div class="heading">
+                    <div>
+                        <h1 id="heading">Your wealth, together.</h1>
+                        <p id="subtitle">Secure circles. Shared progress. Transparent decisions.</p>
+                    </div><span class="status">● DEMO MODE</span>
+                </div>
+                <div id="page" aria-live="polite"></div>
+                <footer>Illustrative features only. Financial decisions and transfers require regulated, verified
+                    partners and human approval.</footer>
+            </div>
+        </main>
+    </div>
+    <script src="../extensions/themba-v17/web/app.js" defer></script>
+    <script>
+        (function () {
+            const roleSelect = document.getElementById("role");
+            if (!roleSelect) return;
+
+            const destinations = {
+                member: "members-dashboard.html",
+                treasurer: "treasurer-dashboard.html",
+                platform_admin: "platform-admin-dashboard.html",
+                insurance: "insurance-dashboard.html"
+            };
+
+            // Ensure Insurance is selected on this page
+            roleSelect.value = "insurance";
+
+            roleSelect.addEventListener("change", function () {
+                const role = roleSelect.value;
+
+                try {
+                    const raw = localStorage.getItem("themba_session");
+                    const session = raw ? JSON.parse(raw) : {};
+                    session.role = role;
+                    localStorage.setItem("themba_session", JSON.stringify(session));
+                } catch (e) { /* ignore */ }
+
+                if (destinations[role] && role !== "insurance") {
+                    window.location.href = destinations[role];
+                }
+            });
+        })();
+    </script>
+
+    <script src="../extensions/themba-v17/web/app.js" defer></script>
+    <script>
+        (function () {
+            const roleSelect = document.getElementById("role");
+            const signOutBtn = document.getElementById("sign-out-btn");
+
+            if (roleSelect) {
+                roleSelect.value = "insurance";
+                roleSelect.addEventListener("change", function () {
+                    const role = roleSelect.value;
+                    const destinations = {
+                        member: "/dashboards/members-dashboard.html",
+                        treasurer: "/dashboards/treasurer-dashboard.html",
+                        platform_admin: "/dashboards/platform-admin-dashboard.html",
+                        insurance: "/dashboards/insurance-dashboard.html"
+                    };
+                    try {
+                        const raw = localStorage.getItem("themba_session");
+                        const session = raw ? JSON.parse(raw) : {};
+                        session.role = role;
+                        localStorage.setItem("themba_session", JSON.stringify(session));
+                    } catch (e) { }
+                    if (destinations[role] && role !== "insurance") {
+                        window.location.href = destinations[role];
+                    }
+                });
+            }
+
+            if (signOutBtn) {
+                signOutBtn.addEventListener("click", function () {
+                    try {
+                        localStorage.removeItem("themba_session");
+                        sessionStorage.removeItem("themba_session");
+                    } catch (e) { }
+                    window.location.href = "/dashboards/login.html";
+                });
+            }
+        })();
+    </script>
+</body>
+
+</html>
