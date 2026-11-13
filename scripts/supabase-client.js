@@ -64,6 +64,9 @@
         myProfile: async () => read(sb.from("profiles").select("full_name,wallet_address").eq("id", await uid()).maybeSingle()),
         saveWallet: async (address) => { const { error } = await sb.from("profiles").update({ wallet_address: address }).eq("id", await uid()); if (error) throw new Error(error.message); },
         platformOverview: () => rpc("platform_overview", {}),
+        adminDirectory: () => rpc("admin_directory", {}),
+        adminSetMemberFlag: (stokvel, user, flagged) => rpc("admin_set_member_flag", { p_stokvel: stokvel, p_user: user, p_flagged: flagged }),
+        adminRemoveMember: (stokvel, user) => rpc("admin_remove_member", { p_stokvel: stokvel, p_user: user }),
 
         /* ---- reads (RLS limits these to the caller's own stokvels) ---- */
         // RLS lets you read every member of your stokvels, so filter to YOUR OWN membership rows
