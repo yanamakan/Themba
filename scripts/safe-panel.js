@@ -99,11 +99,11 @@ window.ThembaSafe = {
 
     const forms = ready && mode !== "member" ? `
       <div class="safe-forms">
-        <form class="safe-form" data-safe-form="contribute">
+        ${mode === "signer" ? `<form class="safe-form" data-safe-form="contribute">
           <h3>Contribute</h3><small class="safe-muted">Send Mock USDT from your wallet into the pot.</small>
           <input class="input" name="amount" type="number" min="0.000001" step="any" placeholder="Amount (Mock USDT)" required>
           <button class="btn btn-gold" type="submit" ${dis}>Send to the pot</button>
-        </form>
+        </form>` : ""}
         ${isSigner ? `<form class="safe-form" data-safe-form="propose">
           <h3>Propose withdrawal</h3><small class="safe-muted">Needs ${threshold} of ${owners} signers.</small>
           <input class="input" name="to" type="text" placeholder="Recipient 0x…" required>

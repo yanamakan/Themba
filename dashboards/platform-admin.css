@@ -209,7 +209,7 @@
 
 .admin-overview-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(270px, .9fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   margin-top: 14px;
 }
@@ -389,7 +389,7 @@
 
 .admin-shortcuts {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 12px;
 }
@@ -826,6 +826,7 @@
 }
 
 .admin-members-card {
+  overflow: visible;
   padding: 12px 20px;
 }
 .admin-member-row {
@@ -875,6 +876,53 @@
   color: #d4b642;
   background: #302b19;
 }
+.member-status.fraud {
+  min-width: 130px;
+  color: #f0bd83;
+  background: #392719;
+}
+.admin-member-actions {
+  position: relative;
+  flex: 0 0 auto;
+}
+.admin-member-actions .row-open {
+  min-width: 34px;
+}
+.admin-member-menu {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 190px;
+  padding: 5px;
+  background: #142019;
+  border: 1px solid #314238;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
+}
+.admin-member-menu[hidden] {
+  display: none;
+}
+.admin-member-menu button {
+  width: 100%;
+  padding: 9px 10px;
+  color: #d7dfd8;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  font: 9px var(--font-sans);
+}
+.admin-member-menu button:hover,
+.admin-member-menu button:focus-visible {
+  color: #f1cf68;
+  background: #1d2b22;
+  outline: none;
+}
+.admin-member-menu button[data-admin-action="remove-member"] {
+  color: #efa08f;
+}
 
 .admin-stokvel-grid {
   display: grid;
@@ -921,6 +969,69 @@
 .admin-stokvel-card .full-button {
   min-height: 35px;
   margin-top: 5px;
+}
+.stokvel-detail-heading {
+  align-items: flex-end;
+}
+.stokvel-detail-heading .text-link {
+  display: block;
+  margin-bottom: 12px;
+}
+.stokvel-detail-admin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.admin-stokvel-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, .8fr) minmax(0, 1.2fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+.stokvel-detail-card {
+  min-width: 0;
+  padding: 16px;
+}
+.stokvel-detail-members {
+  display: grid;
+  gap: 8px;
+}
+.stokvel-detail-member {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #26342b;
+}
+.stokvel-detail-member:last-child {
+  border-bottom: 0;
+}
+.stokvel-detail-member .row-grow strong,
+.stokvel-detail-member .row-grow small {
+  display: block;
+}
+.stokvel-detail-member .row-grow strong {
+  font-size: 9px;
+}
+.stokvel-detail-member .row-grow small {
+  margin-top: 3px;
+  color: #849489;
+  font-size: 7px;
+}
+.stokvel-detail-member .avatar {
+  width: 32px;
+  height: 32px;
+}
+.stokvel-detail-demo-note {
+  margin-top: 14px;
+  color: #849489;
+  font-size: 9px;
+}
+#stokvel-detail-metrics {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 }
 .admin-settings-card {
   max-width: 760px;
@@ -974,9 +1085,6 @@
     padding-right: 24px;
     padding-left: 24px;
   }
-  .admin-overview-grid {
-    grid-template-columns: minmax(0, 1.25fr) minmax(245px, .85fr);
-  }
   .admin-lower-grid {
     grid-template-columns: 1fr;
   }
@@ -990,7 +1098,8 @@
     width: 240px;
   }
   .admin-overview-grid,
-  .approval-layout {
+  .approval-layout,
+  .admin-stokvel-detail-grid {
     grid-template-columns: 1fr;
   }
   .admin-target {
@@ -1042,6 +1151,9 @@
   .admin-page-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .stokvel-detail-admin {
+    justify-content: flex-start;
     gap: 14px;
   }
   .admin-welcome .btn,
@@ -1131,6 +1243,9 @@
     min-width: unset;
     padding: 5px 7px;
     font-size: 7px;
+  }
+  .member-status.fraud {
+    min-width: unset;
   }
   .admin-member-row .row-open {
     padding: 0;

@@ -28,7 +28,7 @@
       <nav class="side-nav" aria-label="Platform administration">
         <span class="nav-label">Main menu</span>
         <button class="nav-link is-active" type="button" data-admin-page="overview"><span class="nav-icon" data-icon="grid"></span>Overview</button>
-        <button class="nav-link" type="button" data-admin-page="stokvels"><span class="nav-icon" data-icon="users"></span>My Stokvels</button>
+        <button class="nav-link" type="button" data-admin-page="stokvels"><span class="nav-icon" data-icon="users"></span>Stokvels</button>
         <button class="nav-link" type="button" data-admin-page="transactions"><span class="nav-icon" data-icon="transfer"></span>Transactions</button>
         <button class="nav-link" type="button" data-admin-page="approvals"><span class="nav-icon" data-icon="shield"></span>Approvals<span class="nav-badge">3</span></button>
         <span class="nav-label nav-label-account">Management</span>
@@ -62,7 +62,6 @@
         <section class="admin-view is-visible" data-admin-view="overview">
           <div class="admin-welcome">
             <div><span class="eyebrow">Monday, 20 May</span><h1>Good morning, <span data-admin-first-name>Nomsa</span>.</h1><p>Here’s today’s platform overview.</p></div>
-            <button class="btn btn-gold" type="button" data-admin-action="contribution"><span data-icon="plus"></span>Make a contribution</button>
           </div>
           <section class="admin-kpis panel">
             <article><span>Platform overview</span><strong>R 12.8M</strong><small>Total value monitored</small></article>
@@ -75,23 +74,9 @@
               <div class="admin-balance-top"><span class="micro-label">Total group balance <button type="button" class="inline-icon" aria-label="Toggle balance visibility" data-admin-action="toggle-balance"><span data-icon="eye"></span></button></span><span class="wallet-state"><i></i>Wallet not connected</span></div>
               <strong class="admin-balance-value" data-balance="R 48 750,00">R 48 750,00</strong>
               <div class="admin-conversion">≈ 2646.58 DEMO USDT <button type="button" data-admin-action="currency">Switch to USDT</button></div>
-              <div class="admin-contribution-total"><span class="micro-label">Your contributions</span><strong>R 18,500.00</strong></div>
               <button class="button-outline connect-wallet" type="button" data-admin-action="connect-wallet">Connect wallet <span data-icon="arrow"></span></button>
               <div class="admin-coin" aria-hidden="true"><span>T</span></div>
             </section>
-            <section class="admin-target panel">
-              <div class="target-top"><span class="micro-label">Monthly target</span><span class="due-pill">Due in 11 days</span></div>
-              <h2>May contribution</h2>
-              <div class="target-amount"><strong>R 2,500</strong><span>of R 3,000</span></div>
-              <div class="progress-track"><span style="width:83%"></span></div>
-              <div class="target-progress-labels"><span>83% complete</span><span>R 500 remaining</span></div>
-              <button class="button-outline full-button" type="button" data-admin-action="contribution">Complete contribution <span data-icon="arrow"></span></button>
-            </section>
-          </div>
-          <div class="admin-shortcuts">
-            <button class="shortcut" type="button" data-admin-action="contribution"><span data-icon="plus"></span><span><strong>Contribute</strong><small>Add funds to your stokvel</small></span><span class="shortcut-arrow" data-icon="arrow"></span></button>
-            <button class="shortcut" type="button" data-admin-action="loan"><span data-icon="bank"></span><span><strong>Request loan</strong><small>Apply from group funds</small></span><span class="shortcut-arrow" data-icon="arrow"></span></button>
-            <button class="shortcut" type="button" data-admin-action="bill"><span data-icon="receipt"></span><span><strong>Split a bill</strong><small>Share an expense fairly</small></span><span class="shortcut-arrow" data-icon="arrow"></span></button>
           </div>
           <div class="admin-lower-grid">
             <section class="panel admin-recent"><div class="panel-heading"><div><h2>Recent transactions</h2><p>Latest activity across the platform</p></div><button type="button" class="text-link" data-admin-page="transactions">View all <span data-icon="arrow"></span></button></div>
@@ -111,14 +96,14 @@
         </section>
 
         <section class="admin-view" data-admin-view="transactions">
-          <div class="admin-page-heading"><div><span class="eyebrow">Audit trail</span><h1>Transactions</h1><p>Every movement, recorded and transparent.</p></div><button class="btn btn-gold" type="button" data-admin-action="export"><span data-icon="download"></span>Export statement</button></div>
+          <div class="admin-page-heading"><div><span class="eyebrow">Audit trail</span><h1>Transactions</h1><p id="transaction-context">Every movement, recorded and transparent.</p></div><button class="btn btn-gold" type="button" data-admin-action="export"><span data-icon="download"></span>Export statement</button></div>
           <section class="panel admin-table-card">
             <div class="admin-table-controls"><label class="table-search"><span data-icon="search"></span><input type="search" id="transaction-search" placeholder="Search by reference or description" aria-label="Search transactions"></label><div class="admin-filters" aria-label="Filter transactions"><button class="is-selected" type="button" data-filter="all">All</button><button type="button" data-filter="contribution">Contribution</button><button type="button" data-filter="withdrawal">Withdrawal</button><button type="button" data-filter="loan">Loan</button><button type="button" data-filter="bill">Bill payment</button></div></div>
             <div class="admin-table-scroll"><table class="admin-table"><thead><tr><th>Transaction</th><th>Date</th><th>Reference</th><th>Status</th><th>Amount</th><th></th></tr></thead><tbody id="admin-transactions">
-              <tr data-kind="contribution" data-search="monthly contribution ubuntu wealth circle thm-89241"><td><strong>Monthly contribution</strong><small>Ubuntu Wealth Circle</small></td><td>Today, 09:42</td><td>THM-89241</td><td><span class="status status-done">● Completed</span></td><td class="amount-positive">+R 2 500,00</td><td><button class="row-open" type="button" aria-label="View monthly contribution" data-admin-action="transaction-detail">›</button></td></tr>
-              <tr data-kind="withdrawal" data-search="solar installation khula investment club thm-89198"><td><strong>Solar installation</strong><small>Khula Investment Club</small></td><td>Yesterday, 14:18</td><td>THM-89198</td><td><span class="status status-done">● Approved</span></td><td>−R 12 800,00</td><td><button class="row-open" type="button" aria-label="View solar installation" data-admin-action="transaction-detail">›</button></td></tr>
-              <tr data-kind="bill" data-search="grocery collective sisonke savings thm-89172"><td><strong>Grocery collective</strong><small>Sisonke Savings</small></td><td>18 May, 11:06</td><td>THM-89172</td><td><span class="status status-pending">● Pending</span></td><td>−R 8 600,00</td><td><button class="row-open" type="button" aria-label="View grocery collective" data-admin-action="transaction-detail">›</button></td></tr>
-              <tr data-kind="loan" data-search="loan repayment ubuntu wealth circle thm-89064"><td><strong>Loan repayment</strong><small>Ubuntu Wealth Circle</small></td><td>15 May, 08:30</td><td>THM-89064</td><td><span class="status status-done">● Completed</span></td><td class="amount-positive">+R 1 250,00</td><td><button class="row-open" type="button" aria-label="View loan repayment" data-admin-action="transaction-detail">›</button></td></tr>
+              <tr data-stokvel-id="ubuntu-wealth-circle" data-kind="contribution" data-search="monthly contribution ubuntu wealth circle thm-89241"><td><strong>Monthly contribution</strong><small>Ubuntu Wealth Circle</small></td><td>Today, 09:42</td><td>THM-89241</td><td><span class="status status-done">● Completed</span></td><td class="amount-positive">+R 2 500,00</td><td><button class="row-open" type="button" aria-label="View monthly contribution" data-admin-action="transaction-detail">›</button></td></tr>
+              <tr data-stokvel-id="khula-investment-club" data-kind="withdrawal" data-search="solar installation khula investment club thm-89198"><td><strong>Solar installation</strong><small>Khula Investment Club</small></td><td>Yesterday, 14:18</td><td>THM-89198</td><td><span class="status status-done">● Approved</span></td><td>−R 12 800,00</td><td><button class="row-open" type="button" aria-label="View solar installation" data-admin-action="transaction-detail">›</button></td></tr>
+              <tr data-stokvel-id="sisonke-savings" data-kind="bill" data-search="grocery collective sisonke savings thm-89172"><td><strong>Grocery collective</strong><small>Sisonke Savings</small></td><td>18 May, 11:06</td><td>THM-89172</td><td><span class="status status-pending">● Pending</span></td><td>−R 8 600,00</td><td><button class="row-open" type="button" aria-label="View grocery collective" data-admin-action="transaction-detail">›</button></td></tr>
+              <tr data-stokvel-id="ubuntu-wealth-circle" data-kind="loan" data-search="loan repayment ubuntu wealth circle thm-89064"><td><strong>Loan repayment</strong><small>Ubuntu Wealth Circle</small></td><td>15 May, 08:30</td><td>THM-89064</td><td><span class="status status-done">● Completed</span></td><td class="amount-positive">+R 1 250,00</td><td><button class="row-open" type="button" aria-label="View loan repayment" data-admin-action="transaction-detail">›</button></td></tr>
             </tbody></table></div>
             <p class="empty-state" id="transaction-empty" hidden>No transactions match your search.</p>
           </section>
@@ -141,26 +126,26 @@
               <div class="signer-row"><span class="avatar">TD</span><span class="row-grow"><strong>Thabo Dlamini</strong><small>Cannot approve</small></span><span class="signer-initiator">Initiator</span></div>
             </section>
           </div>
-          <div id="safe-panel" data-safe-mode="signer"></div>
+          <div id="safe-panel" data-safe-mode="admin"></div>
         </section>
 
         <section class="admin-view" data-admin-view="members">
-          <div class="admin-page-heading"><div><span class="eyebrow">Ubuntu Wealth Circle</span><h1>Members</h1><p>24 people building wealth together.</p></div><button class="btn btn-gold" type="button" data-admin-action="copy-invite"><span data-icon="copy"></span>Copy invite code</button></div>
+          <div class="admin-page-heading"><div><span class="eyebrow" id="members-stokvel-name">Ubuntu Wealth Circle</span><h1>Members</h1><p id="members-context">Manage members and review potential fraud. Changes are saved in this browser demo only.</p></div><button class="btn btn-gold" type="button" data-admin-action="copy-invite"><span data-icon="copy"></span>Copy invite code</button></div>
           <section class="panel admin-members-card"><div class="admin-members-list" id="admin-members-list">
-            <div class="admin-member-row" data-search="nomsa mthembu treasurer"><span class="avatar avatar-admin-round">NM</span><span class="row-grow"><strong>Nomsa Mthembu</strong><small>Treasurer</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 18,500</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions" data-admin-action="member-menu">···</button></div>
-            <div class="admin-member-row" data-search="lerato molefe administrator"><span class="avatar avatar-purple">LM</span><span class="row-grow"><strong>Lerato Molefe</strong><small>Administrator</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 21,000</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions" data-admin-action="member-menu">···</button></div>
-            <div class="admin-member-row" data-search="thabo dlamini member"><span class="avatar">TD</span><span class="row-grow"><strong>Thabo Dlamini</strong><small>Member</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 16,750</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions" data-admin-action="member-menu">···</button></div>
-            <div class="admin-member-row" data-search="zanele nkosi member"><span class="avatar avatar-purple">ZN</span><span class="row-grow"><strong>Zanele Nkosi</strong><small>Member</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 19,250</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions" data-admin-action="member-menu">···</button></div>
-            <div class="admin-member-row" data-search="sipho khumalo member"><span class="avatar">SK</span><span class="row-grow"><strong>Sipho Khumalo</strong><small>Member</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 17,500</strong></span><span class="member-status pending">● Pending</span><button class="row-open" type="button" aria-label="Member actions" data-admin-action="member-menu">···</button></div>
+            <div class="admin-member-row" data-stokvel-id="ubuntu-wealth-circle" data-member-id="admin-member-nomsa-mthembu" data-search="nomsa mthembu treasurer"><span class="avatar avatar-admin-round">NM</span><span class="row-grow"><strong>Nomsa Mthembu</strong><small>Treasurer</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 18,500</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions for Nomsa Mthembu" aria-expanded="false" data-admin-action="member-menu">···</button></div>
+            <div class="admin-member-row" data-stokvel-id="ubuntu-wealth-circle" data-member-id="admin-member-lerato-molefe" data-search="lerato molefe administrator"><span class="avatar avatar-purple">LM</span><span class="row-grow"><strong>Lerato Molefe</strong><small>Administrator</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 21,000</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions for Lerato Molefe" aria-expanded="false" data-admin-action="member-menu">···</button></div>
+            <div class="admin-member-row" data-stokvel-id="ubuntu-wealth-circle" data-member-id="admin-member-thabo-dlamini" data-search="thabo dlamini member"><span class="avatar">TD</span><span class="row-grow"><strong>Thabo Dlamini</strong><small>Member</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 16,750</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions for Thabo Dlamini" aria-expanded="false" data-admin-action="member-menu">···</button></div>
+            <div class="admin-member-row" data-stokvel-id="ubuntu-wealth-circle" data-member-id="admin-member-zanele-nkosi" data-search="zanele nkosi member"><span class="avatar avatar-purple">ZN</span><span class="row-grow"><strong>Zanele Nkosi</strong><small>Member</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 19,250</strong></span><span class="member-status active">● Active</span><button class="row-open" type="button" aria-label="Member actions for Zanele Nkosi" aria-expanded="false" data-admin-action="member-menu">···</button></div>
+            <div class="admin-member-row" data-stokvel-id="ubuntu-wealth-circle" data-member-id="admin-member-sipho-khumalo" data-search="sipho khumalo member"><span class="avatar">SK</span><span class="row-grow"><strong>Sipho Khumalo</strong><small>Member</small></span><span class="member-contribution"><small>Total contributed</small><strong>R 17,500</strong></span><span class="member-status pending">● Pending</span><button class="row-open" type="button" aria-label="Member actions for Sipho Khumalo" aria-expanded="false" data-admin-action="member-menu">···</button></div>
           </div><p class="empty-state" id="member-empty" hidden>No members match your search.</p></section>
         </section>
 
         <section class="admin-view" data-admin-view="stokvels">
-          <div class="admin-page-heading"><div><span class="eyebrow">Community management</span><h1>My Stokvels</h1><p>Monitor group balances, membership and verification across the platform.</p></div><button class="btn btn-gold" type="button" data-admin-action="create-stokvel"><span data-icon="plus"></span>Create stokvel</button></div>
+          <div class="admin-page-heading"><div><span class="eyebrow">Community management</span><h1>Stokvels</h1><p>Monitor group balances, membership and verification across the platform.</p></div><button class="btn btn-gold" type="button" data-admin-action="create-stokvel"><span data-icon="plus"></span>Create stokvel</button></div>
           <div class="admin-stokvel-grid">
-            <article class="panel admin-stokvel-card"><div><span class="avatar avatar-admin">UW</span><span class="member-status active">Verified</span></div><h2>Ubuntu Wealth Circle</h2><p>Johannesburg · Monthly savings</p><div class="stokvel-metrics"><span><small>Balance</small><strong>R 48,750</strong></span><span><small>Members</small><strong>24</strong></span></div><button class="button-outline full-button" type="button" data-admin-action="select-stokvel">Manage stokvel <span data-icon="arrow"></span></button></article>
-            <article class="panel admin-stokvel-card"><div><span class="avatar avatar-purple">KC</span><span class="member-status active">Verified</span></div><h2>Khula Investment Club</h2><p>Cape Town · Investment group</p><div class="stokvel-metrics"><span><small>Balance</small><strong>R 126,400</strong></span><span><small>Members</small><strong>18</strong></span></div><button class="button-outline full-button" type="button" data-admin-action="select-stokvel">Manage stokvel <span data-icon="arrow"></span></button></article>
-            <article class="panel admin-stokvel-card"><div><span class="avatar">SS</span><span class="member-status pending">Review</span></div><h2>Sisonke Savings</h2><p>Durban · Community savings</p><div class="stokvel-metrics"><span><small>Balance</small><strong>R 72,850</strong></span><span><small>Members</small><strong>32</strong></span></div><button class="button-outline full-button" type="button" data-admin-action="select-stokvel">Review stokvel <span data-icon="arrow"></span></button></article>
+            <article class="panel admin-stokvel-card" data-stokvel-id="ubuntu-wealth-circle"><div><span class="avatar avatar-admin">UW</span><span class="member-status active">Verified</span></div><h2>Ubuntu Wealth Circle</h2><p>Johannesburg · Monthly savings</p><div class="stokvel-metrics"><span><small>Balance</small><strong>R 48,750</strong></span><span><small>Members</small><strong>24</strong></span></div><button class="button-outline full-button" type="button" data-admin-action="select-stokvel">Manage stokvel <span data-icon="arrow"></span></button></article>
+            <article class="panel admin-stokvel-card" data-stokvel-id="khula-investment-club"><div><span class="avatar avatar-purple">KC</span><span class="member-status active">Verified</span></div><h2>Khula Investment Club</h2><p>Cape Town · Investment group</p><div class="stokvel-metrics"><span><small>Balance</small><strong>R 126,400</strong></span><span><small>Members</small><strong>18</strong></span></div><button class="button-outline full-button" type="button" data-admin-action="select-stokvel">Manage stokvel <span data-icon="arrow"></span></button></article>
+            <article class="panel admin-stokvel-card" data-stokvel-id="sisonke-savings"><div><span class="avatar">SS</span><span class="member-status pending">Review</span></div><h2>Sisonke Savings</h2><p>Durban · Community savings</p><div class="stokvel-metrics"><span><small>Balance</small><strong>R 72,850</strong></span><span><small>Members</small><strong>32</strong></span></div><button class="button-outline full-button" type="button" data-admin-action="select-stokvel">Review stokvel <span data-icon="arrow"></span></button></article>
           </div>
           <form id="admin-create-stokvel-form" class="panel admin-settings-form" hidden>
             <h2>Create a local demo stokvel</h2>
@@ -170,6 +155,19 @@
             <label>Monthly contribution (R)<input class="input" name="amount" type="number" min="1" step="1" required></label>
             <button class="btn btn-gold" type="submit">Save demo stokvel</button>
           </form>
+        </section>
+
+        <section class="admin-view" data-admin-view="stokvel-detail">
+          <div class="admin-page-heading stokvel-detail-heading">
+            <div><button class="text-link" type="button" data-admin-page="stokvels">← All stokvels</button><span class="eyebrow" id="stokvel-detail-location"></span><h1 id="stokvel-detail-name"></h1><p id="stokvel-detail-description"></p></div>
+            <div class="stokvel-detail-admin"><span class="member-status" id="stokvel-detail-status"></span><button class="button-outline" type="button" data-admin-action="toggle-stokvel-review" id="stokvel-review-button"></button></div>
+          </div>
+          <div class="admin-kpis panel" id="stokvel-detail-metrics"></div>
+          <div class="admin-stokvel-detail-grid">
+            <section class="panel stokvel-detail-card"><div class="panel-heading"><div><h2>Members</h2><p>Available member records for this stokvel</p></div><button class="text-link" type="button" data-admin-action="manage-stokvel-members">Manage members <span data-icon="arrow"></span></button></div><div class="stokvel-detail-members" id="stokvel-detail-members"></div><p class="empty-state" id="stokvel-detail-members-empty" hidden></p></section>
+            <section class="panel stokvel-detail-card"><div class="panel-heading"><div><h2>Transactions</h2><p>Available transactions for this stokvel</p></div><button class="text-link" type="button" data-admin-action="view-stokvel-transactions">View all <span data-icon="arrow"></span></button></div><div class="admin-table-scroll"><table class="admin-table"><thead><tr><th>Transaction</th><th>Date</th><th>Reference</th><th>Status</th><th>Amount</th><th></th></tr></thead><tbody id="stokvel-detail-transactions"></tbody></table></div><p class="empty-state" id="stokvel-detail-transactions-empty" hidden></p></section>
+          </div>
+          <p class="demo-info stokvel-detail-demo-note">Stokvel management data and status changes are browser-demo only and are not shared with platform members.</p>
         </section>
 
         <section class="admin-view" data-admin-view="settings">
