@@ -15,6 +15,9 @@
     insurance: "insurance-dashboard.html"
   };
   const page = document.body.dataset.page; // "login" | "signup"
+  // Capture invite links before DOMContentLoaded, preserving the invite for existing accounts.
+  const fromInviteLink = new URLSearchParams(window.location.search).get('invite');
+  if (fromInviteLink && fromInviteLink.trim()) sessionStorage.setItem('pending_invite', fromInviteLink.trim());
   const sb = window.ThembaSupabase || null; // set by supabase-client.js when config.js is filled in; otherwise demo mode
   const liveConfigured = !!((window.THEMBA_CONFIG || {}).SUPABASE_URL && (window.THEMBA_CONFIG || {}).SUPABASE_ANON_KEY);
   const libraryMissing = liveConfigured && !sb; // keys are set but the Supabase library did not load: never fall back to demo silently
@@ -206,6 +209,37 @@
     return { name, email: user.email, role, userId: user.id };
   }
 
+  // Use the authenticated identity already in Supabase; never create an account just to join.
+  let redeemingInvite = null;
+  async function redeemPendingInvite() {
+    if (redeemingInvite) return redeemingInvite;
+    const token = (sessionStorage.getItem('pending_invite') || '').trim();
+    if (!token) return true;
+    redeemingInvite = (async () => {
+      try {
+        const { data, error } = await sb.rpc('accept_invite', { p_token: token });
+        if (error) throw error;
+        if (data === false || (data && typeof data === 'object' && data.ok === false)) throw new Error('Invitation was not accepted.');
+        sessionStorage.removeItem('pending_invite');
+        toast('Invitation accepted. Your existing account is now linked to this stokvel.', 'success', 5000);
+        return true;
+      } catch (error) {
+        toast('Signed in, but the invitation could not be accepted: ' + error.message + '. You can retry using the same code.', 'error', 8000);
+        return false;
+      } finally { redeemingInvite = null; }
+    })();
+    return redeemingInvite;
+  }
+
+  // Already authenticated? Directly redeem, then show the existing dashboard.
+  if (sb && (page === 'login' || page === 'signup')) {
+    sb.auth.getSession().then(async ({ data }) => {
+      if (!data || !data.session || !sessionStorage.getItem('pending_invite')) return;
+      await redeemPendingInvite();
+      goToDashboard(await buildSession(data.session.user), true);
+    }).catch((error) => console.error('Could not process invitation:', error));
+  }
+
   async function realSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
@@ -215,7 +249,8 @@
     const idleLabel = page === "signup" ? "Create secure account" : "Sign in securely";
 
     // Get the invite code if they entered one
-    const inviteCode = els.invite ? els.invite.value.trim() : "";
+    const inviteCode = (els.invite ? els.invite.value.trim() : "") || (sessionStorage.getItem("pending_invite") || "").trim();
+    if (inviteCode) sessionStorage.setItem('pending_invite', inviteCode);
 
     try {
       if (page === "signup") {
@@ -230,7 +265,7 @@
               intended_role: els.role.value === "treasurer" ? "treasurer" : "member",
               invite_code: inviteCode || null
             },
-            emailRedirectTo: window.location.origin + "/dashboards/login.html"
+            emailRedirectTo: window.location.origin + '/dashboards/login.html' + (inviteCode ? '?invite=' + encodeURIComponent(inviteCode) : '')
           }
         });
         if (error) throw error;
@@ -239,6 +274,7 @@
           setLoading(els.submit, false, idleLabel);
           return;
         }
+        await redeemPendingInvite();
         goToDashboard(await buildSession(data.user), true);
         return;
       }
@@ -248,27 +284,7 @@
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      // Check if there is a pending invite from the URL/sessionStorage
-      const pendingInvite = sessionStorage.getItem('pending_invite');
-      if (pendingInvite) {
-        try {
-          // Call the SQL function we created in Supabase
-          const { data: joinData, error: joinError } = await sb.rpc('join_stokvel_with_code', {
-            p_code: pendingInvite
-          });
-
-          if (!joinError && joinData && joinData.startsWith('Successfully')) {
-            toast(joinData, "success", 5000);
-          } else {
-            console.error("Failed to join stokvel:", joinData || joinError);
-          }
-        } catch (rpcErr) {
-          console.error("RPC Error:", rpcErr);
-        } finally {
-          // Always clear the code so it doesn't try to join again next time they log in
-          sessionStorage.removeItem('pending_invite');
-        }
-      }
+      await redeemPendingInvite();
 
       goToDashboard(await buildSession(data.user), remember);
 
@@ -289,6 +305,10 @@
     const role = els.role.value;
     const remember = els.remember ? els.remember.checked : true;
     const users = loadUsers();
+    if (page === 'login' && sessionStorage.getItem('pending_invite')) {
+      toast('A live connection is required to accept stokvel invitations. Please sign in when Supabase is available.', 'error', 7000);
+      return;
+    }
 
     if (page === "signup") {
       if (users.some((u) => u.email === email)) {

@@ -131,7 +131,7 @@
           </button>
         </form>
 
-        <p class="auth-switch">Already have an account? <a href="login.html">Sign in</a></p>
+        <p class="auth-switch">Already have an account? <a id="existing-account-login" href="login.html">Sign in to join the stokvel</a></p>
       </div>
     </section>
 
@@ -162,6 +162,9 @@
           input.style.borderColor = 'var(--gold)';
         }
       }
+      const existingLogin = document.getElementById('existing-account-login');
+      const pending = sessionStorage.getItem('pending_invite');
+      if (existingLogin && pending) existingLogin.href = 'login.html?invite=' + encodeURIComponent(pending);
     });
   </script>
 

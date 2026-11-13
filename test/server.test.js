@@ -135,3 +135,15 @@ test("the server serves dashboard pages, styles, and scripts from their folders"
     assert.equal(response.status, 200, resource);
   }
 });
+
+test('legacy login and signup redirects retain invitation tokens', async () => {
+  for (const page of ['login', 'signup']) {
+    const response = await fetch(`${baseUrl}/${page}.html?invite=abc%2B123`, {redirect:'manual'});
+    assert.equal(response.status, 302);
+    assert.equal(response.headers.get('location'), `/dashboards/${page}.html?invite=abc%2B123`);
+  }
+});
+test('legacy unauthenticated email endpoint cannot send invitations', async () => {
+  const response = await fetch(`${baseUrl}/api/send-invite`, {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:'someone@example.com',inviteCode:'123'})});
+  assert.equal(response.status, 503);
+});

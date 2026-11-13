@@ -146,7 +146,7 @@
       signupLinks.forEach(link => {
         const savedInvite = sessionStorage.getItem('pending_invite');
         if (savedInvite) {
-          link.href = `signup.html?invite=${savedInvite}`;
+          link.href = `signup.html?invite=${encodeURIComponent(savedInvite)}`;
         }
       });
     });

@@ -21,7 +21,21 @@
         window.location.href = "login.html";
         return;
     }
-    if (window.ThembaBindUser) window.ThembaBindUser(session.user.id);   // writes from this tab must run as the user it shows
+    if (window.ThembaBindUser) window.ThembaBindUser(session.user.id);
+    // Accept invites for signed-in users without registering twice.
+    const tokenFromLink = new URLSearchParams(window.location.search).get('invite');
+    const pendingInvite = (tokenFromLink || sessionStorage.getItem('pending_invite') || '').trim();
+    if (pendingInvite) {
+        sessionStorage.setItem('pending_invite', pendingInvite);
+        try {
+            const { data, error } = await sb.rpc('accept_invite', { p_token: pendingInvite });
+            if (error) throw error;
+            if (data === false || (data && typeof data === 'object' && data.ok === false)) throw Error('Invitation not accepted');
+            sessionStorage.removeItem('pending_invite');
+        } catch (error) {
+            banner('Could not accept invitation: ' + error.message + '. The code is saved so you can retry.');
+        }
+    }
 
     const $ = (s, r = document) => r.querySelector(s);
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -490,8 +504,8 @@
         const list = h("div", "member-list");
         S.members.forEach((m) => list.append(kids(h("div", "member-row"), h("span", "avatar", initials(name(m.user_id))), kids(h("span", "row-grow"), h("strong", null, name(m.user_id)), h("small", null, m.role + (m.is_signer ? " · signer" : ""))), btn(m.is_signer ? "Remove signer" : "Make signer", "text-link", () => run(() => api.setSigner(S.sid, m.user_id, !m.is_signer), "Signers updated")))));
         p.append(list, btn(S.st.require_onchain_release ? "Strict on-chain mode: ON (turn off)" : "Require on-chain release (strict mode)", "button-outline", () => run(() => api.setOnchainRelease(S.sid, !S.st.require_onchain_release), "Setting updated")), btn("Invite a member", "button-outline", async () => openForm({
-            eyebrow: "Invite", title: "Invite a member", desc: "They must sign up with this exact email. The invite lasts 7 days.", fields: [{ name: "email", label: "Their email", type: "email" }], submit: "Create invite code",
-            onSubmit: async (v) => { const token = await api.inviteMember(S.sid, v.email); try { await navigator.clipboard.writeText(token); } catch (e) { /* clipboard not available */ } toast("Invite code copied: " + token, "success"); window.prompt("Send this invite code to " + v.email, token); }
+            eyebrow: "Invite", title: "Invite a member", desc: "Invitations are for this email and expire after 7 days. Existing members sign in; new members sign up.", fields: [{ name: "email", label: "Their email", type: "email" }], submit: "Create invite code",
+            onSubmit: async (v) => { const token = await api.inviteMember(S.sid, v.email.trim().toLowerCase()); const link = new URL('login.html', window.location.href); link.searchParams.set('invite', token); try { await navigator.clipboard.writeText(link.href); } catch (e) { /* clipboard optional */ } toast('Invitation link ready. Share it privately with ' + v.email, 'success'); window.prompt('Share this invitation link privately:', link.href); }
         })));
         return p;
     }

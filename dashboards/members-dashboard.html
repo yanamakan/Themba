@@ -676,7 +676,7 @@
       <span class="eyebrow">Grow your stokvel</span>
       <h2 id="invite-title" style="font-family: var(--font-display); font-size: 22px; margin-bottom: 10px;">Invite a
         Member</h2>
-      <p style="color: #7d948a; margin-bottom: 20px; font-size: 14px;">Send a secure invite link via email.</p>
+      <p style="color: #7d948a; margin-bottom: 20px; font-size: 14px;">Generate an authenticated invitation link for a new or existing member. Share the link privately.</p>
 
       <div class="field" style="margin-bottom: 20px;">
         <label for="invite-email"
@@ -687,7 +687,7 @@
 
       <button class="btn btn-gold full-button" type="button" id="send-invite-btn"
         style="width: 100%; justify-content: center; height: 42px;">
-        Send Invite Email
+        Generate Invite Link
       </button>
 
       <div style="text-align: center; margin: 20px 0; font-size: 12px; color: #7d948a;">OR SHARE CODE</div>
@@ -728,7 +728,8 @@
 
       // 2. Send the email
       if (sendBtn) {
-        sendBtn.addEventListener('click', async () => {
+        sendBtn.addEventListener('click', async (event) => {
+            event.stopImmediatePropagation();
           const email = emailInput.value.trim();
 
           if (!email || !email.includes('@')) {
@@ -740,30 +741,26 @@
           sendBtn.textContent = "Sending...";
 
           try {
-            const response = await fetch('/api/send-invite', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: email,
-                stokvelName: document.querySelector('.group-tab.is-selected b').innerText || "Themba Stokvel",
-                inviteCode: document.getElementById('modal-invite-code').innerText
-              })
-            });
-
-            if (!response.ok) throw new Error("Failed to send");
-
-            alert("Invite sent successfully! Check your email.");
-            emailInput.value = "";
+            if (!window.ThembaAPI || !window.ThembaSupabase) throw Error('Live sign-in is required to create invitations.');
+            const memberships = await window.ThembaAPI.myStokvels();
+            const selected = localStorage.getItem('themba_live_stokvel');
+            const membership = memberships.find(m => m.stokvels && m.stokvels.id === selected) || (memberships.length === 1 ? memberships[0] : null);
+            if (!membership || !membership.stokvels || !['treasurer', 'chairperson'].includes(membership.role)) throw Error('Select a stokvel where you are treasurer or chairperson.');
+            const token = await window.ThembaAPI.inviteMember(membership.stokvels.id, email.toLowerCase());
+            const link = new URL('login.html', window.location.href);
+            link.searchParams.set('invite', token);
+            try { await navigator.clipboard.writeText(link.href); } catch (e) { /* clipboard can be blocked */ }
+            window.prompt('Share this private invitation link with ' + email + ':', link.href);
+            emailInput.value = '';
             inviteDialog.close();
-
           } catch (error) {
             console.error(error);
-            alert("Error sending invite. Make sure your Node server is running.");
+            alert(error.message || 'Could not create the invitation.');
           } finally {
             sendBtn.disabled = false;
-            sendBtn.textContent = "Send Invite Email";
+            sendBtn.textContent = "Generate Invite Link";
           }
-        });
+        }, true);
       }
     });
   </script>
