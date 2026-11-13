@@ -103,7 +103,7 @@
     async function refresh() {
         if (busy) { again = true; return; }
         busy = true;
-        try { await loadStokvels(); if (!S.profile) S.profile = await api.myProfile().catch(() => null); renderProfile(); if (S.sid && ensureDashboard()) return; if (S.sid) await loadData(); render(); } catch (e) { console.error(e); toast(e.message || "Could not load live data", "error"); }
+        try { await loadStokvels(); if (!S.profile) S.profile = await api.myProfile().catch(() => null); renderProfile(); if (S.sid && ensureDashboard()) return; if (S.sid) await loadData(); render(); ensureSubscription(); } catch (e) { console.error(e); toast(e.message || "Could not load live data", "error"); }
         busy = false; if (again) { again = false; refresh(); } else syncSafe(false);
     }
 
@@ -111,6 +111,9 @@
     function ensureDashboard() {
         const wantTreasurer = isAdmin();
         if (wantTreasurer === TREAS) return false;
+        // A treasurer who chose "View as Member" is allowed to stay on the member dashboard.
+        let viewAs = null; try { viewAs = sessionStorage.getItem("themba_view_as"); } catch (e) { /* storage unavailable */ }
+        if (wantTreasurer && !TREAS && viewAs === "member") return false;
         for (const storage of [localStorage, sessionStorage]) {
             try { const raw = storage.getItem("themba_session"); if (raw) { const s = JSON.parse(raw); s.role = wantTreasurer ? "treasurer" : "member"; storage.setItem("themba_session", JSON.stringify(s)); } } catch (e) { /* storage unavailable */ }
         }
@@ -206,6 +209,25 @@
             eyebrow: "Your communities", title: "Switch stokvel", desc: "Choose the stokvel you want to see.", submit: "Switch",
             fields: [{ name: "sid", label: "Stokvel", options: S.stokvels.map((m) => [m.stokvels.id, `${m.stokvels.name} · ${m.role}`]), value: S.sid }],
             onSubmit: async (v) => { try { localStorage.setItem("themba_live_stokvel", v.sid); } catch (e) { /* storage unavailable */ } }
+        });
+    }
+
+    function createStokvelDialog() {
+        openForm({
+            eyebrow: "New stokvel", title: "Create your stokvel", desc: "You will be its treasurer and first signer. Nobody else is added until you invite them.",
+            fields: [{ name: "name", label: "Stokvel name" }, { name: "monthly", label: "Monthly contribution (USDT)", type: "number", step: "0.01", min: 0, value: 100 }],
+            submit: "Create stokvel",
+            onSubmit: async (v) => {
+                const before = new Set(S.stokvels.map((m) => m.stokvels.id));
+                await api.createStokvel(v.name.trim(), Number(v.monthly));
+                const after = await api.myStokvels();
+                const fresh = after.find((m) => m.stokvels && !before.has(m.stokvels.id));
+                try {
+                    if (fresh) localStorage.setItem("themba_live_stokvel", fresh.stokvels.id);   // open the new stokvel
+                    sessionStorage.removeItem("themba_view_as");   // its creator is its treasurer, so go to that dashboard
+                } catch (e) { /* storage unavailable */ }
+                toast("Stokvel created", "success");
+            }
         });
     }
 
@@ -747,6 +769,8 @@
         if (b && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); TREAS ? logCash() : makeContribution(); return; }
         const gt = e.target.closest(".group-tab[data-sid]");
         if (gt) { e.preventDefault(); e.stopImmediatePropagation(); if (gt.dataset.sid !== S.sid) { try { localStorage.setItem("themba_live_stokvel", gt.dataset.sid); } catch (err) { /* storage unavailable */ } refresh(); } return; }
+        const cs = e.target.closest('[data-action="create-stokvel"]');
+        if (cs) { e.preventDefault(); e.stopImmediatePropagation(); createStokvelDialog(); return; }
         const sw = e.target.closest('[data-action="switch-group"], [data-action="stokvel"]');
         if (sw && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); switchStokvel(); return; }
         const so = e.target.closest('[data-action="sign-out"]');
@@ -758,8 +782,15 @@
         const bb = e.target.closest('[data-action="bill"]');
         if (bb && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); billDialog(); }
     }, true);
+
+    document.addEventListener("change", (e) => {   // remember an explicit "View as" choice so ensureDashboard() doesn't undo it
+        if (!e.target || !e.target.matches("#role-select, #treasurer-role")) return;
+        try { sessionStorage.setItem("themba_view_as", e.target.value); } catch (err) { /* storage unavailable */ }
+    }, true);
+
     async function signOutEverywhere() {   // end the real Supabase session too, not just the demo one
         try { await sb.auth.signOut(); } catch (e) { /* still leave */ }
+        try { sessionStorage.removeItem("themba_view_as"); } catch (e) { /* ignore */ }
         for (const storage of [localStorage, sessionStorage]) { try { storage.removeItem("themba_session"); } catch (e) { /* ignore */ } }
         window.location.href = "login.html";
     }
@@ -777,11 +808,15 @@
         }
     });
 
-    await refresh();
-    if (S.sid) {
-        let t; api.subscribe(S.sid, (table, p) => {
+    let unsubscribe = null, subscribedSid = null, refreshTimer;
+    function ensureSubscription() {   // follow whichever stokvel is active
+        if (!S.sid || S.sid === subscribedSid) return;
+        if (unsubscribe) unsubscribe();
+        subscribedSid = S.sid;
+        unsubscribe = api.subscribe(S.sid, (table, p) => {
             if (table === "alerts" && p.eventType === "INSERT" && p.new) toast("Alert: " + p.new.message, "error");
-            clearTimeout(t); t = setTimeout(refresh, 300);
+            clearTimeout(refreshTimer); refreshTimer = setTimeout(refresh, 300);
         });
     }
+    await refresh();
 })();

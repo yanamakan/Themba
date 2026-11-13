@@ -293,6 +293,45 @@ import { contributeToSafe, proposeTransfer, explorerTx, describeError } from "./
     document.querySelector(".sidebar-profile small").textContent = role === "member" ? "Community member" : role[0].toUpperCase() + role.slice(1);
   }
 
+  function renderGroupMembers(groupId) {
+    const list = document.querySelector('.page-view[data-view="stokvels"] .group-details-grid .member-list');
+    const stack = document.querySelector(".group-balance .member-stack");
+    if (!list || !stack) return;
+    if (list.dataset.defaultHtml === undefined) {
+      list.dataset.defaultHtml = list.innerHTML;
+      stack.dataset.defaultHtml = stack.innerHTML;
+    }
+    const customGroup = demo.list("stokvels").find((group) => group.id === groupId);
+    if (!customGroup) {
+      list.innerHTML = list.dataset.defaultHtml;
+      stack.innerHTML = stack.dataset.defaultHtml;
+      applyProfile();
+      return;
+    }
+    const session = readSession() || {};
+    const name = session.name || "Lethabo Mokoena";
+    const row = document.createElement("div");
+    row.className = "member-row";
+    const avatar = document.createElement("span");
+    avatar.className = "avatar";
+    avatar.textContent = initials(name);
+    const details = document.createElement("span");
+    details.className = "row-grow";
+    const strong = document.createElement("strong");
+    strong.textContent = name;
+    const small = document.createElement("small");
+    small.textContent = "Creator";
+    details.append(strong, small);
+    const status = document.createElement("span");
+    status.className = "verified";
+    status.textContent = "Verified";
+    row.append(avatar, details, status);
+    list.replaceChildren(row);
+    const me = document.createElement("span");
+    me.textContent = initials(name);
+    stack.replaceChildren(me);
+  }
+
   function showToast(message, type = "info", href = null) {
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
@@ -433,6 +472,7 @@ import { contributeToSafe, proposeTransfer, explorerTx, describeError } from "./
       if (customGroup) {
         document.querySelector("#group-balance-value").textContent = "R 0";
         document.querySelector("#group-balance-caption").textContent = `${customGroup.name} · Local demo group`;
+        renderGroupMembers(activeGroup);
       }
 
       const memberVote = demo.list("approvals").find((record) => record.id === "member-venue-request");
@@ -450,7 +490,7 @@ import { contributeToSafe, proposeTransfer, explorerTx, describeError } from "./
           memberButton.disabled = true;
         }
         const membersList = document.querySelector('.page-view[data-view="stokvels"] .member-list');
-        if (membersList && !Array.from(membersList.querySelectorAll(".member-row strong")).some((name) => name.textContent === "Zinhle Ngwenya")) {
+        if (membersList && !customGroup && !Array.from(membersList.querySelectorAll(".member-row strong")).some((name) => name.textContent === "Zinhle Ngwenya")) {
           const row = document.createElement("div");
           row.className = "member-row";
           const avatar = document.createElement("span");
@@ -513,31 +553,52 @@ import { contributeToSafe, proposeTransfer, explorerTx, describeError } from "./
   }
 
   function openDialog(action) {
+    console.log("Opening dialog:", action);
+
     const definition = dialogDefinitions[action];
-    if (!definition) return;
-    currentDialog = action;
-    const fields = action === "receive"
-      ? `<label>Your wallet address<input class="input" name="address" value="${walletAccount || ""}" readonly></label>`
-      : definition.fields;
-    dialogContent.innerHTML = `<div class="dialog-content"><span class="eyebrow">${definition.eyebrow}</span><h2 id="dialog-title">${definition.title}</h2><p>${definition.description}</p>${fields !== null ? `<form id="action-form"><div class="dialog-fields">${fields}</div>${definition.button ? `<button class="btn btn-gold dialog-submit" type="submit">${definition.button}</button>` : ""}<p class="dialog-disclaimer">${definition.disclaimer || "Browser-only demo · Not shared with other users"}</p></form>` : ""}</div>`;
-    if (action === "switch-group") {
-      try {
-        const options = dialogContent.querySelector(".dialog-group-options");
-        demo.list("stokvels").filter((group) => group.source === "member").forEach((group) => {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "button-outline";
-          button.dataset.selectGroup = group.id;
-          const label = document.createElement("span");
-          label.textContent = `${group.name} · Local demo`;
-          button.append(label);
-          options.append(button);
-        });
-      } catch (error) {
-        console.error("Could not load demo groups:", error);
-        showToast(error.message || "Could not load demo groups.", "error");
-      }
+
+    if (!definition) {
+      console.error("Dialog definition not found:", action);
+      return;
     }
+
+    currentDialog = action;
+
+    const fields = action === "receive"
+      ? `
+        <label>
+            Your wallet address
+            <input class="input" name="address"
+                   value="${walletAccount || ""}"
+                   readonly>
+        </label>`
+      : definition.fields;
+
+    dialogContent.innerHTML = `
+        <div class="dialog-content">
+            <span class="eyebrow">${definition.eyebrow}</span>
+            <h2 id="dialog-title">${definition.title}</h2>
+            <p>${definition.description}</p>
+
+            <form id="action-form">
+                <div class="dialog-fields">
+                    ${fields}
+                </div>
+
+                ${definition.button
+        ? `<button class="btn btn-gold dialog-submit" type="submit">
+                         ${definition.button}
+                       </button>`
+        : ""
+      }
+
+                <p class="dialog-disclaimer">
+                    ${definition.disclaimer || "Browser-only demo"}
+                </p>
+            </form>
+        </div>
+    `;
+
     dialog.showModal();
   }
 
@@ -766,6 +827,7 @@ import { contributeToSafe, proposeTransfer, explorerTx, describeError } from "./
         const name = String(values.get("name")).trim();
         const record = saveDemo("stokvels", { source: "member", name, amount: Number(values.get("amount")), membership: values.get("membership"), initials: initials(name), status: "active-demo" });
         if (!record) return;
+        if (!saveDemoPreference("activeGroup", record.id)) return;
         renderSavedDemo();
         dialog.close();
         navigate("stokvels");
