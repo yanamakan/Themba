@@ -1,0 +1,1 @@
+module.exports=function(req,res){res.setHeader('Cache-Control','no-store');return res.status(200).json({service:'themba-access-gateway',version:6,mode:'sandbox-only',repositoryIntegrated:false,telecomConnected:false,smsDeliveryEnabled:false,paymentsEnabled:false,voiceProviderConnected:false,identityProviderConnected:false,personalFinanceApiEnabled:false});};

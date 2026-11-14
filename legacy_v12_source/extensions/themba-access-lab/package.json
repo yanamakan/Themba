@@ -1,0 +1,13 @@
+{
+  "name": "themba-inclusive-access-lab-v7",
+  "private": true,
+  "version": "0.7.0",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "serve": "node dev-server.js",
+    "serve:integrated": "node sandbox/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

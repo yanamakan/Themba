@@ -1,0 +1,10 @@
+const test=require('node:test'),assert=require('node:assert/strict'),{project}=require('../business-model.js');
+test('no paid groups has no revenue',()=>{const x=project({groups:1000,paidPercent:0,monthlyFixed:0});assert.equal(x.mrr,0);assert.equal(x.monthlyResult,-3000)});
+test('mix reconciles to paying count',()=>{const x=project({groups:1000,paidPercent:20});assert.equal(x.paid,200);assert.equal(x.plus+x.pro,x.paid)});
+test('monthly result matches revenue minus modeled costs',()=>{const x=project({groups:5000});assert.equal(x.monthlyResult,x.mrr-x.variable-100000)});
+test('annualized run rate not false growth forecast',()=>{const x=project({groups:3000});assert.equal(x.annualizedRevenue,x.mrr*12)});
+test('break even unavailable if no paying groups',()=>{assert.equal(project({groups:0,paidPercent:0,monthlyFixed:100}).breakEvenGroups,null)});
+test('rejects negative group count',()=>{assert.throws(()=>project({groups:-10}))});
+test('rejects conversion above 100%',()=>{assert.throws(()=>project({paidPercent:110}))});
+test('rejects negative prices',()=>{assert.throws(()=>project({plusPrice:-1}))});
+test('zero fixed cost gives zero break even groups if contribution margin positive',()=>{assert.equal(project({monthlyFixed:0}).breakEvenGroups,0)});
