@@ -2,132 +2,146 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="theme-color" content="#07150e">
-    <title>Themba · Community Wealth Lab</title>
-    <link rel="stylesheet" href="../extensions/themba-v17/web/theme.css">
-    <link rel="stylesheet" href="../extensions/themba-v17/web/inclusive-access.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1310">
+  <meta name="description" content="Explore Themba's community wealth and insurance education tools.">
+  <title>Overview — Themba Insurance</title>
+  <script src="../scripts/theme.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../styles/theme.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="insurance-dashboard.css">
+  <link rel="stylesheet" href="../extensions/themba-v17/web/inclusive-access.css">
 </head>
 
-<body>
-    <div class="shell">
-        <aside class="side" id="side">
-            <div class="brand"><span class="coin">T</span>
-                <div><b>THEMBA</b><small>Community Wealth</small></div>
-            </div>
-            <div class="eyebrow">YOUR WORKSPACE</div>
-            <nav id="nav" aria-label="Feature navigation"><button data-tab="overview" class="active">◈
-                    Overview</button><button data-tab="loans">▤ Loans & guarantors</button><button data-tab="saving">◉
-                    Inflation protection</button><button data-tab="phones">▦ Inclusive access</button><button
-                    data-tab="insurance">♧ Insurance literacy</button><button data-tab="security">◇ Blockchain &
-                    trust</button><button data-tab="business">▥ Business model</button></nav>
-            <button type="button" id="sign-out-btn">Sign out</button>
-            <div class="sidefoot">Demo environment · No money moves</div>
-        </aside>
-        <main>
-            <header><button id="toggle" aria-label="Toggle sidebar" aria-expanded="true">☰</button>
-                <div class="crumb">THEMBA <span>/</span> <strong id="crumb">Overview</strong></div>
-                <div class="toolbar">
-                    <label class="hide-small">View as
-                        <select id="role" class="select role-select" aria-label="Switch dashboard">
-                            <option value="member">Member</option>
-                            <option value="treasurer">Treasurer</option>
-                            <option value="platform_admin">Platform Admin</option>
-                            <option value="insurance" selected>Insurance</option>
-                        </select>
-                    </label>
+<body class="dashboard-body insurance-dashboard">
+  <div class="app-shell">
+    <aside class="sidebar" id="side">
+      <a class="brand sidebar-brand" href="insurance-dashboard.html" aria-label="Themba insurance dashboard">
+        <span class="brand-coin" aria-hidden="true">T</span>
+        <span class="brand-text">
+          <span class="brand-name">THEMBA</span>
+          <span class="brand-tag">Transparent Wealth</span>
+        </span>
+      </a>
 
-                    <button id="large">A+</button>
-                </div>
-            </header>
-            <div class="content">
-                <div class="kicker">COMMUNITY FINANCE · SIMULATION</div>
-                <div class="heading">
-                    <div>
-                        <h1 id="heading">Your wealth, together.</h1>
-                        <p id="subtitle">Secure circles. Shared progress. Transparent decisions.</p>
-                    </div><span class="status">● DEMO MODE</span>
-                </div>
-                <div id="page" aria-live="polite"></div>
-                <footer>Illustrative features only. Financial decisions and transfers require regulated, verified
-                    partners and human approval.</footer>
-            </div>
-        </main>
-    </div>
-    <script src="../extensions/themba-v17/web/inclusive-access.js"></script>
-    <script src="../extensions/themba-v17/web/app.js" defer></script>
-    <script>
-        (function () {
-            const roleSelect = document.getElementById("role");
-            if (!roleSelect) return;
+      <span class="nav-label">Your workspace</span>
+      <nav class="side-nav" id="nav" aria-label="Feature navigation">
+        <button class="nav-link is-active" type="button" data-tab="overview"><span class="nav-icon"
+            aria-hidden="true">◈</span>Overview</button>
+        <button class="nav-link" type="button" data-tab="loans"><span class="nav-icon"
+            aria-hidden="true">▤</span>Loans &amp; guarantors</button>
+        <button class="nav-link" type="button" data-tab="saving"><span class="nav-icon"
+            aria-hidden="true">◉</span>Inflation protection</button>
+        <button class="nav-link" type="button" data-tab="phones"><span class="nav-icon"
+            aria-hidden="true">▦</span>Inclusive access</button>
+        <button class="nav-link" type="button" data-tab="insurance"><span class="nav-icon"
+            aria-hidden="true">♧</span>Insurance literacy</button>
+        <button class="nav-link" type="button" data-tab="security"><span class="nav-icon"
+            aria-hidden="true">◇</span>Blockchain &amp; trust</button>
+        <button class="nav-link" type="button" data-tab="business"><span class="nav-icon"
+            aria-hidden="true">▥</span>Business model</button>
+      </nav>
 
-            const destinations = {
-                member: "members-dashboard.html",
-                treasurer: "treasurer-dashboard.html",
-                platform_admin: "platform-admin-dashboard.html",
-                insurance: "insurance-dashboard.html"
-            };
+      <button class="nav-link sidebar-sign-out" type="button" id="sign-out-btn">
+        <span class="nav-icon" aria-hidden="true">↪</span>Sign out
+      </button>
+      <div class="sidebar-note">
+        <span class="note-shield" aria-hidden="true">●</span>
+        <div>
+          <strong>Demo environment</strong>
+          <p>No money moves during this simulation.</p>
+        </div>
+      </div>
+    </aside>
 
-            // Ensure Insurance is selected on this page
-            roleSelect.value = "insurance";
+    <main class="workspace">
+      <header class="topbar">
+        <button class="mobile-menu" id="toggle" type="button" aria-label="Open navigation" aria-expanded="false">
+          <span aria-hidden="true">☰</span>
+        </button>
+        <div class="breadcrumbs">
+          <span>THEMBA</span><b>/</b><strong id="crumb">Overview</strong>
+        </div>
+        <div class="top-actions">
+          <label class="view-as">View as
+            <select class="select role-select" id="role" aria-label="Switch dashboard">
+              <option value="member">Member</option>
+              <option value="treasurer">Treasurer</option>
+              <option value="platform_admin">Platform Admin</option>
+              <option value="insurance" selected>Insurance</option>
+            </select>
+          </label>
+          <button class="top-icon access-toggle" id="large" type="button" aria-label="Increase text size"
+            title="Increase text size">A+</button>
+          <button class="top-icon theme-toggle" type="button" data-theme-toggle aria-label="Switch to light mode"
+            title="Switch to light mode" aria-pressed="false">
+            <span data-theme-icon aria-hidden="true">☀</span>
+          </button>
+        </div>
+      </header>
 
-            roleSelect.addEventListener("change", function () {
-                const role = roleSelect.value;
+      <div class="main-content insurance-content">
+        <div class="eyebrow kicker">Community finance · Simulation</div>
+        <div class="welcome-row insurance-heading">
+          <div>
+            <h1 id="heading">Your wealth, together.</h1>
+            <p id="subtitle">Secure circles. Shared progress. Transparent decisions.</p>
+          </div>
+          <span class="live-pill"><i></i>Demo mode</span>
+        </div>
+        <div id="page" aria-live="polite"></div>
+        <footer class="insurance-footer">Illustrative features only. Financial decisions and transfers require regulated,
+          verified partners and human approval.</footer>
+      </div>
+    </main>
+  </div>
 
-                try {
-                    const raw = localStorage.getItem("themba_session");
-                    const session = raw ? JSON.parse(raw) : {};
-                    session.role = role;
-                    localStorage.setItem("themba_session", JSON.stringify(session));
-                } catch (e) { /* ignore */ }
+  <script src="../extensions/themba-v17/web/inclusive-access.js"></script>
+  <script src="../extensions/themba-v17/web/app.js" defer></script>
+  <script>
+    (function () {
+      const roleSelect = document.getElementById("role");
+      const signOutButton = document.getElementById("sign-out-btn");
+      const destinations = {
+        member: "members-dashboard.html",
+        treasurer: "treasurer-dashboard.html",
+        platform_admin: "platform-admin-dashboard.html",
+        insurance: "insurance-dashboard.html"
+      };
 
-                if (destinations[role] && role !== "insurance") {
-                    window.location.href = destinations[role];
-                }
-            });
-        })();
-    </script>
+      roleSelect.addEventListener("change", function () {
+        const role = roleSelect.value;
+        try {
+          const raw = localStorage.getItem("themba_session");
+          const session = raw ? JSON.parse(raw) : {};
+          session.role = role;
+          localStorage.setItem("themba_session", JSON.stringify(session));
+        } catch (error) {
+          console.warn("Could not save the selected dashboard role.", error);
+        }
 
-    <script src="../extensions/themba-v17/web/app.js" defer></script>
-    <script>
-        (function () {
-            const roleSelect = document.getElementById("role");
-            const signOutBtn = document.getElementById("sign-out-btn");
+        if (destinations[role] && role !== "insurance") {
+          window.location.href = destinations[role];
+        }
+      });
 
-            if (roleSelect) {
-                roleSelect.value = "insurance";
-                roleSelect.addEventListener("change", function () {
-                    const role = roleSelect.value;
-                    const destinations = {
-                        member: "/dashboards/members-dashboard.html",
-                        treasurer: "/dashboards/treasurer-dashboard.html",
-                        platform_admin: "/dashboards/platform-admin-dashboard.html",
-                        insurance: "/dashboards/insurance-dashboard.html"
-                    };
-                    try {
-                        const raw = localStorage.getItem("themba_session");
-                        const session = raw ? JSON.parse(raw) : {};
-                        session.role = role;
-                        localStorage.setItem("themba_session", JSON.stringify(session));
-                    } catch (e) { }
-                    if (destinations[role] && role !== "insurance") {
-                        window.location.href = destinations[role];
-                    }
-                });
-            }
-
-            if (signOutBtn) {
-                signOutBtn.addEventListener("click", function () {
-                    try {
-                        localStorage.removeItem("themba_session");
-                        sessionStorage.removeItem("themba_session");
-                    } catch (e) { }
-                    window.location.href = "/dashboards/login.html";
-                });
-            }
-        })();
-    </script>
+      signOutButton.addEventListener("click", function () {
+        try {
+          localStorage.removeItem("themba_session");
+          sessionStorage.removeItem("themba_session");
+        } catch (error) {
+          console.warn("Could not clear the saved session.", error);
+        }
+        window.location.href = "login.html";
+      });
+    })();
+  </script>
 </body>
 
 </html>
