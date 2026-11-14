@@ -1030,6 +1030,27 @@
   color: #849489;
   font-size: 9px;
 }
+.admin-transaction-detail-card {
+  padding: 20px;
+}
+.admin-transaction-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 18px;
+}
+.admin-transaction-detail-grid small,
+.admin-transaction-detail-grid strong {
+  display: block;
+}
+.admin-transaction-detail-grid small {
+  margin-bottom: 5px;
+  color: #849489;
+  font-size: 9px;
+}
+.admin-transaction-detail-grid strong {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
 #stokvel-detail-metrics {
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 }
@@ -1277,4 +1298,83 @@
   .admin-view.is-visible {
     animation: none;
   }
+}
+
+html[data-theme="light"] .platform-admin .sidebar {
+  background: #fff;
+  border-color: var(--line);
+}
+
+html[data-theme="light"] .platform-admin .active-group,
+html[data-theme="light"] .platform-admin .admin-search,
+html[data-theme="light"] .platform-admin .admin-filters,
+html[data-theme="light"] .platform-admin .admin-target,
+html[data-theme="light"] .platform-admin .shortcut,
+html[data-theme="light"] .platform-admin .admin-table th,
+html[data-theme="light"] .platform-admin .admin-member-menu {
+  color: var(--text);
+  background: #f1f6f2;
+  border-color: var(--line);
+}
+
+html[data-theme="light"] .platform-admin .admin-welcome h1,
+html[data-theme="light"] .platform-admin .admin-page-heading h1,
+html[data-theme="light"] .platform-admin .admin-kpis article > strong,
+html[data-theme="light"] .platform-admin .admin-table td strong,
+html[data-theme="light"] .platform-admin .admin-member-menu button,
+html[data-theme="light"] .platform-admin .admin-transaction .row-grow strong,
+html[data-theme="light"] .platform-admin .security-item .row-grow strong {
+  color: #24382c;
+}
+
+html[data-theme="light"] .platform-admin .admin-page-heading p,
+html[data-theme="light"] .platform-admin .admin-kpis article > span,
+html[data-theme="light"] .platform-admin .admin-kpis article > small,
+html[data-theme="light"] .platform-admin .admin-conversion,
+html[data-theme="light"] .platform-admin .admin-stokvel-card > p,
+html[data-theme="light"] .platform-admin .stokvel-metrics small,
+html[data-theme="light"] .platform-admin .admin-table th,
+html[data-theme="light"] .platform-admin .admin-table td,
+html[data-theme="light"] .platform-admin .admin-table td small,
+html[data-theme="light"] .platform-admin .member-contribution small,
+html[data-theme="light"] .platform-admin .stokvel-detail-demo-note {
+  color: #66776c;
+}
+
+html[data-theme="light"] .platform-admin .admin-balance {
+  background: linear-gradient(110deg, #e5f4e9, #d9eee0 57%, #edf5ef);
+  border-color: #b9ddc5;
+}
+
+html[data-theme="light"] .platform-admin .admin-filters button {
+  color: #637469;
+}
+
+html[data-theme="light"] .platform-admin .admin-filters button.is-selected {
+  color: #087f5b;
+  background: #dceee2;
+  border-color: #b9ddc5;
+}
+
+html[data-theme="light"] .platform-admin .admin-table td,
+html[data-theme="light"] .platform-admin .admin-member-row,
+html[data-theme="light"] .platform-admin .admin-transaction {
+  border-color: #e4ebe6;
+}
+
+html[data-theme="light"] .platform-admin .member-status.active,
+html[data-theme="light"] .platform-admin .status-done {
+  color: #16834f;
+  background: #e3f4e9;
+}
+
+html[data-theme="light"] .platform-admin .member-status.pending,
+html[data-theme="light"] .platform-admin .status-pending {
+  color: #96700e;
+  background: #fbf2d9;
+}
+
+html[data-theme="light"] .platform-admin .member-status.fraud {
+  color: #a13e35;
+  background: #fff0ee;
 }

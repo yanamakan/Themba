@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const base=path.resolve(__dirname,'..');const auth=fs.readFileSync(path.join(base,'scripts/auth.js'),'utf8');
-const snippet=auth.match(/  let redeemingInvite = null;[\s\S]*?\n  \}\n\n  \/\/ Already authenticated/);
+const snippet=auth.match(/^[ \t]*let redeemingInvite = null;[\s\S]*?^[ \t]*\}\r?\n\r?\n[ \t]*\/\/ Already authenticated/m);
 assert.ok(snippet,'Invitations should have an idempotent async redemption helper');
 function fixture(outcome){const store=new Map([['pending_invite','code-123']]);const calls=[],toasts=[];
   const context={sessionStorage:{getItem:k=>store.get(k)||null,removeItem:k=>store.delete(k)},sb:{rpc:async(name,args)=>{calls.push({name,args});return outcome}},toast:(...a)=>toasts.push(a)};

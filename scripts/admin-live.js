@@ -62,7 +62,7 @@
     const grid = $(".admin-stokvel-grid");
     if (grid) {
         grid.replaceChildren(...(d.stokvels.length ? d.stokvels.map((s) => {
-            const card = h("article", "panel admin-stokvel-card"); card.dataset.stokvelId = s.id; card.dataset.stokvelBaseStatus = "Verified";
+            const card = h("article", "panel admin-stokvel-card"); card.dataset.stokvelId = s.id; card.dataset.stokvelBaseStatus = "Live";
             const active = (s.members || []).filter((m) => m.status === "active").length;
             kids(card,
                 kids(h("div"), h("span", "avatar avatar-admin", initials(s.name)), h("span", "member-status active", "Live")),
@@ -75,6 +75,10 @@
     }
     const createBtn = $('[data-admin-action="create-stokvel"]'); if (createBtn) createBtn.style.display = "none";   // creating a local demo stokvel would mislead; stokvels are created by treasurers
     const createForm = $("#admin-create-stokvel-form"); if (createForm) createForm.remove();
+    window.ThembaAdminLive = true;
+    const reviewButton = $("#stokvel-review-button"); if (reviewButton) reviewButton.hidden = true;
+    const detailNote = $("#stokvel-detail-demo-note");
+    if (detailNote) detailNote.textContent = "Stokvel and transaction data are loaded from the platform database. Member flags and removals are applied through the admin API.";
 
     // ---- members (all stokvels; the existing filter shows one stokvel at a time)
     const list = $("#admin-members-list");
@@ -133,10 +137,25 @@
     const mkTx = (l) => {
         const tr = h("tr"); tr.dataset.stokvelId = l.stokvel_id; tr.dataset.kind = KIND[l.kind] || "contribution";
         const sn = names[l.stokvel_id] || "Stokvel", label = LABEL[l.kind] || l.kind;
-        tr.dataset.search = `${label} ${l.description || ""} ${sn} ${l.tx_hash || ""}`.toLowerCase();
+        const description = l.description || label;
+        const reference = l.tx_hash || label;
+        const date = when(l.created_at);
+        const status = "Recorded";
         const pos = Number(l.amount) > 0;
-        kids(tr, kids(h("td"), h("strong", null, l.description || label), h("small", null, sn)), h("td", null, when(l.created_at)), h("td", null, l.tx_hash ? l.tx_hash.slice(0, 10) + "…" : label),
-            kids(h("td"), h("span", "status status-done", "● Recorded")), h("td", pos ? "amount-positive" : null, (pos ? "+" : "") + usdt(l.amount)), h("td"));
+        const amount = (pos ? "+" : "") + usdt(l.amount);
+        tr.dataset.stokvelName = sn;
+        tr.dataset.transactionDescription = description;
+        tr.dataset.transactionDate = date;
+        tr.dataset.transactionReference = reference;
+        tr.dataset.transactionStatus = status;
+        tr.dataset.transactionAmount = amount;
+        tr.dataset.search = `${label} ${l.description || ""} ${sn} ${l.tx_hash || ""}`.toLowerCase();
+        const view = h("button", "row-open", "›");
+        view.type = "button";
+        view.dataset.adminAction = "transaction-detail";
+        view.setAttribute("aria-label", "View transaction details for " + description);
+        kids(tr, kids(h("td"), h("strong", null, description), h("small", null, sn)), h("td", null, date), h("td", null, l.tx_hash ? l.tx_hash.slice(0, 10) + "…" : label),
+            kids(h("td"), h("span", "status status-done", "● " + status)), h("td", pos ? "amount-positive" : null, amount), kids(h("td"), view));
         return tr;
     };
     if (body) body.replaceChildren(...d.ledger.map(mkTx));
