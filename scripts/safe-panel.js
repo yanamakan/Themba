@@ -22,9 +22,14 @@ window.ThembaSafe = {
 
   const mode = root.dataset.safeMode || "signer";
   const SEPOLIA = "0xaa36a7";
+  const fileOrigin = window.location.protocol === "file:";
   const state = {
     account: null, chainId: null, summary: null, balance: null,
-    pending: [], executed: [], busy: "", notice: null
+    pending: [], executed: [], busy: "",
+    notice: fileOrigin ? {
+      type: "error",
+      text: "Safe data is unavailable from a file URL. Start the app with npm start and open it over HTTP."
+    } : null
   };
 
   const style = document.createElement("style");
@@ -91,13 +96,13 @@ window.ThembaSafe = {
     const busy = Boolean(state.busy);
     const dis = busy ? "disabled" : "";
 
-    const connectButton = !connected
+    const connectButton = fileOrigin ? "" : !connected
       ? `<button class="btn btn-gold" type="button" data-safe-action="connect" ${dis}>Connect wallet</button>`
       : !onSepolia
         ? `<button class="btn btn-gold" type="button" data-safe-action="connect" ${dis}>Switch to Sepolia</button>`
         : "";
 
-    const forms = ready && mode !== "member" ? `
+    const forms = !fileOrigin && ready && mode !== "member" ? `
       <div class="safe-forms">
         ${mode === "signer" ? `<form class="safe-form" data-safe-form="contribute">
           <h3>Contribute</h3><small class="safe-muted">Send Mock USDT from your wallet into the pot.</small>
@@ -127,7 +132,7 @@ window.ThembaSafe = {
       <div class="safe-head">
         <div><h2>Themba pot · Safe multisig</h2>
           <small class="safe-muted"><a href="${esc(explorerAddress(SAFE_CONFIG.safeAddress))}" target="_blank" rel="noopener noreferrer">${esc(short(SAFE_CONFIG.safeAddress))}</a> · Sepolia testnet · Mock USDT</small></div>
-        <div class="safe-actions">${connectButton}<button class="button-outline" type="button" data-safe-action="refresh" ${dis}>Refresh</button></div>
+        <div class="safe-actions">${connectButton}${fileOrigin ? "" : `<button class="button-outline" type="button" data-safe-action="refresh" ${dis}>Refresh</button>`}</div>
       </div>
       <div class="safe-meta">
         <span><small>Pot balance</small><strong>${state.balance !== null ? `${esc(fmt(state.balance))} Mock USDT` : "Connect to view"}</strong></span>
@@ -142,6 +147,7 @@ window.ThembaSafe = {
   }
 
   async function refresh() {
+    if (fileOrigin) return;
     const provider = window.ethereum;
     const jobs = [
       listPending().then((r) => { state.pending = r; }),

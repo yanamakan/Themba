@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#0b1310">
   <meta name="description" content="Themba platform administration dashboard.">
   <title>Overview — Themba Platform Admin</title>
+  <script src="../scripts/theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -77,6 +78,8 @@
           </label>
           <button class="top-icon" type="button" aria-label="View notifications" data-admin-page="approvals"><span
               data-icon="bell"></span><i></i></button>
+          <button class="top-icon theme-toggle" type="button" data-theme-toggle aria-label="Switch to light mode"
+            title="Switch to light mode" aria-pressed="false"><span data-theme-icon aria-hidden="true">☀</span></button>
           <button class="avatar avatar-admin-round top-avatar" type="button" aria-label="Open admin settings"
             data-admin-page="settings" data-admin-initials>NM</button>
         </div>
@@ -241,6 +244,28 @@
               </table>
             </div>
             <p class="empty-state" id="transaction-empty" hidden>No transactions match your search.</p>
+          </section>
+        </section>
+
+        <section class="admin-view" data-admin-view="transaction-detail">
+          <div class="admin-page-heading">
+            <div>
+              <button class="text-link" type="button" data-admin-action="back-from-transaction-detail"
+                id="transaction-detail-back">Back to transactions</button>
+              <span class="eyebrow">Transaction record</span>
+              <h1 id="transaction-detail-name"></h1>
+              <p id="transaction-detail-summary"></p>
+            </div>
+          </div>
+          <section class="panel admin-transaction-detail-card">
+            <div class="admin-transaction-detail-grid">
+              <div><small>Stokvel</small><strong id="transaction-detail-stokvel"></strong></div>
+              <div><small>Date</small><strong id="transaction-detail-date"></strong></div>
+              <div><small>Reference</small><strong id="transaction-detail-reference"></strong></div>
+              <div><small>Status</small><strong id="transaction-detail-status"></strong></div>
+              <div><small>Amount</small><strong id="transaction-detail-amount"></strong></div>
+            </div>
+            <p id="transaction-detail-note" class="stokvel-detail-demo-note"></p>
           </section>
         </section>
 
@@ -438,7 +463,7 @@
               <p class="empty-state" id="stokvel-detail-transactions-empty" hidden></p>
             </section>
           </div>
-          <p class="demo-info stokvel-detail-demo-note">Stokvel management data and status changes are browser-demo only
+          <p class="demo-info stokvel-detail-demo-note" id="stokvel-detail-demo-note">Stokvel management data and status changes are browser-demo only
             and are not shared with platform members.</p>
         </section>
 

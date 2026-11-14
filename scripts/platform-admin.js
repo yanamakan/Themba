@@ -29,6 +29,7 @@
     stokvels: "Stokvels",
     "stokvel-detail": "Stokvel Details",
     transactions: "Transactions",
+    "transaction-detail": "Transaction Details",
     approvals: "Approvals",
     members: "Members",
     settings: "Settings"
@@ -40,6 +41,7 @@
   let activeMemberStokvel = "";
   let activeTransactionStokvel = "";
   let selectedStokvelCard = null;
+  let transactionReturnView = "transactions";
 
   function getSession() {
     for (const storage of [localStorage, sessionStorage]) {
@@ -259,11 +261,15 @@
     document.querySelector("#stokvel-detail-description").textContent = "Review this stokvel’s sample activity, member records and admin status.";
 
     const statuses = stokvelReviewStatuses();
-    const underReview = isStokvelUnderReview(card, statuses);
+    const liveData = Boolean(window.ThembaAdminLive);
+    const underReview = !liveData && isStokvelUnderReview(card, statuses);
     const detailStatus = document.querySelector("#stokvel-detail-status");
     detailStatus.className = `member-status ${underReview ? "pending" : "active"}`;
-    detailStatus.textContent = underReview ? (card.dataset.stokvelBaseStatus === "Review" ? "Review" : "Under review") : (card.dataset.stokvelBaseStatus === "Review" ? "Verified" : card.dataset.stokvelBaseStatus);
+    detailStatus.textContent = liveData
+      ? card.querySelector(".member-status").textContent
+      : underReview ? (card.dataset.stokvelBaseStatus === "Review" ? "Review" : "Under review") : (card.dataset.stokvelBaseStatus === "Review" ? "Verified" : card.dataset.stokvelBaseStatus);
     const reviewButton = document.querySelector("#stokvel-review-button");
+    reviewButton.hidden = liveData;
     reviewButton.textContent = underReview ? (card.dataset.stokvelBaseStatus === "Review" ? "Mark as verified" : "Clear review flag") : "Flag for review";
 
     const metrics = document.querySelector("#stokvel-detail-metrics");
@@ -274,7 +280,7 @@
       const value = document.createElement("strong");
       value.textContent = metric.querySelector("strong").textContent;
       const note = document.createElement("small");
-      note.textContent = "Current sample";
+      note.textContent = liveData ? "Live platform data" : "Current sample";
       article.append(label, value, note);
       return article;
     }));
@@ -299,7 +305,9 @@
     }));
     const membersEmpty = document.querySelector("#stokvel-detail-members-empty");
     membersEmpty.hidden = memberRows.length > 0;
-    membersEmpty.textContent = `No sample member records are available for ${name}.`;
+    membersEmpty.textContent = liveData
+      ? `No member records are available for ${name}.`
+      : `No sample member records are available for ${name}.`;
 
     const transactions = Array.from(document.querySelectorAll("#admin-transactions tr"))
       .filter((row) => row.dataset.stokvelId === stokvelId);
@@ -313,7 +321,36 @@
     transactionTable.hidden = transactions.length === 0;
     const transactionsEmpty = document.querySelector("#stokvel-detail-transactions-empty");
     transactionsEmpty.hidden = transactions.length > 0;
-    transactionsEmpty.textContent = `No sample transactions are available for ${name}.`;
+    transactionsEmpty.textContent = liveData
+      ? `No transactions are available for ${name}.`
+      : `No sample transactions are available for ${name}.`;
+    const detailNote = document.querySelector("#stokvel-detail-demo-note");
+    detailNote.textContent = liveData
+      ? "Stokvel and transaction data are loaded from the platform database. Member flags and removals are applied through the admin API."
+      : "Stokvel management data and status changes are browser-demo only and are not shared with platform members.";
+  }
+
+  function renderTransactionDetail(row) {
+    const name = row.dataset.transactionDescription || row.cells[0].querySelector("strong").textContent.trim();
+    const stokvel = row.dataset.stokvelName || row.cells[0].querySelector("small")?.textContent.trim() || "Stokvel";
+    const date = row.dataset.transactionDate || row.cells[1].textContent.trim();
+    const reference = row.dataset.transactionReference || row.cells[2].textContent.trim();
+    const status = row.dataset.transactionStatus || row.cells[3].textContent.replace(/^[●\s]+/, "").trim();
+    const amount = row.dataset.transactionAmount || row.cells[4].textContent.trim();
+
+    document.querySelector("#transaction-detail-name").textContent = name;
+    document.querySelector("#transaction-detail-summary").textContent = `${stokvel} · ${date}`;
+    document.querySelector("#transaction-detail-stokvel").textContent = stokvel;
+    document.querySelector("#transaction-detail-date").textContent = date;
+    document.querySelector("#transaction-detail-reference").textContent = reference;
+    document.querySelector("#transaction-detail-status").textContent = status;
+    document.querySelector("#transaction-detail-amount").textContent = amount;
+    document.querySelector("#transaction-detail-note").textContent = window.ThembaAdminLive
+      ? "Transaction details from the platform ledger."
+      : "Transaction details from the browser demo sample.";
+    document.querySelector("#transaction-detail-back").textContent = transactionReturnView === "stokvel-detail"
+      ? "Back to stokvel details"
+      : "Back to transactions";
   }
 
   function navigate(page) {
@@ -334,7 +371,7 @@
     applySearch();
   }
 
-  function applySearch() {
+  function applySearch(routeToSearchResults = false) {
     const query = document.querySelector("#global-search").value.trim().toLowerCase();
     const transactionQuery = document.querySelector("#transaction-search").value.trim().toLowerCase();
     const search = `${query} ${transactionQuery}`.trim();
@@ -366,8 +403,8 @@
       ? "No sample member records are available for this stokvel."
       : "No members match your search.";
 
-    if (query && visibleMembers === 0 && visibleTransactions > 0) navigateViewOnly("transactions");
-    else if (query && visibleMembers > 0) navigateViewOnly("members");
+    if (routeToSearchResults && query && visibleMembers === 0 && visibleTransactions > 0) navigateViewOnly("transactions");
+    else if (routeToSearchResults && query && visibleMembers > 0) navigateViewOnly("members");
   }
 
   function closeMemberMenus(except) {
@@ -613,9 +650,16 @@
       closeMemberMenus();
       applySearch();
       toast(`${name} removed from the browser demo member list.`, "success");
+    } else if (action === "back-from-transaction-detail") {
+      navigate(transactionReturnView);
     } else if (action === "transaction-detail") {
       const row = actionButton.closest("tr");
-      toast(`${row.cells[0].querySelector("strong").textContent} · Reference ${row.cells[2].textContent}`);
+      const currentView = document.querySelector(".admin-view.is-visible");
+      transactionReturnView = currentView && currentView.dataset.adminView === "stokvel-detail"
+        ? "stokvel-detail"
+        : "transactions";
+      renderTransactionDetail(row);
+      navigate("transaction-detail");
     } else if (action === "create-stokvel" || action === "select-stokvel") {
       if (action === "create-stokvel") {
         const form = document.querySelector("#admin-create-stokvel-form");
@@ -667,7 +711,7 @@
     }
   });
 
-  document.querySelector("#global-search").addEventListener("input", applySearch);
+  document.querySelector("#global-search").addEventListener("input", () => applySearch(true));
   document.querySelector("#transaction-search").addEventListener("input", applySearch);
   document.querySelector("#admin-role-select").addEventListener("change", (event) => {
     const role = event.target.value;
