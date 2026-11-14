@@ -19,8 +19,10 @@
     "@safe-global/api-kit": "^5.0.4",
     "@safe-global/protocol-kit": "^8.0.11",
     "buffer": "^6.0.3",
+    "dotenv": "^18.0.10",
     "ethers": "^6.17.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "nodemailer": "^10.5.0"
   },
   "devDependencies": {
     "esbuild": "^0.28.2"

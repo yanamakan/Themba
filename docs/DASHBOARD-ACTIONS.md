@@ -68,8 +68,8 @@ The demo activity notice in the Transactions view explains that local entries
 are not an immutable ledger. The export action includes existing sample rows
 and saved demo loans, bills, and confirmed Safe contributions.
 
-Admin dashboard loan and bill shortcuts navigate to this dashboard, open the
-relevant view, and show its form.
+Loan and bill request flows remain available from the Member dashboard;
+Platform Admin no longer has shortcuts to those forms.
 
 ## Treasurer dashboard
 
@@ -100,9 +100,17 @@ also restores local preferences and records:
 - Balance visibility, displayed currency, and the sample wallet connected
   toggle persist as UI preferences. **Demo wallet connected** is only a visual
   demo state; it does not connect a wallet or represent real assets.
-- Member and stokvel controls display the selected sample record's details.
-- The contribution shortcut leads to the Safe panel. Loan and bill shortcuts
-  navigate to the corresponding Member form.
+- Manage stokvel opens a detail view with the selected group's displayed
+  metrics, available sample members and transactions. The admin can flag a
+  group for review or open its member/transaction views. Review status changes
+  are saved in this browser demo only; unavailable sample records are not
+  invented.
+- Member row actions can flag a sample member for potential fraud or remove
+  that member from the displayed sample list. These changes persist in this
+  browser only and do not update a real account or database.
+- The admin Safe panel does not offer a contribution form. Treasurer signer
+  wallets can still make testnet contributions. Loan and bill actions are not
+  offered in the Platform Admin dashboard.
 - Search, transaction filters, navigation, profile updates, and CSV export are
   available for the displayed sample data.
 

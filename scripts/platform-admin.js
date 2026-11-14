@@ -26,7 +26,8 @@
 
   const pageTitles = {
     overview: "Overview",
-    stokvels: "My Stokvels",
+    stokvels: "Stokvels",
+    "stokvel-detail": "Stokvel Details",
     transactions: "Transactions",
     approvals: "Approvals",
     members: "Members",
@@ -36,6 +37,9 @@
   const toastStack = document.querySelector("#admin-toasts");
   const demo = window.ThembaDemo;
   let activeFilter = "all";
+  let activeMemberStokvel = "";
+  let activeTransactionStokvel = "";
+  let selectedStokvelCard = null;
 
   function getSession() {
     for (const storage of [localStorage, sessionStorage]) {
@@ -108,6 +112,7 @@
         const card = document.createElement("article");
         card.className = "panel admin-stokvel-card";
         card.dataset.demoRecord = stokvel.id;
+        card.dataset.stokvelId = stokvel.id;
         const header = document.createElement("div");
         const avatar = document.createElement("span");
         avatar.className = "avatar avatar-admin";
@@ -203,6 +208,114 @@
     document.querySelector("#admin-profile-email").value = session.email || "admin@themba.demo";
   }
 
+  function stokvelReviewStatuses() {
+    const statuses = demo.getPreference("adminStokvelReviewStatuses", {});
+    if (!statuses || typeof statuses !== "object" || Array.isArray(statuses)) {
+      throw new Error("Saved stokvel review status data is invalid.");
+    }
+    return statuses;
+  }
+
+  function isStokvelUnderReview(card, statuses = stokvelReviewStatuses()) {
+    if (Object.prototype.hasOwnProperty.call(statuses, card.dataset.stokvelId)) return statuses[card.dataset.stokvelId];
+    return card.dataset.stokvelBaseStatus === "Review";
+  }
+
+  function updateStokvelReviewStatus(card, underReview) {
+    const status = card.querySelector(".member-status");
+    const baseStatus = card.dataset.stokvelBaseStatus;
+    status.classList.toggle("pending", underReview);
+    status.classList.toggle("active", !underReview);
+    status.textContent = underReview ? (baseStatus === "Review" ? "Review" : "Under review") : (baseStatus === "Review" ? "Verified" : baseStatus);
+    if (selectedStokvelCard === card) {
+      const detailStatus = document.querySelector("#stokvel-detail-status");
+      detailStatus.className = `member-status ${underReview ? "pending" : "active"}`;
+      detailStatus.textContent = status.textContent;
+      const reviewButton = document.querySelector("#stokvel-review-button");
+      reviewButton.textContent = underReview ? (baseStatus === "Review" ? "Mark as verified" : "Clear review flag") : "Flag for review";
+    }
+  }
+
+  function restoreStokvelReviewStatuses() {
+    try {
+      const statuses = stokvelReviewStatuses();
+      document.querySelectorAll(".admin-stokvel-card").forEach((card) => {
+        const status = card.querySelector(".member-status");
+        card.dataset.stokvelBaseStatus = status.textContent.trim();
+        updateStokvelReviewStatus(card, isStokvelUnderReview(card, statuses));
+      });
+    } catch (error) {
+      console.error("Could not restore stokvel review statuses:", error);
+      toast(error.message || "Could not restore saved stokvel review statuses.", "error");
+    }
+  }
+
+  function renderStokvelDetail(card) {
+    selectedStokvelCard = card;
+    const stokvelId = card.dataset.stokvelId;
+    const name = card.querySelector("h2").textContent;
+    document.querySelector("#stokvel-detail-name").textContent = name;
+    document.querySelector("#stokvel-detail-location").textContent = card.querySelector("p").textContent;
+    document.querySelector("#stokvel-detail-description").textContent = "Review this stokvel’s sample activity, member records and admin status.";
+
+    const statuses = stokvelReviewStatuses();
+    const underReview = isStokvelUnderReview(card, statuses);
+    const detailStatus = document.querySelector("#stokvel-detail-status");
+    detailStatus.className = `member-status ${underReview ? "pending" : "active"}`;
+    detailStatus.textContent = underReview ? (card.dataset.stokvelBaseStatus === "Review" ? "Review" : "Under review") : (card.dataset.stokvelBaseStatus === "Review" ? "Verified" : card.dataset.stokvelBaseStatus);
+    const reviewButton = document.querySelector("#stokvel-review-button");
+    reviewButton.textContent = underReview ? (card.dataset.stokvelBaseStatus === "Review" ? "Mark as verified" : "Clear review flag") : "Flag for review";
+
+    const metrics = document.querySelector("#stokvel-detail-metrics");
+    metrics.replaceChildren(...Array.from(card.querySelectorAll(".stokvel-metrics > span"), (metric) => {
+      const article = document.createElement("article");
+      const label = document.createElement("span");
+      label.textContent = metric.querySelector("small").textContent;
+      const value = document.createElement("strong");
+      value.textContent = metric.querySelector("strong").textContent;
+      const note = document.createElement("small");
+      note.textContent = "Current sample";
+      article.append(label, value, note);
+      return article;
+    }));
+
+    const memberRows = Array.from(document.querySelectorAll("#admin-members-list .admin-member-row"))
+      .filter((row) => row.dataset.stokvelId === stokvelId);
+    const membersList = document.querySelector("#stokvel-detail-members");
+    membersList.replaceChildren(...memberRows.map((row) => {
+      const item = document.createElement("div");
+      item.className = "stokvel-detail-member";
+      item.append(row.querySelector(".avatar").cloneNode(true));
+      const identity = document.createElement("span");
+      identity.className = "row-grow";
+      const memberName = document.createElement("strong");
+      memberName.textContent = row.querySelector(".row-grow strong").textContent;
+      const role = document.createElement("small");
+      role.textContent = row.querySelector(".row-grow small").textContent;
+      identity.append(memberName, role);
+      const memberStatus = row.querySelector(".member-status").cloneNode(true);
+      item.append(identity, memberStatus);
+      return item;
+    }));
+    const membersEmpty = document.querySelector("#stokvel-detail-members-empty");
+    membersEmpty.hidden = memberRows.length > 0;
+    membersEmpty.textContent = `No sample member records are available for ${name}.`;
+
+    const transactions = Array.from(document.querySelectorAll("#admin-transactions tr"))
+      .filter((row) => row.dataset.stokvelId === stokvelId);
+    const transactionList = document.querySelector("#stokvel-detail-transactions");
+    transactionList.replaceChildren(...transactions.map((row) => {
+      const copy = row.cloneNode(true);
+      copy.hidden = false;
+      return copy;
+    }));
+    const transactionTable = transactionList.closest(".admin-table-scroll");
+    transactionTable.hidden = transactions.length === 0;
+    const transactionsEmpty = document.querySelector("#stokvel-detail-transactions-empty");
+    transactionsEmpty.hidden = transactions.length > 0;
+    transactionsEmpty.textContent = `No sample transactions are available for ${name}.`;
+  }
+
   function navigate(page) {
     if (!pageTitles[page]) return;
     document.querySelectorAll("[data-admin-view]").forEach((view) => {
@@ -229,22 +342,112 @@
     document.querySelectorAll("#admin-transactions tr").forEach((row) => {
       const matchesType = activeFilter === "all" || row.dataset.kind === activeFilter;
       const matchesSearch = !search || row.dataset.search.includes(search) || search.split(/\s+/).every((part) => row.dataset.search.includes(part));
-      const visible = matchesType && matchesSearch;
+      const matchesStokvel = !activeTransactionStokvel || row.dataset.stokvelId === activeTransactionStokvel;
+      const visible = matchesType && matchesSearch && matchesStokvel;
       row.hidden = !visible;
       if (visible) visibleTransactions += 1;
     });
-    document.querySelector("#transaction-empty").hidden = visibleTransactions !== 0;
+    const transactionEmpty = document.querySelector("#transaction-empty");
+    transactionEmpty.hidden = visibleTransactions !== 0;
+    transactionEmpty.textContent = activeTransactionStokvel && visibleTransactions === 0
+      ? "No sample transactions are available for this stokvel."
+      : "No transactions match your search.";
 
     let visibleMembers = 0;
     document.querySelectorAll("#admin-members-list .admin-member-row").forEach((row) => {
-      const visible = !query || row.dataset.search.includes(query);
+      const matchesStokvel = !activeMemberStokvel || row.dataset.stokvelId === activeMemberStokvel;
+      const visible = matchesStokvel && (!query || row.dataset.search.includes(query));
       row.hidden = !visible;
       if (visible) visibleMembers += 1;
     });
-    document.querySelector("#member-empty").hidden = visibleMembers !== 0;
+    const memberEmpty = document.querySelector("#member-empty");
+    memberEmpty.hidden = visibleMembers !== 0;
+    memberEmpty.textContent = activeMemberStokvel && visibleMembers === 0
+      ? "No sample member records are available for this stokvel."
+      : "No members match your search.";
 
     if (query && visibleMembers === 0 && visibleTransactions > 0) navigateViewOnly("transactions");
     else if (query && visibleMembers > 0) navigateViewOnly("members");
+  }
+
+  function closeMemberMenus(except) {
+    document.querySelectorAll(".admin-member-actions").forEach((container) => {
+      if (container === except) return;
+      container.querySelector(".admin-member-menu").hidden = true;
+      container.querySelector('[data-admin-action="member-menu"]').setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function prepareMemberMenus() {
+    document.querySelectorAll("#admin-members-list .admin-member-row").forEach((row) => {
+      const trigger = row.querySelector('[data-admin-action="member-menu"]');
+      row.dataset.memberBaseStatus = row.querySelector(".member-status").classList.contains("pending") ? "pending" : "active";
+      const container = document.createElement("div");
+      container.className = "admin-member-actions";
+      trigger.parentNode.insertBefore(container, trigger);
+      container.appendChild(trigger);
+      trigger.setAttribute("aria-haspopup", "menu");
+
+      const menu = document.createElement("div");
+      menu.className = "admin-member-menu";
+      menu.setAttribute("role", "menu");
+      menu.hidden = true;
+      const flag = document.createElement("button");
+      flag.type = "button";
+      flag.setAttribute("role", "menuitem");
+      flag.dataset.adminAction = "flag-member";
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.setAttribute("role", "menuitem");
+      remove.dataset.adminAction = "remove-member";
+      remove.textContent = "Remove member";
+      menu.append(flag, remove);
+      container.appendChild(menu);
+    });
+  }
+
+  function updateMemberStatus(row, flagged) {
+    const status = row.querySelector(".member-status");
+    status.classList.toggle("fraud", flagged);
+    status.classList.toggle("pending", !flagged && row.dataset.memberBaseStatus === "pending");
+    status.classList.toggle("active", !flagged && row.dataset.memberBaseStatus !== "pending");
+    status.textContent = flagged ? "Potential fraud" : row.dataset.memberBaseStatus === "pending" ? "● Pending" : "● Active";
+    const flagAction = row.querySelector('[data-admin-action="flag-member"]');
+    flagAction.textContent = flagged ? "Clear fraud flag" : "Flag as potential fraud";
+  }
+
+  function saveMemberStatus(row, status) {
+    const member = {
+      id: row.dataset.memberId,
+      name: row.querySelector(".row-grow strong").textContent,
+      status,
+      summary: `${status === "removed-demo" ? "Removed" : status === "potential-fraud-demo" ? "Flagged for potential fraud" : "Cleared fraud flag"}: ${row.querySelector(".row-grow strong").textContent}`
+    };
+    try {
+      const existing = demo.list("members").find((record) => record.id === member.id);
+      if (existing) demo.update("members", member.id, member);
+      else demo.add("members", member);
+      return true;
+    } catch (error) {
+      console.error("Could not save demo member action:", error);
+      toast(error.message || "Could not save this member action.", "error");
+      return false;
+    }
+  }
+
+  function restoreMemberActions() {
+    try {
+      const records = demo.list("members");
+      document.querySelectorAll("#admin-members-list .admin-member-row").forEach((row) => {
+        const record = records.find((member) => member.id === row.dataset.memberId);
+        if (record?.status === "removed-demo") row.remove();
+        else updateMemberStatus(row, record?.status === "potential-fraud-demo");
+      });
+    } catch (error) {
+      console.error("Could not restore saved member actions:", error);
+      toast(error.message || "Could not restore saved member actions.", "error");
+    }
+    applySearch();
   }
 
   function navigateViewOnly(page) {
@@ -277,8 +480,20 @@
   }
 
   document.addEventListener("click", (event) => {
+    if (!event.target.closest(".admin-member-actions")) closeMemberMenus();
     const pageLink = event.target.closest("[data-admin-page]");
     if (pageLink) {
+      if (pageLink.dataset.adminPage === "members") {
+        activeMemberStokvel = "";
+        document.querySelector("#members-stokvel-name").textContent = "Ubuntu Wealth Circle";
+        document.querySelector("#members-context").textContent = "Manage members and review potential fraud. Changes are saved in this browser demo only.";
+      } else if (pageLink.dataset.adminPage === "transactions") {
+        activeTransactionStokvel = "";
+        document.querySelector("#transaction-context").textContent = "Every movement, recorded and transparent.";
+      } else if (pageLink.dataset.adminPage === "stokvels") {
+        activeMemberStokvel = "";
+        activeTransactionStokvel = "";
+      }
       navigate(pageLink.dataset.adminPage);
       return;
     }
@@ -297,12 +512,6 @@
       actionButton.setAttribute("aria-expanded", String(isOpen));
     } else if (action === "switch-stokvel") {
       navigate("stokvels");
-    } else if (action === "contribution") {
-      navigate("approvals");
-      document.querySelector("#safe-panel").scrollIntoView({ behavior: "smooth", block: "start" });
-      toast("Use the Safe panel to connect a signer wallet and confirm an on-chain contribution.", "info");
-    } else if (action === "loan" || action === "bill") {
-      window.location.href = `members-dashboard.html?open=${action}`;
     } else if (action === "export") {
       exportTransactions();
     } else if (action === "approve-approval") {
@@ -382,12 +591,28 @@
       sessionStorage.removeItem("themba_session");
       window.location.href = "../login.html";
     } else if (action === "member-menu") {
+      const container = actionButton.closest(".admin-member-actions");
+      const menu = container.querySelector(".admin-member-menu");
+      const isOpen = menu.hidden;
+      closeMemberMenus(container);
+      menu.hidden = !isOpen;
+      actionButton.setAttribute("aria-expanded", String(isOpen));
+    } else if (action === "flag-member") {
+      const row = actionButton.closest(".admin-member-row");
+      const flagged = !row.querySelector(".member-status").classList.contains("fraud");
+      if (!saveMemberStatus(row, flagged ? "potential-fraud-demo" : "active-demo")) return;
+      updateMemberStatus(row, flagged);
+      closeMemberMenus();
+      toast(flagged ? "Member flagged for potential fraud in this browser demo." : "Fraud flag cleared in this browser demo.", "success");
+    } else if (action === "remove-member") {
       const row = actionButton.closest(".admin-member-row");
       const name = row.querySelector(".row-grow strong").textContent;
-      const role = row.querySelector(".row-grow small").textContent;
-      const contribution = row.querySelector(".member-contribution strong").textContent;
-      const status = row.querySelector(".member-status").textContent.replace("●", "").trim();
-      toast(`${name} · ${role} · ${status} · contributed ${contribution}.`);
+      if (!window.confirm(`Remove ${name} from the displayed demo member list? This only affects this browser's demo data.`)) return;
+      if (!saveMemberStatus(row, "removed-demo")) return;
+      row.remove();
+      closeMemberMenus();
+      applySearch();
+      toast(`${name} removed from the browser demo member list.`, "success");
     } else if (action === "transaction-detail") {
       const row = actionButton.closest("tr");
       toast(`${row.cells[0].querySelector("strong").textContent} · Reference ${row.cells[2].textContent}`);
@@ -401,9 +626,39 @@
         }
       } else {
         const card = actionButton.closest(".admin-stokvel-card");
-        const name = card.querySelector("h2").textContent;
-        const details = Array.from(card.querySelectorAll(".stokvel-metrics strong"), (item) => item.textContent).join(" · ");
-        toast(`${name} · ${details}`);
+        try {
+          renderStokvelDetail(card);
+          navigate("stokvel-detail");
+        } catch (error) {
+          console.error("Could not open stokvel details:", error);
+          toast(error.message || "Could not open stokvel details.", "error");
+        }
+      }
+    } else if (action === "manage-stokvel-members") {
+      if (!selectedStokvelCard) return;
+      const name = selectedStokvelCard.querySelector("h2").textContent;
+      activeMemberStokvel = selectedStokvelCard.dataset.stokvelId;
+      document.querySelector("#members-stokvel-name").textContent = name;
+      document.querySelector("#members-context").textContent = `Manage ${name} members and review potential fraud. Changes are saved in this browser demo only.`;
+      navigate("members");
+    } else if (action === "view-stokvel-transactions") {
+      if (!selectedStokvelCard) return;
+      const name = selectedStokvelCard.querySelector("h2").textContent;
+      activeTransactionStokvel = selectedStokvelCard.dataset.stokvelId;
+      document.querySelector("#transaction-context").textContent = `Showing sample transactions for ${name}.`;
+      navigate("transactions");
+    } else if (action === "toggle-stokvel-review") {
+      if (!selectedStokvelCard) return;
+      try {
+        const statuses = stokvelReviewStatuses();
+        const underReview = !isStokvelUnderReview(selectedStokvelCard, statuses);
+        statuses[selectedStokvelCard.dataset.stokvelId] = underReview;
+        if (!setDemoPreference("adminStokvelReviewStatuses", statuses)) return;
+        updateStokvelReviewStatus(selectedStokvelCard, underReview);
+        toast(underReview ? "Stokvel flagged for review in this browser demo." : "Stokvel marked verified in this browser demo.", "success");
+      } catch (error) {
+        console.error("Could not update stokvel review status:", error);
+        toast(error.message || "Could not update stokvel review status.", "error");
       }
     } else {
       const actionLabel = actionButton.querySelector(".row-grow strong")?.textContent || actionButton.textContent.trim();
@@ -417,7 +672,12 @@
   document.querySelector("#admin-role-select").addEventListener("change", (event) => {
     const role = event.target.value;
     updateSession({ role });
-    const destinations = { member: "members-dashboard.html", treasurer: "treasurer-dashboard.html", platform_admin: "platform-admin-dashboard.html" };
+    const destinations = {
+      member: "members-dashboard.html",
+      treasurer: "treasurer-dashboard.html",
+      platform_admin: "platform-admin-dashboard.html",
+      insurance: "insurance-dashboard.html"
+    };
     window.location.href = destinations[role] || destinations.platform_admin;
   });
 
@@ -456,11 +716,17 @@
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") sidebar.classList.remove("is-open");
+    if (event.key === "Escape") {
+      sidebar.classList.remove("is-open");
+      closeMemberMenus();
+    }
   });
 
   applyProfile();
+  prepareMemberMenus();
+  restoreMemberActions();
   renderSavedStokvels();
+  restoreStokvelReviewStatuses();
   restoreDemoState();
   applySearch();
 })();

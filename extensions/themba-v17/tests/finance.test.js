@@ -1,0 +1,10 @@
+'use strict';
+const {test}=require('node:test'), assert=require('node:assert/strict');
+const {quoteLoan,activitySignals,inflationTarget,validateGuarantor}=require('../server/finance');
+test('zero-interest loan',()=>{const r=quoteLoan({principal:1200,annualRatePct:0,months:12,monthlyIncome:10000});assert.equal(r.monthlyPayment,100);assert.equal(r.totalInterest,0);assert.equal(r.withinIllustrativeCap,true)});
+test('loan interest and affordability',()=>{const r=quoteLoan({principal:12000,annualRatePct:12,months:12,monthlyIncome:2000,existingMonthlyDebt:500});assert.ok(r.monthlyPayment>1000);assert.equal(r.withinIllustrativeCap,false)});
+test('reject invalid rates and negative loans',()=>{assert.throws(()=>quoteLoan({principal:-1,annualRatePct:10,months:12,monthlyIncome:10000}));assert.throws(()=>quoteLoan({principal:100,annualRatePct:999,months:12,monthlyIncome:10000}))});
+test('missing activity is not fabricated',()=>{assert.equal(activitySignals({monthsObserved:0,onTimeContributions:0,contributionsExpected:0,meetingAttendance:0,meetingsExpected:0}).activitySummary,null)});
+test('inconsistent activity rejected',()=>assert.throws(()=>activitySignals({monthsObserved:2,onTimeContributions:3,contributionsExpected:2,meetingAttendance:1,meetingsExpected:2})));
+test('inflation increases future nominal target',()=>{const r=inflationTarget({currentSavings:1000,annualInflationPct:5,years:2});assert.equal(r.futureCostEquivalent,1102.5);assert.equal(r.gapToMaintainTarget,102.5)});
+test('guarantor must explicitly consent',()=>{assert.equal(validateGuarantor({borrowerId:'a',guarantorId:'b',consent:false}).eligibleForReview,false);assert.equal(validateGuarantor({borrowerId:'a',guarantorId:'b',consent:true,identityVerified:true,consentRecordedAt:new Date().toISOString()}).eligibleForReview,true)});

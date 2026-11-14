@@ -21,8 +21,21 @@
         window.location.href = "login.html";
         return;
     }
-    if (window.ThembaBindUser) window.ThembaBindUser(session.user.id);   // writes from this tab must run as the user it shows
-    { const va = document.querySelector(".view-as"); if (va) va.style.display = "none"; }   // the role comes from the database, not a demo switcher
+    if (window.ThembaBindUser) window.ThembaBindUser(session.user.id);
+    // Accept invites for signed-in users without registering twice.
+    const tokenFromLink = new URLSearchParams(window.location.search).get('invite');
+    const pendingInvite = (tokenFromLink || sessionStorage.getItem('pending_invite') || '').trim();
+    if (pendingInvite) {
+        sessionStorage.setItem('pending_invite', pendingInvite);
+        try {
+            const { data, error } = await sb.rpc('accept_invite', { p_token: pendingInvite });
+            if (error) throw error;
+            if (data === false || (data && typeof data === 'object' && data.ok === false)) throw Error('Invitation not accepted');
+            sessionStorage.removeItem('pending_invite');
+        } catch (error) {
+            banner('Could not accept invitation: ' + error.message + '. The code is saved so you can retry.');
+        }
+    }
 
     const $ = (s, r = document) => r.querySelector(s);
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -104,7 +117,7 @@
     async function refresh() {
         if (busy) { again = true; return; }
         busy = true;
-        try { await loadStokvels(); if (S.sid && ensureDashboard()) return; if (S.sid) await loadData(); render(); } catch (e) { console.error(e); toast(e.message || "Could not load live data", "error"); }
+        try { await loadStokvels(); if (!S.profile) S.profile = await api.myProfile().catch(() => null); renderProfile(); if (S.sid && ensureDashboard()) return; if (S.sid) await loadData(); render(); ensureSubscription(); } catch (e) { console.error(e); toast(e.message || "Could not load live data", "error"); }
         busy = false; if (again) { again = false; refresh(); } else syncSafe(false);
     }
 
@@ -112,6 +125,9 @@
     function ensureDashboard() {
         const wantTreasurer = isAdmin();
         if (wantTreasurer === TREAS) return false;
+        // A treasurer who chose "View as Member" is allowed to stay on the member dashboard.
+        let viewAs = null; try { viewAs = sessionStorage.getItem("themba_view_as"); } catch (e) { /* storage unavailable */ }
+        if (wantTreasurer && !TREAS && viewAs === "member") return false;
         for (const storage of [localStorage, sessionStorage]) {
             try { const raw = storage.getItem("themba_session"); if (raw) { const s = JSON.parse(raw); s.role = wantTreasurer ? "treasurer" : "member"; storage.setItem("themba_session", JSON.stringify(s)); } } catch (e) { /* storage unavailable */ }
         }
@@ -147,6 +163,36 @@
         const cb = $('[data-page="contributions"] .nav-badge'); if (cb && TREAS) { cb.textContent = st.pending.length; cb.style.display = st.pending.length ? "" : "none"; }
     }
 
+    /* ---------- profile & settings ---------- */
+    function renderProfile() {
+        const name = (S.profile && S.profile.full_name) || (session.user.user_metadata && session.user.user_metadata.full_name) || "";
+        $$("[data-user-name]").forEach((e) => (e.textContent = name || "Member"));
+        $$("[data-user-initials]").forEach((e) => (e.textContent = initials(name || "Member")));
+        $$("[data-first-name]").forEach((e) => (e.textContent = (name.trim().split(/\s+/)[0]) || "there"));
+        const sp = $(".sidebar-profile small"); if (sp) sp.textContent = S.sid ? (S.role[0].toUpperCase() + S.role.slice(1)) : "Member";
+        const form = $("#profile-form"); if (!form) return;
+        const nm = $("#profile-name", form), em = $("#profile-email", form), rl = $("#profile-role", form);
+        if (nm && document.activeElement !== nm) nm.value = name;
+        if (em) { em.value = session.user.email || ""; em.readOnly = true; em.title = "Your sign-in email can't be changed here"; }
+        if (rl) { const lab = rl.closest("label"); if (lab) lab.style.display = "none"; }   // the role comes from the database, not a setting
+        const cards = $$(".settings-card", VIEW("settings") || document);
+        const p = cards[1] && $(".panel-heading p", cards[1]); if (p) p.textContent = `Signed in as ${session.user.email}. Your browser wallet connection is separate from your Themba account.`;
+    }
+    document.addEventListener("submit", async (e) => {   // capture: replaces the demo profile save
+        if (!e.target || e.target.id !== "profile-form") return;
+        e.preventDefault(); e.stopImmediatePropagation();
+        const name = ($("#profile-name").value || "").trim();
+        if (name.length < 1 || name.length > 100) { toast("Enter a name between 1 and 100 characters.", "error"); return; }
+        const b = $('button[type="submit"]', e.target); if (b) b.disabled = true;
+        try {
+            await api.saveProfileName(name);
+            S.profile = Object.assign({}, S.profile, { full_name: name });
+            for (const storage of [localStorage, sessionStorage]) { try { const raw = storage.getItem("themba_session"); if (raw) { const x = JSON.parse(raw); x.name = name; storage.setItem("themba_session", JSON.stringify(x)); } } catch (err) { /* storage unavailable */ } }
+            renderProfile(); await refresh(); toast("Your profile has been updated.", "success");
+        } catch (err) { toast(err.message || "Could not save your profile.", "error"); }
+        finally { if (b) b.disabled = false; }
+    }, true);
+
     // Sidebar "active stokvel" button: show the real stokvel, and let the person switch between the ones they belong to.
     function renderGroupHeader() {
         const g = $(".active-group"); if (!g || !S.st) return;
@@ -177,6 +223,25 @@
             eyebrow: "Your communities", title: "Switch stokvel", desc: "Choose the stokvel you want to see.", submit: "Switch",
             fields: [{ name: "sid", label: "Stokvel", options: S.stokvels.map((m) => [m.stokvels.id, `${m.stokvels.name} · ${m.role}`]), value: S.sid }],
             onSubmit: async (v) => { try { localStorage.setItem("themba_live_stokvel", v.sid); } catch (e) { /* storage unavailable */ } }
+        });
+    }
+
+    function createStokvelDialog() {
+        openForm({
+            eyebrow: "New stokvel", title: "Create your stokvel", desc: "You will be its treasurer and first signer. Nobody else is added until you invite them.",
+            fields: [{ name: "name", label: "Stokvel name" }, { name: "monthly", label: "Monthly contribution (USDT)", type: "number", step: "0.01", min: 0, value: 100 }],
+            submit: "Create stokvel",
+            onSubmit: async (v) => {
+                const before = new Set(S.stokvels.map((m) => m.stokvels.id));
+                await api.createStokvel(v.name.trim(), Number(v.monthly));
+                const after = await api.myStokvels();
+                const fresh = after.find((m) => m.stokvels && !before.has(m.stokvels.id));
+                try {
+                    if (fresh) localStorage.setItem("themba_live_stokvel", fresh.stokvels.id);   // open the new stokvel
+                    sessionStorage.removeItem("themba_view_as");   // its creator is its treasurer, so go to that dashboard
+                } catch (e) { /* storage unavailable */ }
+                toast("Stokvel created", "success");
+            }
         });
     }
 
@@ -439,8 +504,8 @@
         const list = h("div", "member-list");
         S.members.forEach((m) => list.append(kids(h("div", "member-row"), h("span", "avatar", initials(name(m.user_id))), kids(h("span", "row-grow"), h("strong", null, name(m.user_id)), h("small", null, m.role + (m.is_signer ? " · signer" : ""))), btn(m.is_signer ? "Remove signer" : "Make signer", "text-link", () => run(() => api.setSigner(S.sid, m.user_id, !m.is_signer), "Signers updated")))));
         p.append(list, btn(S.st.require_onchain_release ? "Strict on-chain mode: ON (turn off)" : "Require on-chain release (strict mode)", "button-outline", () => run(() => api.setOnchainRelease(S.sid, !S.st.require_onchain_release), "Setting updated")), btn("Invite a member", "button-outline", async () => openForm({
-            eyebrow: "Invite", title: "Invite a member", desc: "They must sign up with this exact email. The invite lasts 7 days.", fields: [{ name: "email", label: "Their email", type: "email" }], submit: "Create invite code",
-            onSubmit: async (v) => { const token = await api.inviteMember(S.sid, v.email); try { await navigator.clipboard.writeText(token); } catch (e) { /* clipboard not available */ } toast("Invite code copied: " + token, "success"); window.prompt("Send this invite code to " + v.email, token); }
+            eyebrow: "Invite", title: "Invite a member", desc: "We email them a personalised invitation with a button to join. It is for this email address and expires after 7 days. Existing members sign in; new members sign up.", fields: [{ name: "email", label: "Their email", type: "email" }], submit: "Send invitation",
+            onSubmit: async (v) => { const email = v.email.trim().toLowerCase(); const result = await api.sendInvitation(S.sid, email); if (result.emailed) { toast('Invitation emailed to ' + email, 'success'); return; } try { await navigator.clipboard.writeText(result.link); } catch (e) { /* clipboard optional */ } toast(result.reason, 'info'); window.prompt('Share this invitation link privately with ' + email + ':', result.link); }
         })));
         return p;
     }
@@ -718,6 +783,8 @@
         if (b && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); TREAS ? logCash() : makeContribution(); return; }
         const gt = e.target.closest(".group-tab[data-sid]");
         if (gt) { e.preventDefault(); e.stopImmediatePropagation(); if (gt.dataset.sid !== S.sid) { try { localStorage.setItem("themba_live_stokvel", gt.dataset.sid); } catch (err) { /* storage unavailable */ } refresh(); } return; }
+        const cs = e.target.closest('[data-action="create-stokvel"]');
+        if (cs) { e.preventDefault(); e.stopImmediatePropagation(); createStokvelDialog(); return; }
         const sw = e.target.closest('[data-action="switch-group"], [data-action="stokvel"]');
         if (sw && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); switchStokvel(); return; }
         const so = e.target.closest('[data-action="sign-out"]');
@@ -729,8 +796,15 @@
         const bb = e.target.closest('[data-action="bill"]');
         if (bb && S.sid) { e.preventDefault(); e.stopImmediatePropagation(); billDialog(); }
     }, true);
+
+    document.addEventListener("change", (e) => {   // remember an explicit "View as" choice so ensureDashboard() doesn't undo it
+        if (!e.target || !e.target.matches("#role-select, #treasurer-role")) return;
+        try { sessionStorage.setItem("themba_view_as", e.target.value); } catch (err) { /* storage unavailable */ }
+    }, true);
+
     async function signOutEverywhere() {   // end the real Supabase session too, not just the demo one
         try { await sb.auth.signOut(); } catch (e) { /* still leave */ }
+        try { sessionStorage.removeItem("themba_view_as"); } catch (e) { /* ignore */ }
         for (const storage of [localStorage, sessionStorage]) { try { storage.removeItem("themba_session"); } catch (e) { /* ignore */ } }
         window.location.href = "login.html";
     }
@@ -748,11 +822,15 @@
         }
     });
 
-    await refresh();
-    if (S.sid) {
-        let t; api.subscribe(S.sid, (table, p) => {
+    let unsubscribe = null, subscribedSid = null, refreshTimer;
+    function ensureSubscription() {   // follow whichever stokvel is active
+        if (!S.sid || S.sid === subscribedSid) return;
+        if (unsubscribe) unsubscribe();
+        subscribedSid = S.sid;
+        unsubscribe = api.subscribe(S.sid, (table, p) => {
             if (table === "alerts" && p.eventType === "INSERT" && p.new) toast("Alert: " + p.new.message, "error");
-            clearTimeout(t); t = setTimeout(refresh, 300);
+            clearTimeout(refreshTimer); refreshTimer = setTimeout(refresh, 300);
         });
     }
+    await refresh();
 })();

@@ -440,7 +440,12 @@
   document.querySelector("#treasurer-role").addEventListener("change", (event) => {
     const role = event.target.value;
     updateSession({ role });
-    const destinations = { member: "members-dashboard.html", platform_admin: "platform-admin-dashboard.html", treasurer: "treasurer-dashboard.html" };
+    const destinations = {
+      member: "members-dashboard.html",
+      platform_admin: "platform-admin-dashboard.html",
+      treasurer: "treasurer-dashboard.html",
+      insurance: "insurance-dashboard.html"
+    };
     window.location.href = destinations[role] || destinations.treasurer;
   });
   document.querySelector("#treasurer-profile-form").addEventListener("submit", (event) => {

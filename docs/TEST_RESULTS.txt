@@ -1,0 +1,65 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> themba@1.0.0 pretest
+> npm run build
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> themba@1.0.0 build
+> esbuild scripts/dashboard.js --bundle --platform=browser --format=iife --minify --outfile=scripts/dashboard.bundle.js && esbuild scripts/safe-panel.js --bundle --platform=browser --format=iife --minify --outfile=scripts/safe-panel.bundle.js
+
+
+  scripts/dashboard.bundle.js  2.1mb ⚠️
+
+⚡ Done in 188ms
+
+  scripts/safe-panel.bundle.js  2.1mb ⚠️
+
+⚡ Done in 106ms
+
+> themba@1.0.0 test
+> node --test
+
+✔ safe preflight accepts well-formed demonstration (0.581895ms)
+✔ safe rejects wrong network, duplicate owner and replay (0.160852ms)
+✔ safe requires two signers (0.069645ms)
+✔ audit tampering detectable (0.492601ms)
+✔ zero-interest loan (0.613352ms)
+✔ loan interest and affordability (0.208052ms)
+✔ reject invalid rates and negative loans (0.396176ms)
+✔ missing activity is not fabricated (0.177817ms)
+✔ inconsistent activity rejected (0.077506ms)
+✔ inflation increases future nominal target (0.12011ms)
+✔ guarantor must explicitly consent (0.517909ms)
+✔ existing account accepts invite without signing up again (2.097774ms)
+✔ failed invite is preserved for retry (0.853654ms)
+✔ negative result without SQL error must not clear invitation (0.643647ms)
+✔ parallel attempts share one request (0.659721ms)
+✔ login redeems with current account, not via a second signup (0.153741ms)
+✔ email invite creates private login link using authenticated RPC (0.386161ms)
+✔ dashboard invitation modal blocks stale duplicate handler (0.31278ms)
+✔ unauthenticated email endpoint is disabled by default (0.121382ms)
+✔ signed-in users redeem from either login or legacy signup links without registration (7.192655ms)
+
+  WARNING: SAFE_API_KEY is not set, so the Safe panel cannot load pending/executed requests (HTTP 500).
+  Create a file named exactly .env in the project root (next to package.json) containing:
+    SAFE_API_KEY=your_key_here
+  then restart the server. (On Windows check it is not called .env.txt.)
+
+✔ health endpoint identifies the demo environment and unconfigured database (15.420353ms)
+✔ treasurer endpoints return the dashboard demo data (8.66289ms)
+✔ platform overview endpoint returns platform metrics (1.894167ms)
+✔ unknown API routes return a JSON 404 (1.676831ms)
+✔ Safe proxy forwards allowed requests with the server-side API key (4.687537ms)
+✔ the server serves the existing login page (5.301941ms)
+✔ the server serves dashboard pages, styles, and scripts from their folders (16.932568ms)
+✔ legacy login and signup redirects retain invitation tokens (3.015534ms)
+✔ legacy unauthenticated email endpoint cannot send invitations (6.306382ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 632.878453

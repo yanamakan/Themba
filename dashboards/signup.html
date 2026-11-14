@@ -103,6 +103,13 @@
             </select>
           </div>
 
+          <!-- ADD THIS NEW FIELD HERE -->
+          <div class="field">
+            <label for="invite-code">Invite Code (Optional)</label>
+            <input class="input" id="invite-code" name="invite-code" type="text" placeholder="e.g. KHULA-8X4P">
+            <p class="field-error" role="alert"></p>
+          </div>
+
           <button class="btn btn-gold" type="submit" id="submit-btn">
             <span class="btn-label">Create secure account</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -124,17 +131,67 @@
           </button>
         </form>
 
-        <p class="auth-switch">Already have an account? <a href="login.html">Sign in</a></p>
+        <p class="auth-switch">Already have an account? <a id="existing-account-login" href="login.html">Sign in to join the stokvel</a></p>
       </div>
     </section>
 
   </main>
 
   <div class="toast-stack" id="toasts" aria-live="polite"></div>
+
+  <!-- Add this right before your existing scripts in signup.html -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('invite-code');
+      if (!input) return;
+
+      // 1. Check the URL for an invite code
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlInvite = urlParams.get('invite');
+
+      if (urlInvite) {
+        // If it's in the URL, save it to sessionStorage and put it in the box
+        sessionStorage.setItem('pending_invite', urlInvite);
+        input.value = urlInvite;
+        input.style.borderColor = 'var(--gold)'; // Highlight it so they know it's there
+      } else {
+        // 2. If it's NOT in the URL, check if they brought a pending invite from the login page
+        const savedInvite = sessionStorage.getItem('pending_invite');
+        if (savedInvite) {
+          input.value = savedInvite;
+          input.style.borderColor = 'var(--gold)';
+        }
+      }
+      const existingLogin = document.getElementById('existing-account-login');
+      const pending = sessionStorage.getItem('pending_invite');
+      if (existingLogin && pending) existingLogin.href = 'login.html?invite=' + encodeURIComponent(pending);
+    });
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Get the URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const inviteCode = urlParams.get('invite');
+
+      // If there is a code in the URL, put it in the input box
+      if (inviteCode) {
+        const input = document.getElementById('invite-code');
+        if (input) {
+          input.value = inviteCode;
+
+          // Optional: Highlight the field so they know it was auto-filled
+          input.style.borderColor = 'var(--gold)';
+          input.style.backgroundColor = '#173326';
+        }
+      }
+    });
+  </script>
   <script src="../scripts/config.js"></script>
   <script src="../scripts/supabase.js"></script>
   <script src="../scripts/supabase-client.js"></script>
   <script src="../scripts/auth.js"></script>
+
 </body>
 
 </html>

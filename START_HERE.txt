@@ -1,0 +1,10 @@
+THEMBA V17 — JAVASCRIPT INTEGRATION KIT
+
+1. CHECK OUT branch Feature/themba-complete-integration.
+2. Extract ZIP at repository root. Files are additive.
+3. Run: node --test extensions/themba-v17/tests/*.test.js
+4. Open themba-v17.html or start existing app with npm start and navigate to /themba-v17.html.
+5. Read README.md to enable the optional API router and connect into existing nav.
+6. Run npm test before proposing merge. Do NOT merge to main automatically.
+
+This is not live banking, a deployed on-chain contract, insurance coverage, or real USSD gateway. See security notes.

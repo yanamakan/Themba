@@ -17,10 +17,11 @@
     // account signs in from another tab, writes from this tab would silently run as that other account
     // (e.g. a member's loan request being recorded as the treasurer's, so nobody can approve it).
     let boundUser = null;
+    const WRONG_TAB = "This tab belongs to a different account than the one now signed in on this browser. Reload the page, or use a separate browser profile / private window for each test user.";
     async function rpc(name, args) {
         if (boundUser) {
             const { data: { session } } = await sb.auth.getSession();
-            if (!session || session.user.id !== boundUser) throw new Error("This tab belongs to a different account than the one now signed in on this browser. Reload the page, or use a separate browser profile / private window for each test user.");
+            if (!session || session.user.id !== boundUser) throw new Error(WRONG_TAB);
         }
         const { data, error } = await sb.rpc(name, args);
         if (error) throw new Error(error.message);
@@ -41,6 +42,39 @@
         /* ---- writes ---- */
         createStokvel: (name, monthly = 0, safeAddress = null) => rpc("create_stokvel", { p_name: name, p_monthly: monthly, p_safe_address: safeAddress }),
         inviteMember: (stokvel, email, role = "member") => rpc("invite_member", { p_stokvel: stokvel, p_email: email, p_role: role }),
+        // Email an invitation. The backend (POST /api/invitations/email) verifies this session, has Supabase create
+        // the invitation token as the signed-in treasurer, and emails the recipient a personalised join link.
+        // If email delivery is not set up or reachable, the existing invite_member flow creates a private link
+        // instead. Resolves to { emailed: true, email } or { emailed: false, link, reason }.
+        sendInvitation: async (stokvel, email, role = "member") => {
+            const recipient = String(email || "").trim().toLowerCase();
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) throw new Error("Not signed in");
+            if (boundUser && session.user.id !== boundUser) throw new Error(WRONG_TAB);
+            let res = null;
+            try {
+                res = await fetch("/api/invitations/email", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.access_token },
+                    body: JSON.stringify({ stokvelId: stokvel, email: recipient, role })
+                });
+            } catch (_networkError) { res = null; }   // no backend reachable (e.g. static hosting)
+            const body = res ? await res.json().catch(() => ({})) : {};
+            const code = body && body.error && body.error.code;
+            if (res && res.ok) return { emailed: true, email: recipient };
+            // Invitation created, but the email did not go out: the server returns the private link to share by hand.
+            if (res && res.status === 502 && code === "EMAIL_SEND_FAILED" && body.link) {
+                return { emailed: false, link: body.link, reason: "The invitation was created but the email could not be sent." };
+            }
+            // Email not available here: use the existing link flow.
+            if (!res || res.status === 404 || code === "EMAIL_NOT_CONFIGURED") {
+                const token = await rpc("invite_member", { p_stokvel: stokvel, p_email: recipient, p_role: role });
+                const link = new URL("login.html", window.location.href);
+                link.searchParams.set("invite", token);
+                return { emailed: false, link: link.href, reason: "Email delivery is not set up, so a private invitation link was created instead." };
+            }
+            throw new Error((body && body.error && body.error.message) || "The invitation could not be sent. Please try again.");
+        },
         acceptInvite: (token) => rpc("accept_invite", { p_token: token }),
         setSigner: (stokvel, user, value) => rpc("set_signer", { p_stokvel: stokvel, p_user: user, p_value: value }),
         logCashContribution: (stokvel, member, amount, period) => rpc("log_cash_contribution", { p_stokvel: stokvel, p_member: member, p_amount: amount, p_period: period }),
@@ -62,8 +96,12 @@
         linkSafeTx: (request, safeTxHash) => rpc("link_safe_tx", { p_request: request, p_safe_tx_hash: safeTxHash }),
         setOnchainRelease: (stokvel, value) => rpc("set_onchain_release", { p_stokvel: stokvel, p_value: value }),
         myProfile: async () => read(sb.from("profiles").select("full_name,wallet_address").eq("id", await uid()).maybeSingle()),
+        saveProfileName: async (name) => { const { error } = await sb.from("profiles").update({ full_name: name }).eq("id", await uid()); if (error) throw new Error(error.message); },
         saveWallet: async (address) => { const { error } = await sb.from("profiles").update({ wallet_address: address }).eq("id", await uid()); if (error) throw new Error(error.message); },
         platformOverview: () => rpc("platform_overview", {}),
+        adminDirectory: () => rpc("admin_directory", {}),
+        adminSetMemberFlag: (stokvel, user, flagged) => rpc("admin_set_member_flag", { p_stokvel: stokvel, p_user: user, p_flagged: flagged }),
+        adminRemoveMember: (stokvel, user) => rpc("admin_remove_member", { p_stokvel: stokvel, p_user: user }),
 
         /* ---- reads (RLS limits these to the caller's own stokvels) ---- */
         // RLS lets you read every member of your stokvels, so filter to YOUR OWN membership rows

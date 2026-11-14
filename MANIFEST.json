@@ -1,0 +1,54 @@
+{
+  "kit": "Themba v17 Javascript Additive Integration",
+  "target_branch": "Feature/themba-complete-integration",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "70fc9702101ff0252847cbb639744ae99ffbf6df74689890a7b46b72eba7426e"
+    },
+    {
+      "path": "START_HERE.txt",
+      "sha256": "e284e099fc54fbd96f3f83debcff1c278db70a750ef01ba912e6522fbdef6ab9"
+    },
+    {
+      "path": "extensions/themba-v17/docs/INTEGRATION.md",
+      "sha256": "03b95b13172822910fef71614ff9192d8192fdd54fbfdf68bce9c209a8b316bf"
+    },
+    {
+      "path": "extensions/themba-v17/docs/REVENUE_MODEL.md",
+      "sha256": "b6a235b9e67fede165063ef631489d0168d1fabdd3b72141bfce4cf53c8ea4c2"
+    },
+    {
+      "path": "extensions/themba-v17/server/chain.js",
+      "sha256": "cde89c1700a53ccc2d620420334901b0ece9d65ca723f2d2588b94f681c213ce"
+    },
+    {
+      "path": "extensions/themba-v17/server/finance.js",
+      "sha256": "0148f1253f8f08e6dc09df35fad012989589b525d625d132a39115fca39dad47"
+    },
+    {
+      "path": "extensions/themba-v17/server/router.js",
+      "sha256": "07d3020e8d8498da8d78d5a7ae8c67dd0d4d87ae63ab45ce477fedea786e9247"
+    },
+    {
+      "path": "extensions/themba-v17/tests/chain.test.js",
+      "sha256": "e43b82225dd92a287ba8c74ea3037412602940514b2cbb41d09f5b850b763341"
+    },
+    {
+      "path": "extensions/themba-v17/tests/finance.test.js",
+      "sha256": "2de56b6b57440f208b5d1865bbef1576898aa87eb82825e97508a658dafbf898"
+    },
+    {
+      "path": "extensions/themba-v17/web/app.js",
+      "sha256": "dd53aac3cf32d7404032dc9a51bda9ffb6414bdb705080cfc9e46b3fdcab4525"
+    },
+    {
+      "path": "extensions/themba-v17/web/theme.css",
+      "sha256": "8e7173a9f2ffcd27b0957eba6016587a4c457a04569d32739e0b7308b8fc4224"
+    },
+    {
+      "path": "themba-v17.html",
+      "sha256": "8ba36833bbb5799ca74ee9c1200fde0302175fddcd489d4dc98f5c66b010c098"
+    }
+  ]
+}
