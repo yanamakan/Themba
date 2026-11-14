@@ -1,5 +1,5 @@
 .dashboard-body {
-  min-width: 320px;
+  min-width: 0;
   min-height: 100vh;
   background: #0a110e;
 }
@@ -1674,6 +1674,13 @@
   .top-icon {
     display: none;
   }
+  .top-icon.theme-toggle {
+    display: grid;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+  }
   .breadcrumbs {
     gap: 7px;
     font-size: 8px;
@@ -1864,6 +1871,34 @@
   }
   .settings-form {
     grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 420px) {
+  .topbar {
+    gap: 5px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+  .top-actions {
+    flex-shrink: 0;
+    gap: 2px;
+  }
+  .view-as {
+    gap: 3px;
+  }
+  .view-as .role-select {
+    width: 82px;
+    padding-right: 24px;
+    padding-left: 7px;
+  }
+  .top-icon.theme-toggle {
+    flex-basis: 32px;
+    width: 32px;
+    height: 32px;
+  }
+  .top-avatar {
+    width: 30px;
+    height: 30px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

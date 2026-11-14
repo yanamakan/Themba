@@ -1156,6 +1156,13 @@
   .admin-topbar .top-icon {
     display: none;
   }
+  .admin-topbar .theme-toggle {
+    display: grid;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+  }
   .platform-admin .role-select {
     width: 112px;
     height: 32px;
@@ -1292,6 +1299,42 @@
   }
   .admin-settings-form .btn {
     grid-column: auto;
+  }
+}
+@media (max-width: 420px) {
+  .admin-topbar {
+    gap: 4px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+  .admin-search {
+    min-width: 0;
+    width: clamp(72px, 26vw, 96px);
+    flex: 1 1 80px;
+    margin-left: 2px;
+  }
+  .admin-search input {
+    min-width: 0;
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+  .admin-topbar .top-actions {
+    flex-shrink: 0;
+    gap: 4px;
+  }
+  .admin-topbar .theme-toggle {
+    flex-basis: 32px;
+    width: 32px;
+    height: 32px;
+  }
+  .platform-admin .role-select {
+    width: 88px;
+    padding-right: 22px;
+    padding-left: 6px;
+  }
+  .admin-topbar .top-avatar {
+    width: 30px;
+    height: 30px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
