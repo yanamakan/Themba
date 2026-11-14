@@ -235,6 +235,15 @@
     const api = {
       updateContext(next) { context = { ...context, ...next }; updateUsdd(); updateVoice(); return api; },
       setLanguage(code) { if (LANGS.includes(code)) { locale = code; q('[data-ia="language"]').value = code; ussdMode = 'menu'; updateUsdd(); updateVoice(); } return api; },
+      setTheme(value) {
+        if (value === 'dark' || value === 'light') {
+          theme = value;
+          root.dataset.theme = theme;
+          const button = q('[data-action="theme"]');
+          if (button) button.textContent = theme === 'dark' ? '☀ Light mode' : '☾ Dark mode';
+        }
+        return api;
+      },
       destroy() { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); root.removeEventListener('click', clickHandler); root.removeEventListener('submit', submitHandler); root.removeEventListener('change', changeHandler); root.replaceChildren(); root.classList.remove('themba-ia', 'ia-large', 'ia-high-contrast'); root.removeAttribute('data-theme'); delete root.__thembaInclusiveAccess; }
     };
     root.__thembaInclusiveAccess = api; return api;
